@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "FallingHellgateGameMode.generated.h"
+#include "FHGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FALLINGHELLGATE_API AFallingHellgateGameMode : public AGameModeBase
+class FALLINGHELLGATE_API AFHGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 	

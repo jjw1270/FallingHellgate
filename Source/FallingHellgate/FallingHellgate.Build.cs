@@ -24,7 +24,9 @@ public class FallingHellgate : ModuleRules
             new string[] {
                 "FallingHellgate",
                 "FallingHellgate/Public",
-                "FallingHellgate/Public/Framework"
+                "FallingHellgate/Public/Framework",
+                "FallingHellgate/Public/Characters",
+                "FallingHellgate/Public/Characters/PlayableCharacter"
             }
         );
 
@@ -32,7 +34,9 @@ public class FallingHellgate : ModuleRules
             new string[]
             {
                 "FallingHellgate/Private",
-                "FallingHellgate/Private/Framework"
+                "FallingHellgate/Private/Framework",
+                "FallingHellgate/Private/Characters",
+                "FallingHellgate/Private/Characters/PlayableCharacter"
             }
         );
     }

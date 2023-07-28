@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS()
 class FALLINGHELLGATE_API UItemBase : public UObject
 {
 	GENERATED_BODY()

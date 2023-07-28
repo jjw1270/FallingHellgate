@@ -26,7 +26,10 @@ public class FallingHellgate : ModuleRules
                 "FallingHellgate/Public",
                 "FallingHellgate/Public/Framework",
                 "FallingHellgate/Public/Characters",
-                "FallingHellgate/Public/Characters/PlayableCharacter"
+                "FallingHellgate/Public/Characters/PlayableCharacter",
+                "FallingHellgate/Public/Item",
+                "FallingHellgate/Public/Item/Consumable",
+                "FallingHellgate/Public/Item/Equipment"
             }
         );
 
@@ -36,7 +39,10 @@ public class FallingHellgate : ModuleRules
                 "FallingHellgate/Private",
                 "FallingHellgate/Private/Framework",
                 "FallingHellgate/Private/Characters",
-                "FallingHellgate/Private/Characters/PlayableCharacter"
+                "FallingHellgate/Private/Characters/PlayableCharacter",
+                "FallingHellgate/Private/Item",
+                "FallingHellgate/Private/Item/Consumable",
+                "FallingHellgate/Private/Item/Equipment"
             }
         );
     }

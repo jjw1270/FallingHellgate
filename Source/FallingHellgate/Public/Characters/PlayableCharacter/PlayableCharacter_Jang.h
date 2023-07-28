@@ -14,17 +14,5 @@ UCLASS()
 class FALLINGHELLGATE_API APlayableCharacter_Jang : public APlayableCharacter
 {
 	GENERATED_BODY()
-	
-protected:
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/** Called for movement input */
-	virtual void Move(const FInputActionValue& Value) override;
-
-	/** Called for looking input */
-	virtual void Look(const FInputActionValue& Value) override;
-
-private:
-	bool bIsForwardMoveFirstPressed;
 };

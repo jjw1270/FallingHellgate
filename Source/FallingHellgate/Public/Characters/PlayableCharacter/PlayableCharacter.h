@@ -47,11 +47,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	/** interact Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* InteractAction;
+
+
 protected:
 	/** Called for movement input */
-	virtual void Move(const FInputActionValue& Value);   //Temp Virtual for dev
+	virtual void Move(const FInputActionValue& Value);   //Temp Virtual for develop
 
 	/** Called for looking input */
-	virtual void Look(const FInputActionValue& Value);   //Temp Virtual for dev
+	virtual void Look(const FInputActionValue& Value);   //Temp Virtual for develop
+
+	/** Called for Interact input */
+	void Interaction(const FInputActionValue& Value);
+
+public:
+	UPROPERTY(BlueprintReadOnly)
+	AActor* InteractingActor;  // For AnimNotify on Interaction Montage Playing, Delete when Notify End Execution.
 
 };

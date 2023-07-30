@@ -10,7 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
-#include "Math/UnrealMathUtility.h"
+#include "InteractionInterface.h"
 
 // Sets default values
 APlayableCharacter::APlayableCharacter()
@@ -72,6 +72,9 @@ void APlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayableCharacter::Look);
 
+		//Interaction
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayableCharacter::Interaction);
+
 	}
 }
 
@@ -109,4 +112,41 @@ void APlayableCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void APlayableCharacter::Interaction(const FInputActionValue& Value)
+{
+	TArray<AActor*> OverlappingActors;
+	GetCapsuleComponent()->GetOverlappingActors(OverlappingActors);
+
+	double NearestLength = 99999999.0f;
+	IInteractionInterface* NearestInteractiveInterfaceObj = nullptr;
+
+	// Find NearestInteractiveInterfaceObj
+	for (AActor* Target : OverlappingActors)
+	{
+		IInteractionInterface* TargetInterfaceObj = Cast<IInteractionInterface>(Target);
+		if (!TargetInterfaceObj)
+		{
+			continue;
+		}
+
+		double distance = FVector::Dist(Target->GetActorLocation(), GetActorLocation());
+		if (NearestLength < distance)
+		{
+			continue;
+		}
+
+		NearestLength = distance;
+
+		NearestInteractiveInterfaceObj = TargetInterfaceObj;
+		InteractingActor = Target;
+	}
+
+	if (!NearestInteractiveInterfaceObj)
+	{
+		return;
+	}
+
+	NearestInteractiveInterfaceObj->Execute_EventInteraction(InteractingActor);
 }

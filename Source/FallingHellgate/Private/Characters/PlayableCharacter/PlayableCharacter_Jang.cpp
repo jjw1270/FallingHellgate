@@ -28,7 +28,6 @@ void APlayableCharacter_Jang::Interaction(const FInputActionValue& Value)
 
 	double NearestLength = 99999999.0f;
 	IInteractionInterface* NearestInteractiveInterfaceObj = nullptr;
-	AActor* InteractiveActor = nullptr;
 
 	// Find NearestInteractiveInterfaceObj
 	for (AActor* Target : OverlappingActors)
@@ -46,8 +45,9 @@ void APlayableCharacter_Jang::Interaction(const FInputActionValue& Value)
 		}
 
 		NearestLength = distance;
+
 		NearestInteractiveInterfaceObj = TargetInterfaceObj;
-		InteractiveActor = Target;
+		InteractingActor = Target;
 	}
 
 	if (!NearestInteractiveInterfaceObj)
@@ -55,5 +55,5 @@ void APlayableCharacter_Jang::Interaction(const FInputActionValue& Value)
 		return;
 	}
 
-	NearestInteractiveInterfaceObj->Execute_EventInteraction(InteractiveActor);
+	NearestInteractiveInterfaceObj->Execute_EventInteraction(InteractingActor);
 }

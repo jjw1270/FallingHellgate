@@ -24,4 +24,8 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void Interaction(const FInputActionValue& Value);
+
+protected:
+	UPROPERTY(BlueprintReadOnly)
+	AActor* InteractingActor;  // For AnimNotify on Interaction Montage Playing, Delete when Notify End Execution.
 };

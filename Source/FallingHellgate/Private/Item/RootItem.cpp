@@ -35,6 +35,9 @@ void ARootItem::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 void ARootItem::EventInteraction_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Interaction"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
+		FString::Printf(TEXT("Interaction ActorName = %s"), *this->GetName()));
+
 	// Play Interaction Montage
 	// In Montage AnimNotify, make logic...
 }

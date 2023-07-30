@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "ItemInfo.generated.h"
 
@@ -14,10 +15,10 @@ public:
     
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 Price;
+    FString Name;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TObjectPtr<UTexture2D> ItemImage;
+    int32 Price;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bIsEffectSelf;
@@ -37,6 +38,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString ItemTextInfo;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TObjectPtr<UTexture2D> ItemImage;
 };
 
 USTRUCT(Atomic, BlueprintType)
@@ -48,10 +51,10 @@ public:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 Price;
+    FString Name;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TObjectPtr<UTexture2D> ItemImage;
+    int32 Price;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Health;
@@ -74,4 +77,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString ItemTextInfo;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 EnhancedCount;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TObjectPtr<UTexture2D> ItemImage;
 };

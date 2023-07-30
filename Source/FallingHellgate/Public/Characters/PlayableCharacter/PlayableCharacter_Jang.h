@@ -15,4 +15,13 @@ class FALLINGHELLGATE_API APlayableCharacter_Jang : public APlayableCharacter
 {
 	GENERATED_BODY()
 
+protected:
+	/** interact Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* InteractAction;
+
+protected:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void Interaction(const FInputActionValue& Value);
 };

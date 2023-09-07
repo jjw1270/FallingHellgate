@@ -57,6 +57,11 @@ AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializ
 	PlayerStatusComp = CreateDefaultSubobject<UPlayerStatusComponent>(TEXT("PlayerStatus"));
 }
 
+USkeletalMeshComponent* AFHPlayerCharacter::GetMesh()
+{
+	return LowerBody;
+}
+
 void AFHPlayerCharacter::InitModularMeshComp()
 {
 	LowerBody = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("LowerBody"));

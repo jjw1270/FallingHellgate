@@ -102,6 +102,10 @@ protected:
 	UPROPERTY()
 	TArray<UModularSkeletalMeshComponent*> ArmorMSMCompArray;
 
+public:
+	UFUNCTION(BlueprintCallable, Category = Mesh)
+	class USkeletalMeshComponent* GetMesh();
+
 protected:
 	void InitModularMeshComp();
 

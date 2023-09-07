@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class FALLINGHELLGATE_API UModularSkeletalMeshComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()

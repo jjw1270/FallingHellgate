@@ -69,8 +69,8 @@ Modular Mesh Components
 */ 
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
-	UModularSkeletalMeshComponent* LowerBody;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
+	//UModularSkeletalMeshComponent* LowerBody;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
 	UModularSkeletalMeshComponent* Shoes;
@@ -101,10 +101,6 @@ protected:
 
 	UPROPERTY()
 	TArray<UModularSkeletalMeshComponent*> ArmorMSMCompArray;
-
-public:
-	UFUNCTION(BlueprintCallable, Category = Mesh)
-	class USkeletalMeshComponent* GetMesh();
 
 protected:
 	void InitModularMeshComp();

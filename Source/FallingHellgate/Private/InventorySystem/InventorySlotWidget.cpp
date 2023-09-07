@@ -54,7 +54,7 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 	DDOperation->DefaultDragVisual = DragWidget;
 	DDOperation->DraggingItemData = SlotItemData;
 	DDOperation->DraggingItemAmount = SlotItemAmount;
-	if (Image_OnRegist->GetVisibility() == ESlateVisibility::Visible)
+	if (IsSlotItemRegisted())
 	{
 		DDOperation->bIsRegist = true;
 	}
@@ -122,7 +122,7 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	}
 
 	PrevInventorySlot->SetSlot(SlotItemData, SlotItemAmount);
-	if (Image_OnRegist->GetVisibility() == ESlateVisibility::Visible)
+	if (IsSlotItemRegisted())
 	{
 		PrevInventorySlot->SetOnRegistImageVisibility(true);
 	}
@@ -213,6 +213,16 @@ void UInventorySlotWidget::SetOnRegistImageVisibility(const bool& bIsRegist)
 	{
 		Image_OnRegist->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+bool UInventorySlotWidget::IsSlotItemRegisted()
+{
+	if (Image_OnRegist->GetVisibility() == ESlateVisibility::Visible)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 bool UInventorySlotWidget::IsEmpty()

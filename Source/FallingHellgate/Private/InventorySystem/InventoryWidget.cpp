@@ -145,8 +145,9 @@ void UInventoryWidget::SortItemSlot()
 			if (!InventorySlotArray[j]->IsEmpty())
 			{
 				InventorySlotArray[i]->SetSlot(InventorySlotArray[j]->GetSlotItemData(), InventorySlotArray[j]->GetSlotItemAmount());
-				InventorySlotArray[j]->ClearSlot();
+				InventorySlotArray[i]->SetOnRegistImageVisibility(InventorySlotArray[j]->IsSlotItemRegisted());
 
+				InventorySlotArray[j]->ClearSlot();
 				break;
 			}
 		}

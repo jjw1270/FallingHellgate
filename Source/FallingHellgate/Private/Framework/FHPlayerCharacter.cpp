@@ -23,7 +23,7 @@
 #include "PlayerStatusComponent.h"
 
 AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::MeshComponentName))
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularSkeletalMeshComponent>(ACharacter::MeshComponentName = TEXT("LowerBody")))
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -57,55 +57,50 @@ AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializ
 	PlayerStatusComp = CreateDefaultSubobject<UPlayerStatusComponent>(TEXT("PlayerStatus"));
 }
 
-USkeletalMeshComponent* AFHPlayerCharacter::GetMesh()
-{
-	return LowerBody;
-}
-
 void AFHPlayerCharacter::InitModularMeshComp()
 {
-	LowerBody = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("LowerBody"));
-	LowerBody->SetupAttachment(RootComponent);
+	UModularSkeletalMeshComponent* LowerBody = Cast<UModularSkeletalMeshComponent>(GetMesh());
+	CHECK_VALID(LowerBody);
 	LowerBody->SetArmorType(EArmorType::Lower);
 	ArmorMSMCompArray.Add(LowerBody);
 
 	Shoes = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Shoes"));
-	Shoes->SetupAttachment(LowerBody);
+	Shoes->SetupAttachment(GetMesh());
 	Shoes->SetArmorType(EArmorType::Shoes);
-	Shoes->SetLeaderPoseComponent(LowerBody);
+	Shoes->SetLeaderPoseComponent(GetMesh());
 	ArmorMSMCompArray.Add(Shoes);
 
 	UpperBody = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("UpperBody"));
-	UpperBody->SetupAttachment(LowerBody);
+	UpperBody->SetupAttachment(GetMesh());
 	UpperBody->SetArmorType(EArmorType::Upper);
-	UpperBody->SetLeaderPoseComponent(LowerBody);
+	UpperBody->SetLeaderPoseComponent(GetMesh());
 	ArmorMSMCompArray.Add(UpperBody);
 
 	Cloak = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Cloak"));
 	Cloak->SetupAttachment(UpperBody);
 	Cloak->SetArmorType(EArmorType::None);
-	Cloak->SetLeaderPoseComponent(LowerBody);
+	Cloak->SetLeaderPoseComponent(GetMesh());
 
 	Glove_L = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Glove_L"));
 	Glove_L->SetupAttachment(UpperBody);
 	Glove_L->SetArmorType(EArmorType::Gloves);
-	Glove_L->SetLeaderPoseComponent(LowerBody);
+	Glove_L->SetLeaderPoseComponent(GetMesh());
 	ArmorMSMCompArray.Add(Glove_L);
 
 	Glove_R = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Glove_R"));
 	Glove_R->SetupAttachment(UpperBody);
 	Glove_R->SetArmorType(EArmorType::None);
-	Glove_R->SetLeaderPoseComponent(LowerBody);
+	Glove_R->SetLeaderPoseComponent(GetMesh());
 
 	Head = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Head"));
 	Head->SetupAttachment(UpperBody);
 	Head->SetArmorType(EArmorType::None);
-	Head->SetLeaderPoseComponent(LowerBody);
+	Head->SetLeaderPoseComponent(GetMesh());
 
 	Hair = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Hair"));
 	Hair->SetupAttachment(Head);
 	Hair->SetArmorType(EArmorType::None);
-	Hair->SetLeaderPoseComponent(LowerBody);
+	Hair->SetLeaderPoseComponent(GetMesh());
 
 	Helmet = CreateDefaultSubobject<UModularSkeletalMeshComponent>(TEXT("Helmet"));
 	Helmet->SetupAttachment(Head, TEXT("HAIR"));
@@ -264,9 +259,6 @@ void AFHPlayerCharacter::Res_PickUp_Implementation(FRotator LookAtRot)
 	// Play Interaction Montage
 	CHECK_VALID(LootingMontage);
 	PlayAnimMontage(LootingMontage);
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Res_PickUp")));
-
 }
 
 void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)

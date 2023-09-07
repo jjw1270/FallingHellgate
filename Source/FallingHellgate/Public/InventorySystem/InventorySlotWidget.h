@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	void SetOnRegistImageVisibility(const bool& bIsRegist);
 
+	UFUNCTION(BlueprintCallable, Category = Widget)
+	bool IsSlotItemRegisted();
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = Component)
 	class UInventoryComponent* InventoryComp;

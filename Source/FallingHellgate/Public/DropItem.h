@@ -36,9 +36,6 @@ protected:
 private:
 	APlayerController* PlayerController;
 
-	UPROPERTY(EditDefaultsOnly, Category = Particle, Meta = (AllowPrivateAccess = true))
-	TSubclassOf<UParticleSystemComponent> ItemParticleClass;
-
 	UPROPERTY(EditAnywhere, Category = Widget, Meta = (AllowPrivateAccess = true))
 	float WidgetVisiblityRange{ 1500.f };
 

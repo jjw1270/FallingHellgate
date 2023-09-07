@@ -264,6 +264,9 @@ void AFHPlayerCharacter::Res_PickUp_Implementation(FRotator LookAtRot)
 	// Play Interaction Montage
 	CHECK_VALID(LootingMontage);
 	PlayAnimMontage(LootingMontage);
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Res_PickUp")));
+
 }
 
 void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)

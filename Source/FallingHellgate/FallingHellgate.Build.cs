@@ -35,6 +35,7 @@ public class FallingHellgate : ModuleRules
                 Path.Combine(ModuleDirectory, "Public/Data"),
                 Path.Combine(ModuleDirectory, "Public/Notifies"),
                 Path.Combine(ModuleDirectory, "Public/Interfaces"),
+                Path.Combine(ModuleDirectory, "Public/ShopSystem"),
 
             }
         );

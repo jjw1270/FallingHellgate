@@ -210,8 +210,6 @@ void AFHPlayerCharacter::Look(const FInputActionValue& Value)
 
 void AFHPlayerCharacter::Interaction(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interaction"));
-
 	// return if interacting is executing
 	if (InteractingActor)
 	{

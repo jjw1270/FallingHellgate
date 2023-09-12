@@ -98,6 +98,13 @@ void UHUDWidget::WidgetDragEnd()
 	}
 }
 
+void UHUDWidget::CloseAllWidgets()
+{
+	QuickSlotWidget->SetVisibility(ESlateVisibility::Collapsed);
+	InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+	EquipmentWidget->SetVisibility(ESlateVisibility::Collapsed);
+}
+
 bool UHUDWidget::CheckAllHandleableWidgetCollapsed()
 {
 	if (InventoryWidget->GetVisibility() == ESlateVisibility::Visible)

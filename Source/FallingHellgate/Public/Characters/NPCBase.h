@@ -13,12 +13,37 @@ class FALLINGHELLGATE_API ANPCBase : public ACharacter, public IInteractionInter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ANPCBase();
 
 protected:
-	// Called when the game starts or when spawned
+	UPROPERTY()
+	class AFHPlayerCharacter* TargetPlayer;
+
+	// Interpolation speed for smoothly turning towards the target.
+	float InterpolationSpeed = 5.0f;
+
+	// Time interval between updates.
+	float UpdateInterval = 0.01f;
+
+	FTimerHandle TimerHandle;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UNPCWidget> NPCWidgetClass;
+
+	UPROPERTY()
+	class UNPCWidget* NPCWidget;
+
+protected:
+	UPROPERTY(EditAnywhere, Category = NPC)
+	FText NPCName;
+
+	UPROPERTY(EditAnywhere, Category = NPC)
+	FText NPCDialogues;
+
+protected:
 	virtual void BeginPlay() override;
+
+	void UpdateCharacterRotation();
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = Interface)
@@ -26,5 +51,5 @@ public:
 
 	virtual void EventInteraction_Implementation(ACharacter* OwnCharacter) override;
 
-
+	virtual void EndInteraction();
 };

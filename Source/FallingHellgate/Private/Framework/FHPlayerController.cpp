@@ -9,6 +9,7 @@
 #include "InventoryComponent.h"
 #include "QuickSlotComponent.h"
 #include "EquipmentComponent.h"
+#include "ShopComponent.h"
 // UI
 #include "FHHUD.h"
 #include "HUDWidget.h"
@@ -18,6 +19,7 @@ AFHPlayerController::AFHPlayerController()
 	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComp"));
 	QuickSlotComp = CreateDefaultSubobject<UQuickSlotComponent>(TEXT("QuickSlotComp"));
 	EquipmentComp = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComp"));
+	ShopComp = CreateDefaultSubobject<UShopComponent>(TEXT("ShopComp"));
 }
 
 void AFHPlayerController::BeginPlay()
@@ -68,4 +70,18 @@ void AFHPlayerController::WidgetOnOff(FName WidgetName)
 	}
 
 	HUDWidget->SwichWidgetVisibility(this, WidgetName);
+}
+
+void AFHPlayerController::CloseAllWidgets()
+{
+	if (!HUDWidget)
+	{
+		AFHHUD* FHHUD = GetHUD<AFHHUD>();
+		check(FHHUD);
+
+		HUDWidget = FHHUD->GetHUDWidget();
+		check(HUDWidget);
+	}
+
+	HUDWidget->CloseAllWidgets();
 }

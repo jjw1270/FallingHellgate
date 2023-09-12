@@ -17,3 +17,7 @@ void ANPCBase::BeginPlay()
 	Super::BeginPlay();
 	
 }
+
+void ANPCBase::EventInteraction_Implementation(ACharacter* OwnCharacter)
+{
+}

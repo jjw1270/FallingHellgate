@@ -61,12 +61,19 @@ void UPlayerStatusComponent::InitCurrentPlayerStats()
 {
 	UE_LOG(LogTemp, Warning, TEXT("InitCurrentPlayerStats"));
 
+	Money = GI->GetPlayerMoney();
+
 	CurrentHealth = GI->GetDefaultPlayerStats().DefaultHealth;
 	CurrentStamina = GI->GetDefaultPlayerStats().DefaultStamina;
 	CurrentAttack = GI->GetDefaultPlayerStats().DefaultAttack;
 	CurrentAttackSpeed = GI->GetDefaultPlayerStats().DefaultAttackSpeed;
 	CurrentCritcal = GI->GetDefaultPlayerStats().DefaultCritcal;
 	CurrentDefence = GI->GetDefaultPlayerStats().DefaultDefence;
+
+	if (MoneyUpdateDelegate.IsBound())
+	{
+		MoneyUpdateDelegate.Broadcast(Money);
+	}
 
 	//BroadCast to stat UI
 	if (StatusUpdateDelegate.IsBound())

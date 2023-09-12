@@ -93,11 +93,17 @@ protected:
 	FText PlayerName;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	int32 Money;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
 	FDefaultPlayerStats DefaultPlayerStats;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Data)
 	FORCEINLINE FText& GetPlayerName() { return PlayerName; }
+
+	UFUNCTION(BlueprintCallable, Category = Status)
+	FORCEINLINE int32& GetPlayerMoney() { return Money; }
 
 	UFUNCTION(BlueprintCallable, Category = Status)
 	FORCEINLINE FDefaultPlayerStats& GetDefaultPlayerStats() { return DefaultPlayerStats; }

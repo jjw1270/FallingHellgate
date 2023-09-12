@@ -30,13 +30,19 @@ protected:
 	class UInputMappingContext* UIMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* MouseCursorVisibilityAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* InventoryUIAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* EquipmentUIAction;
 
 // Input Func
-public:
+protected:
+	UFUNCTION(BlueprintCallable, Category = Widget)
+	void SetMouseCursorVisibility();
+
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	void WidgetOnOff(FName WidgetName);
 

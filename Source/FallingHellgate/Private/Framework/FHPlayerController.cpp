@@ -36,8 +36,23 @@ void AFHPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
+		EnhancedInputComponent->BindAction(MouseCursorVisibilityAction, ETriggerEvent::Started, this, &AFHPlayerController::SetMouseCursorVisibility);
 		EnhancedInputComponent->BindAction<AFHPlayerController, FName>(InventoryUIAction, ETriggerEvent::Started, this, &AFHPlayerController::WidgetOnOff, FName("InventoryWidget"));
 		EnhancedInputComponent->BindAction<AFHPlayerController, FName>(EquipmentUIAction, ETriggerEvent::Started, this, &AFHPlayerController::WidgetOnOff, FName("EquipmentWidget"));
+	}
+}
+
+void AFHPlayerController::SetMouseCursorVisibility()
+{
+	if (!GetMouseCursor())
+	{
+		SetInputMode(FInputModeGameAndUI());
+		SetShowMouseCursor(true);
+	}
+	else
+	{
+		SetInputMode(FInputModeGameOnly());
+		SetShowMouseCursor(false);
 	}
 }
 

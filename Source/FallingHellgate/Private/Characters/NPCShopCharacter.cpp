@@ -13,9 +13,11 @@ void ANPCShopCharacter::EventInteraction_Implementation(ACharacter* OwnCharacter
 	NPCWidget->SetNPCDialoguesText(NPCDialogues);
 	NPCWidget->SetMenu(1, NPCMenu1Text);
 	NPCWidget->Btn_NPCMenu1->OnClicked.AddDynamic(this, &ANPCShopCharacter::OpenShop);
+
+	NPCWidget->HideUnBoundMenu();
 }
 
 void ANPCShopCharacter::OpenShop()
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("SHOPPING"));
 }

@@ -51,5 +51,6 @@ public:
 
 	virtual void EventInteraction_Implementation(ACharacter* OwnCharacter) override;
 
+	UFUNCTION(BlueprintCallable)
 	virtual void EndInteraction();
 };

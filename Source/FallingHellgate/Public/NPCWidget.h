@@ -35,6 +35,9 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
+	class UButton* Btn_Exit;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_NPCMenu1;
 
 	UPROPERTY(meta = (BindWidget))

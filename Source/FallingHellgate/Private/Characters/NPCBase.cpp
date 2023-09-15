@@ -61,6 +61,10 @@ void ANPCBase::EventInteraction_Implementation(ACharacter* OwnCharacter)
 
     PC->CloseAllWidgets();
 
+    if (!PC->IsLocalPlayerController())
+    {
+        return;
+    }
     NPCWidget = CreateWidget<UNPCWidget>(PC, NPCWidgetClass);
     NPCWidget->AddToViewport(99);
 }

@@ -9,6 +9,11 @@ void ANPCShopCharacter::EventInteraction_Implementation(ACharacter* OwnCharacter
 {
 	Super::EventInteraction_Implementation(OwnCharacter);
 
+	if (!NPCWidget)
+	{
+		return;
+	}
+
 	NPCWidget->SetNPCNameText(NPCName);
 	NPCWidget->SetNPCDialoguesText(NPCDialogues);
 	NPCWidget->SetMenu(1, NPCMenu1Text);

@@ -35,6 +35,9 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
+	class UBorder* Border_NPCDefault;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_Exit;
 
 	UPROPERTY(meta = (BindWidget))

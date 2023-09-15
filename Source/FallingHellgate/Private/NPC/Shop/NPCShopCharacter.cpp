@@ -3,7 +3,10 @@
 
 #include "NPCShopCharacter.h"
 #include "NPCWidget.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Components/Border.h"
+#include "Components/Widget.h"
 
 void ANPCShopCharacter::EventInteraction_Implementation(ACharacter* OwnCharacter)
 {
@@ -25,4 +28,13 @@ void ANPCShopCharacter::EventInteraction_Implementation(ACharacter* OwnCharacter
 void ANPCShopCharacter::OpenShop()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SHOPPING"));
+	if (UWidget* NPCDefaultWidget = Cast<UWidget>(NPCWidget->Border_NPCDefault))
+	{
+		NPCDefaultWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void ANPCShopCharacter::CloseShop()
+{
+
 }

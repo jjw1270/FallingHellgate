@@ -28,14 +28,15 @@ public class FallingHellgate : ModuleRules
                 ModuleDirectory,
                 Path.Combine(ModuleDirectory, "Public"),
                 Path.Combine(ModuleDirectory, "Public/Framework"),
-                Path.Combine(ModuleDirectory, "Public/InventorySystem"),
-                Path.Combine(ModuleDirectory, "Public/QuickSlotSystem"),
-                Path.Combine(ModuleDirectory, "Public/EquipmentSystem"),
-                Path.Combine(ModuleDirectory, "Public/Characters"),
                 Path.Combine(ModuleDirectory, "Public/Data"),
-                Path.Combine(ModuleDirectory, "Public/Notifies"),
-                Path.Combine(ModuleDirectory, "Public/Interfaces"),
-                Path.Combine(ModuleDirectory, "Public/ShopSystem"),
+                Path.Combine(ModuleDirectory, "Public/Player"),
+                Path.Combine(ModuleDirectory, "Public/Player/InventorySystem"),
+                Path.Combine(ModuleDirectory, "Public/Player/QuickSlotSystem"),
+                Path.Combine(ModuleDirectory, "Public/Player/EquipmentSystem"),
+                Path.Combine(ModuleDirectory, "Public/Player/Notifies"),
+                Path.Combine(ModuleDirectory, "Public/Player/Interfaces"),
+                Path.Combine(ModuleDirectory, "Public/NPC"),
+                Path.Combine(ModuleDirectory, "Public/NPC/Shop"),
 
             }
         );

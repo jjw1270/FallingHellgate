@@ -9,7 +9,6 @@
 #include "InventoryComponent.h"
 #include "QuickSlotComponent.h"
 #include "EquipmentComponent.h"
-#include "ShopComponent.h"
 // UI
 #include "FHHUD.h"
 #include "HUDWidget.h"
@@ -19,7 +18,6 @@ AFHPlayerController::AFHPlayerController()
 	InventoryComp = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComp"));
 	QuickSlotComp = CreateDefaultSubobject<UQuickSlotComponent>(TEXT("QuickSlotComp"));
 	EquipmentComp = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComp"));
-	ShopComp = CreateDefaultSubobject<UShopComponent>(TEXT("ShopComp"));
 }
 
 void AFHPlayerController::BeginPlay()

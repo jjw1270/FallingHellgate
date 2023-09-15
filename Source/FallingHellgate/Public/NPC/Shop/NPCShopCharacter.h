@@ -17,6 +17,12 @@ class FALLINGHELLGATE_API ANPCShopCharacter : public ANPCBase
 protected:
 	UPROPERTY(EditAnywhere, Category = NPC)
 	FText NPCMenu1Text;
+
+	UPROPERTY(EditDefaultsOnly, Category = Widget)
+	TSubclassOf<UUserWidget> ShopWidgetClass;
+
+	UPROPERTY()
+	class UUserWidget* ShopWidget;
 	
 public:
 	virtual void EventInteraction_Implementation(ACharacter* OwnCharacter) override;
@@ -24,4 +30,7 @@ public:
 protected:
 	UFUNCTION()
 	void OpenShop();
+
+	UFUNCTION()
+	void CloseShop();
 };

@@ -57,9 +57,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Component)
 	class UEquipmentComponent* EquipmentComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Component)
-	class UShopComponent* ShopComp;
-
 public:
 	UFUNCTION(BlueprintCallable)
 	void CloseAllWidgets();
@@ -74,9 +71,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Component)
 	FORCEINLINE class UEquipmentComponent* GetEquipmentComp() const { return EquipmentComp; }
-
-	UFUNCTION(BlueprintCallable, Category = Component)
-	FORCEINLINE class UShopComponent* GetShopComp() const { return ShopComp; }
 
 // UI
 protected:

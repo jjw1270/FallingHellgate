@@ -35,6 +35,9 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
+	class UOverlay* Overlay_NPCDefault;
+
+	UPROPERTY(meta = (BindWidget))
 	class UBorder* Border_NPCDefault;
 
 	UPROPERTY(meta = (BindWidget))

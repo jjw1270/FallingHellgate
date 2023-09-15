@@ -19,10 +19,10 @@ protected:
 	FText NPCMenu1Text;
 
 	UPROPERTY(EditDefaultsOnly, Category = Widget)
-	TSubclassOf<UUserWidget> ShopWidgetClass;
+	TSubclassOf<class UShopWidget> ShopWidgetClass;
 
 	UPROPERTY()
-	class UUserWidget* ShopWidget;
+	class UShopWidget* ShopWidget;
 	
 public:
 	virtual void EventInteraction_Implementation(ACharacter* OwnCharacter) override;

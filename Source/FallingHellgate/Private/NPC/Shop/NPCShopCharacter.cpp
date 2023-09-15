@@ -2,11 +2,17 @@
 
 
 #include "NPCShopCharacter.h"
+#include "FallingHellgate.h"
 #include "NPCWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/Border.h"
 #include "Components/Widget.h"
+#include "Components/Overlay.h"
+#include "ShopWidget.h"
+#include "Components/OverlaySlot.h"
+
+#include "Kismet/GameplayStatics.h"
 
 void ANPCShopCharacter::EventInteraction_Implementation(ACharacter* OwnCharacter)
 {
@@ -32,9 +38,18 @@ void ANPCShopCharacter::OpenShop()
 	{
 		NPCDefaultWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
+
+	CHECK_VALID(ShopWidgetClass);
+	ShopWidget = CreateWidget<UShopWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), ShopWidgetClass);
+	CHECK_VALID(ShopWidget);
+	UOverlaySlot* OS_ShopWidget = NPCWidget->Overlay_NPCDefault->AddChildToOverlay(ShopWidget);
+	CHECK_VALID(OS_ShopWidget);
+	OS_ShopWidget->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+	OS_ShopWidget->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
 }
 
 void ANPCShopCharacter::CloseShop()
 {
-
+	CHECK_VALID(ShopWidget);
+	ShopWidget->RemoveFromParent();
 }

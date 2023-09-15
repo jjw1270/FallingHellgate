@@ -6,6 +6,7 @@
 #include "FHPlayerCharacter.h"
 #include "FHPlayerController.h"
 #include "NPCWidget.h"
+#include "Components/Button.h"
 
 // Sets default values
 ANPCBase::ANPCBase()
@@ -42,7 +43,6 @@ void ANPCBase::UpdateCharacterRotation()
 
     if (FMath::IsNearlyEqual(InterpolatedRotation.Yaw, TargetRotation.Yaw, 5.0f))
     {
-        // Clear the timer because the character is looking at the target.
         GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
     }
 }
@@ -56,7 +56,7 @@ void ANPCBase::EventInteraction_Implementation(ACharacter* OwnCharacter)
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANPCBase::UpdateCharacterRotation, UpdateInterval, true);
 
-    AFHPlayerController* PC = OwnCharacter->GetController<AFHPlayerController>();
+    AFHPlayerController* PC = TargetPlayer->GetController<AFHPlayerController>();
     CHECK_VALID(PC);
 
     PC->CloseAllWidgets();
@@ -66,12 +66,20 @@ void ANPCBase::EventInteraction_Implementation(ACharacter* OwnCharacter)
         return;
     }
     NPCWidget = CreateWidget<UNPCWidget>(PC, NPCWidgetClass);
+    NPCWidget->Btn_Exit->OnClicked.AddDynamic(this, &ANPCBase::EndInteraction);
+
     NPCWidget->AddToViewport(99);
+
+    PC->SetInputMode(FInputModeUIOnly());
+    PC->SetShowMouseCursor(true);
 }
 
 void ANPCBase::EndInteraction()
 {
     TargetPlayer->InteractingActor = nullptr;
+
+    AFHPlayerController* PC = TargetPlayer->GetController<AFHPlayerController>();
+    CHECK_VALID(PC);
 
     if (!NPCWidget)
     {
@@ -79,4 +87,7 @@ void ANPCBase::EndInteraction()
     }
 
     NPCWidget->RemoveFromParent();
+
+    PC->SetInputMode(FInputModeGameOnly());
+    PC->SetShowMouseCursor(false);
 }

@@ -22,5 +22,6 @@ public:
 	virtual void EventInteraction_Implementation(ACharacter* OwnCharacter) override;
 
 protected:
+	UFUNCTION()
 	void OpenShop();
 };

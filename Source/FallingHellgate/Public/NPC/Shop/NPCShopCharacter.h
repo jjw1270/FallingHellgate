@@ -31,6 +31,7 @@ protected:
 	UFUNCTION()
 	void OpenShop();
 
+public:
 	UFUNCTION()
 	void CloseShop();
 };

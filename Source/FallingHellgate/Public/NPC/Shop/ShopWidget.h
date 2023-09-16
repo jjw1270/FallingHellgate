@@ -18,10 +18,22 @@ protected:
 	virtual void NativeConstruct() override;
 
 protected:
+	UPROPERTY()
+	class ANPCShopCharacter* NPCShopChar;
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_CloseShop;
+
+	UPROPERTY(meta = (BindWidget))
+	class UScrollBox* ScrollBox_Inventory;
+
+public:
+	void SetNPCShopCharacter(class ANPCShopCharacter* NewNPCShopChar);
 
 protected:
 	UFUNCTION()
 	void OnCloseShopClicked();
+
+protected:
+	void InitShopInventory();
 };

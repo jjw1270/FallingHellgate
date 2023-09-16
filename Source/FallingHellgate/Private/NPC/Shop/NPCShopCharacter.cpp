@@ -42,6 +42,8 @@ void ANPCShopCharacter::OpenShop()
 	CHECK_VALID(ShopWidgetClass);
 	ShopWidget = CreateWidget<UShopWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), ShopWidgetClass);
 	CHECK_VALID(ShopWidget);
+	ShopWidget->SetNPCShopCharacter(this);
+
 	UOverlaySlot* OS_ShopWidget = NPCWidget->Overlay_NPCDefault->AddChildToOverlay(ShopWidget);
 	CHECK_VALID(OS_ShopWidget);
 	OS_ShopWidget->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);

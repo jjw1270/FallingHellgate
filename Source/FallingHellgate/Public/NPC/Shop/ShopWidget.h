@@ -27,6 +27,9 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* ScrollBox_Inventory;
 
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* TextBlock_MyMoney;
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UShopInventorySlotWidget> ShopInventorySlotClass;

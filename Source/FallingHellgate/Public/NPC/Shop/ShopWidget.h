@@ -27,6 +27,13 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* ScrollBox_Inventory;
 
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UShopInventorySlotWidget> ShopInventorySlotClass;
+
+	UPROPERTY()
+	TArray<class UShopInventorySlotWidget*> ShopInventorySlotArray;
+
 public:
 	void SetNPCShopCharacter(class ANPCShopCharacter* NewNPCShopChar);
 
@@ -36,4 +43,8 @@ protected:
 
 protected:
 	void InitShopInventory();
+
+	void AddShopInventorySlot(class UItemData* NewItemData, int32 NewAmount);
+
+	
 };

@@ -54,4 +54,9 @@ void ANPCShopCharacter::CloseShop()
 {
 	CHECK_VALID(ShopWidget);
 	ShopWidget->RemoveFromParent();
+
+	if (UWidget* NPCDefaultWidget = Cast<UWidget>(NPCWidget->Border_NPCDefault))
+	{
+		NPCDefaultWidget->SetVisibility(ESlateVisibility::Visible);
+	}
 }

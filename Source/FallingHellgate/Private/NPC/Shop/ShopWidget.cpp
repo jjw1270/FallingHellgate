@@ -6,6 +6,9 @@
 #include "NPCShopCharacter.h"
 #include "Components/Button.h"
 #include "FHGameInstance.h"
+#include "ShopInventorySlotWidget.h"
+#include "ItemData.h"
+#include "Components/ScrollBox.h"
 
 void UShopWidget::NativeConstruct()
 {
@@ -31,10 +34,25 @@ void UShopWidget::InitShopInventory()
 	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
 	CHECK_VALID(GI);
 
+	CHECK_VALID(ShopInventorySlotClass);
+
 	for (const auto& InventoryItem : *GI->GetInventoryItems())
 	{
-		// create slot widget
-		// set slot data = ItemName, price, amount, image
-		// add slot to scrollbox
+		AddShopInventorySlot(InventoryItem.Key, InventoryItem.Value);
 	}
+}
+
+void UShopWidget::AddShopInventorySlot(class UItemData* NewItemData, int32 NewAmount)
+{
+	// create slot widget
+	// set slot data = ItemName, price, amount, image, type
+	// add slot to scrollbox
+	UShopInventorySlotWidget* ShopInventorySlot = CreateWidget<UShopInventorySlotWidget>(GetWorld(), ShopInventorySlotClass);
+	ShopInventorySlot->AddToViewport();
+	CHECK_VALID(ShopInventorySlot);
+
+	ShopInventorySlot->SetSlotData(NewItemData->GetBaseData(), NewItemData->GetItemType(), NewAmount);
+	ShopInventorySlotArray.Add(ShopInventorySlot);
+
+	ScrollBox_Inventory->AddChild(ShopInventorySlot);
 }

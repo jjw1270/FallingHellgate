@@ -59,18 +59,19 @@ void ANPCBase::EventInteraction_Implementation(ACharacter* OwnCharacter)
     AFHPlayerController* PC = TargetPlayer->GetController<AFHPlayerController>();
     CHECK_VALID(PC);
 
-    PC->CloseAllWidgets();
-
     if (!PC->IsLocalPlayerController())
     {
         return;
     }
+    
+    PC->CloseAllWidgets();
+
     NPCWidget = CreateWidget<UNPCWidget>(PC, NPCWidgetClass);
     NPCWidget->Btn_Exit->OnClicked.AddDynamic(this, &ANPCBase::EndInteraction);
 
     NPCWidget->AddToViewport(99);
 
-    PC->SetInputMode(FInputModeUIOnly());
+    PC->SetInputMode(FInputModeGameAndUI());
     PC->SetShowMouseCursor(true);
 }
 

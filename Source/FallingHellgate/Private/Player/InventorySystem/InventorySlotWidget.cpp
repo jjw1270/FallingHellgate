@@ -54,10 +54,6 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 	DDOperation->DefaultDragVisual = DragWidget;
 	DDOperation->DraggingItemData = SlotItemData;
 	DDOperation->DraggingItemAmount = SlotItemAmount;
-	if (IsSlotItemRegisted())
-	{
-		DDOperation->bIsRegist = true;
-	}
 	
 	DDOperation->Payload = this;
 
@@ -65,7 +61,7 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 	ClearSlot();
 
 	InventoryWidget->GetItemInfoBox()->SetVisibility(ESlateVisibility::Collapsed);
-	if (!DDOperation->bIsRegist)
+	if (!DDOperation->DraggingItemData->IsRegisted())
 	{
 		InventoryWidget->GetItemTrash()->SetVisibility(ESlateVisibility::Visible);
 	}
@@ -109,7 +105,7 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	if (IsEmpty())
 	{	
 		SetSlot(DDOperation->DraggingItemData, DDOperation->DraggingItemAmount);
-		SetOnRegistImageVisibility(DDOperation->bIsRegist);
+		SetOnRegistImageVisibility(DDOperation->DraggingItemData->IsRegisted());
 
 		return true;
 	}
@@ -129,7 +125,7 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	
 	ClearSlot();
 	SetSlot(DDOperation->DraggingItemData, DDOperation->DraggingItemAmount);
-	SetOnRegistImageVisibility(DDOperation->bIsRegist);
+	SetOnRegistImageVisibility(DDOperation->DraggingItemData->IsRegisted());
 
 	return true;
 }
@@ -200,7 +196,7 @@ void UInventorySlotWidget::ClearSlot()
 	Image_Item->SetBrushFromTexture(nullptr);
 	Image_Item->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
 
-	SetOnRegistImageVisibility(false);
+	Image_OnRegist->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UInventorySlotWidget::SetOnRegistImageVisibility(const bool& bIsRegist)
@@ -213,16 +209,13 @@ void UInventorySlotWidget::SetOnRegistImageVisibility(const bool& bIsRegist)
 	{
 		Image_OnRegist->SetVisibility(ESlateVisibility::Collapsed);
 	}
+
+	SlotItemData->RegistItem(bIsRegist);
 }
 
 bool UInventorySlotWidget::IsSlotItemRegisted()
 {
-	if (Image_OnRegist->GetVisibility() == ESlateVisibility::Visible)
-	{
-		return true;
-	}
-
-	return false;
+	return SlotItemData->IsRegisted();
 }
 
 bool UInventorySlotWidget::IsEmpty()

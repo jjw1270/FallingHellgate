@@ -21,7 +21,4 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Drag Drop Operation")
 	int32 DraggingItemAmount;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Drag Drop Operation")
-	bool bIsRegist;
-
 };

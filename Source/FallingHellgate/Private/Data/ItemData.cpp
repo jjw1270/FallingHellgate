@@ -33,6 +33,11 @@ void UItemData::SetArmorData(FArmorItemData& NewArmorData, int32 NewUniqueID)
 	BaseData = ArmorData.BaseData;
 }
 
+void UItemData::RegistItem(bool bNewRegist)
+{
+	bIsRegisted = bNewRegist;
+}
+
 FBaseItemData& UItemData::GetBaseData()
 {
 	return BaseData;

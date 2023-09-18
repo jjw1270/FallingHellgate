@@ -19,6 +19,12 @@ protected:
 
 protected:
 	UPROPERTY()
+	class UFHGameInstance* GI;
+
+	UPROPERTY()
+	class AFHPlayerController* PC;
+
+	UPROPERTY()
 	class ANPCShopCharacter* NPCShopChar;
 
 	UPROPERTY(meta = (BindWidget))
@@ -43,6 +49,9 @@ public:
 protected:
 	UFUNCTION()
 	void OnCloseShopClicked();
+
+	UFUNCTION()
+	void OnMoneyUpdate(int32 UpdateMoney);
 
 protected:
 	void InitShopInventory();

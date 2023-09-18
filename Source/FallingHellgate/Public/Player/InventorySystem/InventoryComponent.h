@@ -14,6 +14,8 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_ItemUpdate, class UItemData*, c
 // UItemData* ItemData, const int32& UniqueID, const bool& bIsRegist
 DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_ItemRegister, class UItemData*, const bool&);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_MoneyUpdate, int32, UpdateMoney);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FALLINGHELLGATE_API UInventoryComponent : public UActorComponent
 {
@@ -50,6 +52,9 @@ public:
 	FDele_Multi_ItemUpdate ItemUpdateDelegate;
 
 	FDele_Multi_ItemRegister ItemRegisterDelegate;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)
+	FDele_Dynamic_MoneyUpdate MoneyUpdateDelegate;
 
 // Inventory func
 public:

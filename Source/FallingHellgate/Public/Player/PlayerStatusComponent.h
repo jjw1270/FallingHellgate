@@ -8,8 +8,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FDele_Dynamic_StatusUpdate, int32, UpdateHealth, int32, UpdateStamina, int32, UpdateAttack, float, UpdateAttackSpeed, float, UpdateCritical, int32, UpdateDefence);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_MoneyUpdate, int32, UpdateMoney);
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FALLINGHELLGATE_API UPlayerStatusComponent : public UActorComponent
 {
@@ -41,9 +39,6 @@ protected:
 	void UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina);
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	int32 Money;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = Status)
 	int32 CurrentHealth;
 
@@ -65,9 +60,6 @@ protected:
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)
 	FDele_Dynamic_StatusUpdate StatusUpdateDelegate;
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)
-	FDele_Dynamic_MoneyUpdate MoneyUpdateDelegate;
 
 public:
 	UFUNCTION()

@@ -16,6 +16,9 @@ class FALLINGHELLGATE_API UShopInventorySlotWidget : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
+	virtual void NativeConstruct() override;
+	
+protected:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextBlock_ItemName;
 
@@ -41,9 +44,17 @@ protected:
 	class UButton* Btn_Sell;
 
 protected:
+	UPROPERTY()
+	class UInventoryComponent* InventoryComp;
+
+	UPROPERTY()
+	class UItemData* SloItemData;
+
 	int32 MaxAmount;
 
 	int32 SellAmount;
+
+	int32 Price;
 
 protected:
 	UFUNCTION()
@@ -56,6 +67,6 @@ protected:
 	void Sell();
 
 public:
-	void SetSlotData(const FBaseItemData& NewBaseItemData, const EItemType& NewItemType, const int32& NewAmount);
+	void SetSlotData(class UItemData* NewItemData, const int32& NewAmount);
 
 };

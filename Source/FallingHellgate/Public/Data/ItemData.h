@@ -47,12 +47,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Data)
 	int32 UniqueID;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Data)
+	bool bIsRegisted;
+
 public:
 	void SetConsumableData(FConsumableItemData& NewConsumableData);
 
 	void SetWeaponData(FWeaponItemData& NewWeaponData, int32 NewUniqueID);
 
 	void SetArmorData(FArmorItemData& NewArmorData, int32 NewUniqueID);
+
+	void RegistItem(bool bRegist);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Data)
@@ -73,4 +78,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Data)
 	FORCEINLINE int32 GetUniqueID() const { return UniqueID; }
 
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE bool IsRegisted() const { return bIsRegisted; }
 };

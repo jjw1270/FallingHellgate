@@ -89,4 +89,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	FORCEINLINE class URemoveConfirmWidget* GetRemoveConfirmWidget() const { return RemoveConfirmWidget; }
 
+	UFUNCTION(BlueprintCallable, Category = Widget)
+	FORCEINLINE TArray<class UInventorySlotWidget*> GetInventorySlotArray() const { return InventorySlotArray; }
 };

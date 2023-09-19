@@ -23,6 +23,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
@@ -48,10 +50,14 @@ protected:
 	/** Called for looking input */
 	virtual void Look(const FInputActionValue& Value);   //Temp Virtual for develop
 
+public:
+	// Use When Replicate Move Server and Client
+	UPROPERTY(Replicated)
+	FRotator PlayerRotation;
 
-////////////////////////////
-////////////////////////////
-////////////////////////////
+	//Return Player index 0's Rotation or just PlayerRotation
+	UFUNCTION(BlueprintPure)
+	FRotator GetPlayerRotation();
 
 /*
 Modular Mesh Components
@@ -67,11 +73,7 @@ Modular Mesh Components
 			<Hair>
 			<Helmet>
 */ 
-
 protected:
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
-	//UModularSkeletalMeshComponent* LowerBody;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
 	UModularSkeletalMeshComponent* Shoes;
 
@@ -117,6 +119,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputMappingContext* DefaultMappingContext;
 
+	/** Roll Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* RollAction;
+
+	/** Sprint Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* SprintAction;
+
+	/** RightClick Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* RightClickAction;
+
+	/** LeftClick Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LeftClickAction;
+
 	/** interact Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* InteractAction;
@@ -141,6 +159,27 @@ protected:
 	class UInputAction* QuickSlot6Action;
 
 protected:
+	/** Called for Roll input */
+	void RollInput(const FInputActionValue& Value);
+
+	/** Called for Sprint input */
+	void SprintInput(const FInputActionValue& Value);
+
+	/** Called for StopSprint input */
+	void StopSprintInput(const FInputActionValue& Value);
+
+	/** Called for RightClick input */
+	void RightClickInput(const FInputActionValue& Value);
+
+	/** Called for StopRightClick input */
+	void StopRightClickInput(const FInputActionValue& Value);
+
+	/** Called for LeftClick input */
+	void LeftClickInput(const FInputActionValue& Value);
+
+	/** Called for StopLeftClick input */
+	void StopLeftClickInput(const FInputActionValue& Value);
+
 	/** Called for Interact input */
 	void Interaction(const FInputActionValue& Value);
 
@@ -158,6 +197,38 @@ protected:
 	void OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
 
 public:
+	// Do Roll Move function
+	UFUNCTION(Server, Reliable)
+	void Req_DoRollMove();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_DoRollMove();
+
+	// Set MaxWalkSpeed For Sprint Action
+	UFUNCTION(Server, Reliable)
+	void Req_SetMaxWalkSpeed(float NewSpeed);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_SetMaxWalkSpeed(float NewSpeed);
+
+	//Left Click Attack Action
+	UFUNCTION(Server, Reliable)
+	void Req_LeftClickAttack(bool IsPressed);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_LeftClickAttack(bool IsPressed);
+
+	void LeftClickAttack(bool IsPressed);
+
+	//Right Click Attack Action
+	UFUNCTION(Server, Reliable)
+	void Req_RightClickAttack(bool IsPressed);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_RightClickAttack(bool IsPressed);
+
+	void RightClickAttack(bool IsPressed);
+
 	UFUNCTION(Server, Reliable)
 	void Req_PickUp(FRotator LookAtRot);
 
@@ -182,8 +253,23 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_OnEquipVisibilityUpdate(const EArmorType UpdateArmorType);
 
+public:
+	// Check Any MontagePlaying
+	UFUNCTION(BlueprintCallable)
+	bool bIsMontagePlaying() { return GetMesh()->GetAnimInstance()->IsAnyMontagePlaying(); };
+
+
+
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, Meta = (AllowPrivateAccess = true))
+	// Use When Roll
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	class UAnimMontage* StandToRollMontage;
+
+	// Use When Roll
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	class UAnimMontage* RunToRollMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> LootingMontage;
 
 protected:

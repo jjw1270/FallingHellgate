@@ -61,6 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CloseAllWidgets();
 
+	UFUNCTION(BlueprintCallable)
+	void OpenBackgroundWidgets();
+
 // Component Getter
 public:
 	UFUNCTION(BlueprintCallable, Category = Component)

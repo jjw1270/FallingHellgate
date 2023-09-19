@@ -105,6 +105,11 @@ void UHUDWidget::CloseAllWidgets()
 	EquipmentWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
+void UHUDWidget::OpenBackgroundWidgets()
+{
+	QuickSlotWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
 bool UHUDWidget::CheckAllHandleableWidgetCollapsed()
 {
 	if (InventoryWidget->GetVisibility() == ESlateVisibility::Visible)

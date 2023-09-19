@@ -33,7 +33,6 @@ void ANPCShopCharacter::EventInteraction_Implementation(ACharacter* OwnCharacter
 
 void ANPCShopCharacter::OpenShop()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SHOPPING"));
 	if (UWidget* NPCDefaultWidget = Cast<UWidget>(NPCWidget->Border_NPCDefault))
 	{
 		NPCDefaultWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -54,6 +53,7 @@ void ANPCShopCharacter::CloseShop()
 {
 	CHECK_VALID(ShopWidget);
 	ShopWidget->RemoveFromParent();
+	ShopWidget = nullptr;
 
 	if (UWidget* NPCDefaultWidget = Cast<UWidget>(NPCWidget->Border_NPCDefault))
 	{

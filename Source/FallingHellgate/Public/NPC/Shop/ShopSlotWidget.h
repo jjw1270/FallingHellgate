@@ -3,18 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ItemData.h"
 #include "Blueprint/UserWidget.h"
-#include "ShopInventorySlotWidget.generated.h"
+#include "ShopSlotWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FALLINGHELLGATE_API UShopInventorySlotWidget : public UUserWidget
+class FALLINGHELLGATE_API UShopSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 	virtual void NativeConstruct() override;
 	
@@ -23,16 +22,13 @@ protected:
 	class UTextBlock* TextBlock_ItemName;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* TextBlock_ItemType;
-
-	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextBlock_ItemPrice;
 
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Image_Item;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* TextBlock_SellAmount;
+	class UTextBlock* TextBlock_BuyAmount;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Btn_AmountUp;
@@ -41,18 +37,21 @@ protected:
 	class UButton* Btn_AmountDown;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_Sell;
+	class UButton* Btn_Buy;
 
 protected:
+	UPROPERTY()
+	class UFHGameInstance* GI;
+
 	UPROPERTY()
 	class UInventoryComponent* InventoryComp;
 
 	UPROPERTY()
-	class UItemData* SloItemData;
+	class UShopWidget* ShopWidget;
 
-	int32 MaxAmount;
+	struct FConsumableItemData SloItemData;
 
-	int32 SellAmount;
+	int32 BuyAmount;
 
 	int32 Price;
 
@@ -64,12 +63,11 @@ protected:
 	void AmountDown();
 
 	UFUNCTION()
-	void Sell();
+	void Buy();
 
 public:
-	void SetSlotData(class UItemData* NewItemData, const int32& NewAmount);
+	void SetSlotData(struct FConsumableItemData* NewItemData);
 
-	void UpdateSlotAmount(const int32& NewAmount);
+	void SetShopWidget(class UShopWidget* NewShopWidget);
 
-	FORCEINLINE class UItemData* GetSlotData() const { return SloItemData; }
 };

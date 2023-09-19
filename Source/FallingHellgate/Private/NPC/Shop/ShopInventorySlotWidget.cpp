@@ -45,17 +45,13 @@ void UShopInventorySlotWidget::AmountDown()
 void UShopInventorySlotWidget::Sell()
 {
 	UE_LOG(LogTemp, Warning, TEXT("CONFIRM SELL"));
-	// remove inventory item from inventory comp
-	InventoryComp->RemoveItemFromInventory(SloItemData, SellAmount);
 	// update money
 	if (InventoryComp->MoneyUpdateDelegate.IsBound())
 	{
 		InventoryComp->MoneyUpdateDelegate.Broadcast(Price * SellAmount);
 	}
-	if (SellAmount == MaxAmount)
-	{
-		RemoveFromParent();
-	}
+	// remove inventory item from inventory comp
+	InventoryComp->RemoveItemFromInventory(SloItemData, SellAmount);
 }
 
 void UShopInventorySlotWidget::SetSlotData(class UItemData* NewItemData, const int32& NewAmount)
@@ -79,4 +75,11 @@ void UShopInventorySlotWidget::SetSlotData(class UItemData* NewItemData, const i
 	Btn_AmountUp->OnClicked.AddDynamic(this, &UShopInventorySlotWidget::AmountUp);
 	Btn_AmountDown->OnClicked.AddDynamic(this, &UShopInventorySlotWidget::AmountDown);
 	Btn_Sell->OnClicked.AddDynamic(this, &UShopInventorySlotWidget::Sell);
+}
+
+void UShopInventorySlotWidget::UpdateSlotAmount(const int32& NewAmount)
+{
+	MaxAmount = NewAmount;
+	SellAmount = 1;
+	TextBlock_SellAmount->SetText(FText::FromString(FString::FromInt(SellAmount)));
 }

@@ -31,15 +31,8 @@ protected:
 	void InitComponent();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = Data)
-	TSubclassOf<class UItemDataManager> ItemDataManagerClass;
-
-protected:
 	UPROPERTY()
 	class UFHGameInstance* GI;
-
-	UPROPERTY()
-	class UItemDataManager* ItemDataManager;
 
 	UPROPERTY()
 	class UEquipmentComponent* EquipComp;

@@ -41,11 +41,6 @@ void UInventoryComponent::InitComponent()
 
 	EquipComp = PC->GetEquipmentComp();
 	CHECK_VALID(EquipComp);
-
-	if (ItemDataManagerClass)
-	{
-		ItemDataManager = NewObject<UItemDataManager>(this, ItemDataManagerClass);
-	}
 }
 
 void UInventoryComponent::AddItemToInventory(const int32& NewItemID, const int32& NewAmount)
@@ -53,7 +48,7 @@ void UInventoryComponent::AddItemToInventory(const int32& NewItemID, const int32
 	// If Item is Equipment Item, Add new item with unique id
 	// else, Already Exist in Inventory, Add Amount
 
-	EItemType NewItemType = ItemDataManager->GetItemType(NewItemID);
+	EItemType NewItemType = GI->GetItemDataManager()->GetItemType(NewItemID);
 	UItemData* NewItem;
 
 	switch (NewItemType)
@@ -193,7 +188,7 @@ UItemData* UInventoryComponent::GetWeaponItemData(const int32& TargetItemID)
 {
 	FWeaponItemData TempWeaponItemData;
 
-	if (!ItemDataManager->GetWeaponItemInfo(TargetItemID, TempWeaponItemData))
+	if (!GI->GetItemDataManager()->GetWeaponItemInfo(TargetItemID, TempWeaponItemData))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Data in WeaponItemDataTable is Missing"));
 		return nullptr;
@@ -214,7 +209,7 @@ UItemData* UInventoryComponent::GetArmorItemData(const int32& TargetItemID)
 {
 	FArmorItemData TempArmorItemData;
 
-	if (!ItemDataManager->GetArmorItemInfo(TargetItemID, TempArmorItemData))
+	if (!GI->GetItemDataManager()->GetArmorItemInfo(TargetItemID, TempArmorItemData))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Data in ArmorItemDataTable is Missing"));
 		return nullptr;
@@ -235,7 +230,7 @@ UItemData* UInventoryComponent::GetConsumableItemData(const int32& TargetItemID)
 {
 	FConsumableItemData TempConsumableItemData;
 
-	if (!ItemDataManager->GetConsumableItemInfo(TargetItemID, TempConsumableItemData))
+	if (!GI->GetItemDataManager()->GetConsumableItemInfo(TargetItemID, TempConsumableItemData))
 	{
 		UE_LOG(LogTemp, Error, TEXT("Data in ConsumableItemDataTable is Missing"));
 		return nullptr;

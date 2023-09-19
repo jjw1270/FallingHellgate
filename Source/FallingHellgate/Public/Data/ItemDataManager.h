@@ -264,4 +264,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Data)
 	EItemType GetItemType(const int32& ItemID);
+
+public:
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE class UDataTable* GetConsumableItemDataTable() const { return ConsumableItemDataTable; }
+
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE class UDataTable* GetWeaponItemDataTable() const { return WeaponItemDataTable; }
+
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE class UDataTable* GetArmorItemDataTable() const { return ArmorItemDataTable; }
+
 };

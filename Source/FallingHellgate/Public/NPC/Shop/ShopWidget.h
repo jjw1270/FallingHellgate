@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "ShopWidget.generated.h"
 
+DECLARE_DELEGATE(FDele_NoMoney);
+
 /**
  * 
  */
@@ -15,6 +17,8 @@ class FALLINGHELLGATE_API UShopWidget : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
+	virtual void NativePreConstruct() override;
+
 	virtual void NativeConstruct() override;
 
 protected:
@@ -36,6 +40,12 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextBlock_MyMoney;
 
+	UPROPERTY(meta = (BindWidget))
+	class UUniformGridPanel* UniformGridPanel_ShopItems;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	class UBackgroundBlur* BackgroundBlur_NoMoney;
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UShopInventorySlotWidget> ShopInventorySlotClass;
@@ -43,8 +53,13 @@ protected:
 	UPROPERTY()
 	TArray<class UShopInventorySlotWidget*> ShopInventorySlotArray;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UShopSlotWidget> ShopSlotClass;
+
 public:
 	void SetNPCShopCharacter(class ANPCShopCharacter* NewNPCShopChar);
+
+	void ShowNoMoneyWidget();
 
 protected:
 	UFUNCTION()
@@ -53,10 +68,15 @@ protected:
 	UFUNCTION()
 	void OnMoneyUpdate(int32 UpdateMoney);
 
+	UFUNCTION()
+	void OnInventoryUpdate(class UItemData* NewItemData, const int32& NewAmount);
+
 protected:
 	void InitShopInventory();
 
 	void AddShopInventorySlot(class UItemData* NewItemData, int32 NewAmount);
 
-	
+	void InitShopSlot();
+
+	class UShopSlotWidget* AddShopSlot(struct FConsumableItemData* NewItemData);
 };

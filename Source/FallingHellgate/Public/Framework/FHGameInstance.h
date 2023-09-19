@@ -7,7 +7,7 @@
 #include "FHGameInstance.generated.h"
 
 /**
- * 
+ *
  */
 
 USTRUCT(BlueprintType)
@@ -15,7 +15,7 @@ struct FDefaultPlayerStats
 {
 	GENERATED_USTRUCT_BODY()
 
-	public:
+public:
 	FDefaultPlayerStats()
 		: DefaultHealth(1000), DefaultStamina(1000), DefaultAttack(0),
 		DefaultAttackSpeed(0.f), DefaultCritcal(0.f), DefaultDefence(0)
@@ -46,7 +46,7 @@ UCLASS()
 class FALLINGHELLGATE_API UFHGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
 public:
 	//test
 	UFUNCTION(BlueprintCallable, Category = Test)
@@ -56,6 +56,17 @@ protected:
 	virtual void Init() override;
 
 	virtual void Shutdown() override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = Data)
+	TSubclassOf<class UItemDataManager> ItemDataManagerClass;
+
+	UPROPERTY()
+	class UItemDataManager* ItemDataManager;
+
+public:
+	UFUNCTION(BLueprintCallable)
+	FORCEINLINE class UItemDataManager* GetItemDataManager() const { return ItemDataManager; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Data)

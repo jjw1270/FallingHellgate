@@ -83,3 +83,17 @@ void AFHPlayerController::CloseAllWidgets()
 
 	HUDWidget->CloseAllWidgets();
 }
+
+void AFHPlayerController::OpenBackgroundWidgets()
+{
+	if (!HUDWidget)
+	{
+		AFHHUD* FHHUD = GetHUD<AFHHUD>();
+		check(FHHUD);
+
+		HUDWidget = FHHUD->GetHUDWidget();
+		check(HUDWidget);
+	}
+
+	HUDWidget->OpenBackgroundWidgets();
+}

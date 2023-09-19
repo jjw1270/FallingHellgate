@@ -27,5 +27,4 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	class UHUDWidget* GetHUDWidget();
-
 };

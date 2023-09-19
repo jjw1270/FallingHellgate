@@ -29,6 +29,8 @@ public:
 
 	void CloseAllWidgets();
 
+	void OpenBackgroundWidgets();
+
 protected:
 	bool CheckAllHandleableWidgetCollapsed();
 

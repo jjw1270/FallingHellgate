@@ -89,6 +89,8 @@ void ANPCBase::EndInteraction()
 
     NPCWidget->RemoveFromParent();
 
+    PC->OpenBackgroundWidgets();
+
     PC->SetInputMode(FInputModeGameOnly());
     PC->SetShowMouseCursor(false);
 }

@@ -10,6 +10,10 @@ void UFHGameInstance::Init()
 {
 	Super::Init();
 
+	if (ItemDataManagerClass)
+	{
+		ItemDataManager = NewObject<UItemDataManager>(this, ItemDataManagerClass);
+	}
 }
 
 // Save Data when End Game

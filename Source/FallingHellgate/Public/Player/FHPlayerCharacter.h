@@ -34,46 +34,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
-protected:
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* MoveAction;
-
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
-
-protected:
-	/** Called for movement input */
-	virtual void Move(const FInputActionValue& Value);   //Temp Virtual for develop
-
-	/** Called for looking input */
-	virtual void Look(const FInputActionValue& Value);   //Temp Virtual for develop
-
-public:
-	// Use When Replicate Move Server and Client
-	UPROPERTY(Replicated)
-	FRotator PlayerRotation;
-
-	//Return Player index 0's Rotation or just PlayerRotation
-	UFUNCTION(BlueprintPure)
-	FRotator GetPlayerRotation();
-
-/*
-Modular Mesh Components
-<LowerBody(Mesh)>
-	<Shoes>
-	<UpperBody>
-		<Cloak>
-		<Glove_L>
-			<Weapon_L>
-		<Glove_R>
-			<Weapon_R>
-		<Head>
-			<Hair>
-			<Helmet>
-*/ 
-protected:
+//[Modular Mesh Components]
+/*	<LowerBody(Mesh)>
+		<Shoes>
+		<UpperBody>
+			<Cloak>
+			<Glove_L>
+				<Weapon_L> (Reserved)
+			<Glove_R>
+				<Weapon_R>
+			<Head>
+				<Hair>
+				<Helmet> */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
 	UModularSkeletalMeshComponent* Shoes;
 
@@ -99,15 +71,11 @@ protected:
 	UModularSkeletalMeshComponent* Helmet;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
-	UModularSkeletalMeshComponent* Weapon;
+	class UBaseWeapon* Weapon;
 
 	UPROPERTY()
 	TArray<UModularSkeletalMeshComponent*> ArmorMSMCompArray;
 
-protected:
-	void InitModularMeshComp();
-
-// Components
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Component)
 	TObjectPtr<UCapsuleComponent> InteractCollision;
 
@@ -115,25 +83,50 @@ protected:
 	class UPlayerStatusComponent* PlayerStatusComp;
 
 protected:
+	void InitModularMeshComp();
+
+public:
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE class UBaseWeapon* GetWeapon() const { return Weapon; }
+
+	//public:
+	//	// Use When Replicate Move Server and Client
+	//	UPROPERTY(Replicated)
+	//	FRotator PlayerRotation;
+	//
+	//	//Return Player index 0's Rotation or just PlayerRotation
+	//	UFUNCTION(BlueprintPure)
+	//	FRotator GetPlayerRotation();
+
+// Inputs
+protected:
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputMappingContext* DefaultMappingContext;
 
-	/** Roll Input Action */
+	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* RollAction;
+	class UInputAction* MoveAction;
 
-	/** Sprint Input Action */
+	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* SprintAction;
+	class UInputAction* LookAction;
 
-	/** RightClick Input Action */
+	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* RightClickAction;
+	class UInputAction* JumpAction;
 
-	/** LeftClick Input Action */
+	/** Dash Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LeftClickAction;
+	class UInputAction* DashAction;
+
+	/** NormalAttack Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* NormalAttackAction;
+
+	/** SmashAttack Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* SmashAttackAction;
 
 	/** interact Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
@@ -158,27 +151,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	class UInputAction* QuickSlot6Action;
 
+public:
+	// Check Any MontagePlaying
+	UFUNCTION(BlueprintCallable)
+	bool CanPlayMontage();
+
 protected:
-	/** Called for Roll input */
-	void RollInput(const FInputActionValue& Value);
+	/** Called for movement input */
+	void Move(const FInputActionValue& Value);
 
-	/** Called for Sprint input */
-	void SprintInput(const FInputActionValue& Value);
+	/** Called for looking input */
+	void Look(const FInputActionValue& Value);
 
-	/** Called for StopSprint input */
-	void StopSprintInput(const FInputActionValue& Value);
+	/** Called for Dash input */
+	void Dash(const FInputActionValue& Value);
 
-	/** Called for RightClick input */
-	void RightClickInput(const FInputActionValue& Value);
+	/** Called for NormalAttack input */
+	void NormalAttack(const FInputActionValue& Value);
 
-	/** Called for StopRightClick input */
-	void StopRightClickInput(const FInputActionValue& Value);
-
-	/** Called for LeftClick input */
-	void LeftClickInput(const FInputActionValue& Value);
-
-	/** Called for StopLeftClick input */
-	void StopLeftClickInput(const FInputActionValue& Value);
+	/** Called for SmashAttack input */
+	void SmashAttack(const FInputActionValue& Value);
 
 	/** Called for Interact input */
 	void Interaction(const FInputActionValue& Value);
@@ -186,6 +178,7 @@ protected:
 	/** Called for Quick Slot inputs */
 	void UseQuickSlot(int32 SlotNum);
 
+// Delegate Binding Events
 protected:
 	UFUNCTION()
 	void OnWeaponUpdate(class UItemData* UpdateEquipItem, const bool& bIsEquip);
@@ -196,41 +189,23 @@ protected:
 	UFUNCTION()
 	void OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
 
+// Network
 public:
-	// Do Roll Move function
 	UFUNCTION(Server, Reliable)
-	void Req_DoRollMove();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Res_DoRollMove();
-
-	// Set MaxWalkSpeed For Sprint Action
-	UFUNCTION(Server, Reliable)
-	void Req_SetMaxWalkSpeed(float NewSpeed);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Res_SetMaxWalkSpeed(float NewSpeed);
-
-	//Left Click Attack Action
-	UFUNCTION(Server, Reliable)
-	void Req_LeftClickAttack(bool IsPressed);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Res_LeftClickAttack(bool IsPressed);
-
-	void LeftClickAttack(bool IsPressed);
-
-	//Right Click Attack Action
-	UFUNCTION(Server, Reliable)
-	void Req_RightClickAttack(bool IsPressed);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Res_RightClickAttack(bool IsPressed);
-
-	void RightClickAttack(bool IsPressed);
+	void Req_Attack(int NormalAttackCount, bool bIsSmash);
 
 	UFUNCTION(Server, Reliable)
 	void Req_PickUp(FRotator LookAtRot);
+
+protected:
+	UFUNCTION(Server, Reliable)
+	void Req_Dash();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_Dash();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_Attack(int NormalAttackCount, bool bIsSmash);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_PickUp(FRotator LookAtRot);
@@ -253,29 +228,21 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_OnEquipVisibilityUpdate(const EArmorType UpdateArmorType);
 
-public:
-	// Check Any MontagePlaying
-	UFUNCTION(BlueprintCallable)
-	bool bIsMontagePlaying() { return GetMesh()->GetAnimInstance()->IsAnyMontagePlaying(); };
-
-
-
+// Montages
 protected:
-	// Use When Roll
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
-	class UAnimMontage* StandToRollMontage;
-
-	// Use When Roll
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
-	class UAnimMontage* RunToRollMontage;
+	TObjectPtr<class UAnimMontage> DashMontage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> LootingMontage;
 
-protected:
-	UPROPERTY()
-	class AFHPlayerController* PC;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> NormalAttackMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> SmashAttackMontage;
+
+protected:
 	UPROPERTY()
 	class UQuickSlotComponent* QuickSlotComp;
 

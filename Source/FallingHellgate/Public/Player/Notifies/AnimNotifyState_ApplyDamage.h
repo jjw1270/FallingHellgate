@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "ApplyDamageAnimNotifyState.generated.h"
+#include "AnimNotifyState_ApplyDamage.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FALLINGHELLGATE_API UApplyDamageAnimNotifyState : public UAnimNotifyState
+class FALLINGHELLGATE_API UAnimNotifyState_ApplyDamage : public UAnimNotifyState
 {
 	GENERATED_BODY()
 	
 
 public:
-	UApplyDamageAnimNotifyState(const FObjectInitializer& ObjectInitializer);
+	UAnimNotifyState_ApplyDamage(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
 

@@ -3,7 +3,6 @@
 
 #include "ModularSkeletalMeshComponent.h"
 #include "FallingHellgate.h"
-#include "Net/UnrealNetwork.h"
 
 UModularSkeletalMeshComponent::UModularSkeletalMeshComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -19,8 +18,6 @@ void UModularSkeletalMeshComponent::BeginPlay()
 void UModularSkeletalMeshComponent::InitDefaultSkeletalMesh()
 {
 	DefaultSkeletalMeshAsset = GetSkeletalMeshAsset();
-
-	// UE_LOG(LogTemp, Error, TEXT("YOU SHOULD SET SKELETAL MESH ASSET! : %d"), *GetName());
 }
 
 void UModularSkeletalMeshComponent::SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip)

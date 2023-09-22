@@ -195,7 +195,7 @@ void UPlayerStatusComponent::UpdateDefaultPlayerStats(const bool& bIsEquip, cons
 void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina)
 {
 	// if Updated default value is less then current value, current value = default vault
-	if (AddHealth < 0 && GI->GetDefaultPlayerStats().DefaultHealth < CurrentHealth)
+	if (GI->GetDefaultPlayerStats().DefaultHealth < CurrentHealth)
 	{
 		CurrentHealth = GI->GetDefaultPlayerStats().DefaultHealth;
 	}
@@ -209,7 +209,7 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 	PlayerChar->Req_UpdateCurrentHealth(GI->GetDefaultPlayerStats().DefaultHealth, CurrentHealth);
 
 	// if Updated default value is less then current value, current value = default vault
-	if (AddStamina < 0 && GI->GetDefaultPlayerStats().DefaultStamina < CurrentStamina)
+	if (GI->GetDefaultPlayerStats().DefaultStamina < CurrentStamina)
 	{
 		CurrentStamina = GI->GetDefaultPlayerStats().DefaultStamina;
 	}
@@ -239,10 +239,10 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 
 const int32& UPlayerStatusComponent::GetCurrentPlayerHealth() const
 {
-	return CurrentStamina;
+	return CurrentHealth;
 }
 
 const int32& UPlayerStatusComponent::GetCurrentPlayerStmina() const
 {
-	return CurrentHealth;
+	return CurrentStamina;
 }

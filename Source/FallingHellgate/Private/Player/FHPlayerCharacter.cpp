@@ -278,8 +278,10 @@ void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 	{
 		return;
 	}
-	
+
 	PlayerStatusComp->UpdateCurrentPlayerStats(0, -DashStamina);
+
+	UE_LOG(LogTemp, Warning, TEXT("CurrentPlayerStmina : %d"), PlayerStatusComp->GetCurrentPlayerStmina());
 
 	bIsDash = true;
 	FTimerHandle DashCoolTimeHandle;

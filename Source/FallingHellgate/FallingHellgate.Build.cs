@@ -34,6 +34,7 @@ public class FallingHellgate : ModuleRules
                 Path.Combine(ModuleDirectory, "Public/Player/Notifies"),
                 Path.Combine(ModuleDirectory, "Public/Player/Interfaces"),
                 Path.Combine(ModuleDirectory, "Public/Player/AttackSystem"),
+                Path.Combine(ModuleDirectory, "Public/Player/Status"),
                 Path.Combine(ModuleDirectory, "Public/NPC"),
                 Path.Combine(ModuleDirectory, "Public/NPC/Shop"),
 

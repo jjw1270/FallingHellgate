@@ -34,18 +34,18 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
-//[Modular Mesh Components]
-/*	<LowerBody(Mesh)>
-		<Shoes>
-		<UpperBody>
-			<Cloak>
-			<Glove_L>
-				<Weapon_L> (Reserved)
-			<Glove_R>
-				<Weapon_R>
-			<Head>
-				<Hair>
-				<Helmet> */
+	//[Modular Mesh Components]
+	/*	<LowerBody(Mesh)>
+			<Shoes>
+			<UpperBody>
+				<Cloak>
+				<Glove_L>
+					<Weapon_L> (Reserved)
+				<Glove_R>
+					<Weapon_R>
+				<Head>
+					<Hair>
+					<Helmet> */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComponent)
 	UModularSkeletalMeshComponent* Shoes;
 
@@ -178,7 +178,7 @@ protected:
 	/** Called for Quick Slot inputs */
 	void UseQuickSlot(int32 SlotNum);
 
-// Delegate Binding Events
+	// Delegate Binding Events
 protected:
 	UFUNCTION()
 	void OnWeaponUpdate(class UItemData* UpdateEquipItem, const bool& bIsEquip);
@@ -189,13 +189,16 @@ protected:
 	UFUNCTION()
 	void OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
 
-// Network
+	// Network
 public:
 	UFUNCTION(Server, Reliable)
 	void Req_Attack(int NormalAttackCount, bool bIsSmash);
 
 	UFUNCTION(Server, Reliable)
 	void Req_PickUp(FRotator LookAtRot);
+
+	UFUNCTION(Server, Reliable)
+	void Req_UpdateCurrentHealth(int32 DefaultHP, int32 CurHP);
 
 protected:
 	UFUNCTION(Server, Reliable)
@@ -228,7 +231,13 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_OnEquipVisibilityUpdate(const EArmorType UpdateArmorType);
 
-// Montages
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_UpdateCurrentHealth(int32 DefaultHP, int32 CurHP);
+
+public:
+	FORCEINLINE class UPlayerStatusComponent* GetPlayerStatusComp() const { return PlayerStatusComp; }
+
+	// Montages
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> DashMontage;
@@ -255,5 +264,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FDele_Multi_EquipVisibilityUpdate EquipVisibilityUpdateDelegate;
+
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	int32 DashStamina{ 100 };
+
+	bool bIsDash;
 
 };

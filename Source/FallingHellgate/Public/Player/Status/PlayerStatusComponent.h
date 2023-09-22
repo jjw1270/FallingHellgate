@@ -6,7 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "PlayerStatusComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FDele_Dynamic_StatusUpdate, int32, UpdateHealth, int32, UpdateStamina, int32, UpdateAttack, float, UpdateAttackSpeed, float, UpdateCritical, int32, UpdateDefence);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FDele_Dynamic_DefaultStatusUpdate, int32, UpdateHealth, int32, UpdateStamina, int32, UpdateAttack, float, UpdateAttackSpeed, float, UpdateCritical, int32, UpdateDefence);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FDele_Dynamic_CurrentStatusUpdate, int32, UpdateHealth, int32, UpdateStamina, int32, UpdateAttack, float, UpdateAttackSpeed, float, UpdateCritical, int32, UpdateDefence);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FALLINGHELLGATE_API UPlayerStatusComponent : public UActorComponent
@@ -36,33 +38,45 @@ protected:
 
 	void InitCurrentPlayerStats();
 
+	FTimerHandle RegenStaminaHandle;
+
+	int32 PrevStamina;
+
+	bool bCanRegenStamina;
+
+	void RegenStamina();
+
+public:
 	void UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina);
 
+	const int32& GetCurrentPlayerHealth() const;
+
+	const int32& GetCurrentPlayerStmina() const;
+
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = Status)
+	UPROPERTY(BlueprintReadOnly, Category = Status)
 	int32 CurrentHealth;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = Status)
+	UPROPERTY(BlueprintReadOnly, Category = Status)
 	int32 CurrentStamina;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = Status)
+	UPROPERTY(BlueprintReadOnly, Category = Status)
 	int32 CurrentAttack;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = Status)
+	UPROPERTY(BlueprintReadOnly, Category = Status)
 	float CurrentAttackSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = Status)
+	UPROPERTY(BlueprintReadOnly, Category = Status)
 	float CurrentCritcal;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = Status)
+	UPROPERTY(BlueprintReadOnly, Category = Status)
 	int32 CurrentDefence;
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)
-	FDele_Dynamic_StatusUpdate StatusUpdateDelegate;
+	FDele_Dynamic_DefaultStatusUpdate DefaultStatusUpdateDelegate;
 
-public:
-	UFUNCTION()
-	void OnRep_CurrentHealth();
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)
+	FDele_Dynamic_CurrentStatusUpdate CurrentStatusUpdateDelegate;
 
 };

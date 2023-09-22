@@ -264,10 +264,26 @@ void AFHPlayerCharacter::Look(const FInputActionValue& Value)
 
 void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 {
+	if (bIsDash)
+	{
+		return;
+	}
+
 	if (!CanPlayMontage() || GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
+
+	if (PlayerStatusComp->GetCurrentPlayerStmina() < DashStamina)
+	{
+		return;
+	}
+	
+	PlayerStatusComp->UpdateCurrentPlayerStats(0, -DashStamina);
+
+	bIsDash = true;
+	FTimerHandle DashCoolTimeHandle;
+	GetWorldTimerManager().SetTimer(DashCoolTimeHandle, [&]() { bIsDash = false; }, 1.5f, false);
 
 	Req_Dash();
 }
@@ -499,4 +515,13 @@ void AFHPlayerCharacter::Res_OnEquipVisibilityUpdate_Implementation(const EArmor
 	default:
 		break;
 	}
+}
+
+void AFHPlayerCharacter::Req_UpdateCurrentHealth_Implementation(int32 DefaultHP, int32 CurHP)
+{
+	Res_UpdateCurrentHealth(DefaultHP, CurHP);
+}
+
+void AFHPlayerCharacter::Res_UpdateCurrentHealth_Implementation(int32 DefaultHP, int32 CurHP)
+{
 }

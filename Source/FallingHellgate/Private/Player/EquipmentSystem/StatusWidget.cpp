@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "EquipmentSystem/StatusWidget.h"
+#include "StatusWidget.h"
 #include "FHPlayerCharacter.h"
 #include "PlayerStatusComponent.h"
 #include "Components/TextBlock.h"
@@ -22,7 +22,7 @@ void UStatusWidget::BindStatusCompEvents()
 		UPlayerStatusComponent* PlayerStatusComp = PlayerCharacter->GetComponentByClass<UPlayerStatusComponent>();
 		if (IsValid(PlayerStatusComp))
 		{
-			PlayerStatusComp->StatusUpdateDelegate.AddDynamic(this, &UStatusWidget::OnStatusUpdate);
+			PlayerStatusComp->DefaultStatusUpdateDelegate.AddDynamic(this, &UStatusWidget::OnStatusUpdate);
 			return;
 		}
 	}

@@ -37,7 +37,6 @@ AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializ
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	// Set JumpZVelocity 700.f(Default) -> 350.f
 	GetCharacterMovement()->JumpZVelocity = 350.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	//----------[ Default Speed Setting Here ]----------
@@ -123,14 +122,6 @@ void AFHPlayerCharacter::InitModularMeshComp()
 	Weapon->SetArmorType(EArmorType::None);
 }
 
-//// Network Setting
-//void AFHPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//
-//	DOREPLIFETIME(AFHPlayerCharacter, PlayerRotation);
-//}
-
 void AFHPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -156,31 +147,6 @@ void AFHPlayerCharacter::BeginPlay()
 
 	EquipVisibilityUpdateDelegate.AddDynamic(this, &AFHPlayerCharacter::OnEquipVisibilityUpdate);
 }
-
-void AFHPlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	////If Has Authority, Set PlayerRotation Uproperty(Replicated)
-	//if (HasAuthority() == true)
-	//{
-	//	PlayerRotation = GetControlRotation();
-	//}
-}
-
-//FRotator AFHPlayerCharacter::GetPlayerRotation()
-//{
-//	//Get Player Character index 0
-//	ACharacter* PlayerCharacter0 = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-//
-//	//If index 0 Player = Self, Get Controller Roatation
-//	if (PlayerCharacter0 == this)
-//	{
-//		return GetControlRotation();
-//	}
-//
-//	return PlayerRotation;
-//}
 
 void AFHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -281,8 +247,6 @@ void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 
 	PlayerStatusComp->UpdateCurrentPlayerStats(0, -DashStamina);
 
-	UE_LOG(LogTemp, Warning, TEXT("CurrentPlayerStmina : %d"), PlayerStatusComp->GetCurrentPlayerStmina());
-
 	bIsDash = true;
 	FTimerHandle DashCoolTimeHandle;
 	GetWorldTimerManager().SetTimer(DashCoolTimeHandle, [&]() { bIsDash = false; }, 1.5f, false);
@@ -315,6 +279,13 @@ void AFHPlayerCharacter::NormalAttack(const FInputActionValue& Value)
 		return;
 	}
 
+	if (PlayerStatusComp->GetCurrentPlayerStmina() < NormalAttackStamina)
+	{
+		return;
+	}
+
+	PlayerStatusComp->UpdateCurrentPlayerStats(0, -NormalAttackStamina);
+
 	if (IWeaponInterface* WeaponInterfaceObj = Cast<IWeaponInterface>(Weapon))
 	{
 		WeaponInterfaceObj->Execute_EventNormalAttack(Weapon, this);
@@ -334,6 +305,13 @@ void AFHPlayerCharacter::SmashAttack(const FInputActionValue& Value)
 	{
 		return;
 	}
+
+	if (PlayerStatusComp->GetCurrentPlayerStmina() < SmashAttackStamina)
+	{
+		return;
+	}
+
+	PlayerStatusComp->UpdateCurrentPlayerStats(0, -SmashAttackStamina);
 
 	if (IWeaponInterface* WeaponInterfaceObj = Cast<IWeaponInterface>(Weapon))
 	{

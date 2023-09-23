@@ -23,8 +23,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
@@ -88,15 +86,6 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UBaseWeapon* GetWeapon() const { return Weapon; }
-
-	//public:
-	//	// Use When Replicate Move Server and Client
-	//	UPROPERTY(Replicated)
-	//	FRotator PlayerRotation;
-	//
-	//	//Return Player index 0's Rotation or just PlayerRotation
-	//	UFUNCTION(BlueprintPure)
-	//	FRotator GetPlayerRotation();
 
 // Inputs
 protected:
@@ -268,6 +257,12 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	int32 DashStamina{ 100 };
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 NormalAttackStamina{ 80 };
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 SmashAttackStamina{ 150 };
 
 	bool bIsDash;
 

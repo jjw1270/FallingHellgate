@@ -13,12 +13,13 @@ class FALLINGHELLGATE_API UBaseWeapon : public UModularSkeletalMeshComponent, pu
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	UBaseWeapon(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+	void SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip, class UAnimMontage* NewNormalAttackMontage, class UAnimMontage* NewSmashAttackMontage);
 
 //Interface Event
 public:
@@ -41,7 +42,13 @@ protected:
 
 	int32 MaxNormalAttackCount{ 4 };
 
-	bool bCanAttack;
+	UPROPERTY()
+	class UAnimMontage* NormalAttackMontage;
+
+	UPROPERTY()
+	class UAnimMontage* SmashAttackMontage;
+
+	FTimerHandle ResetAttackCountHandle;
 
 //Attack Collision
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Collision)
@@ -54,10 +61,6 @@ protected:
 	float TraceSphereRadius;
 
 public:
-	FORCEINLINE void SetCanAttack(bool bNewCanAttack);
-
-	FORCEINLINE bool CanAttack() const { return bCanAttack; }
-
 	//Return LeftClickCount
 	FORCEINLINE int32 GetNormalAttackCount() const { return NormalAttackCount; }
 

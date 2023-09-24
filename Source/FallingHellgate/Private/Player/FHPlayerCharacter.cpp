@@ -162,7 +162,7 @@ void AFHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		//Dash
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AFHPlayerCharacter::Dash);
 		//Sprint
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AFHPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		//NormalAttack
 		EnhancedInputComponent->BindAction(NormalAttackAction, ETriggerEvent::Started, this, &AFHPlayerCharacter::NormalAttack);
@@ -189,7 +189,32 @@ bool AFHPlayerCharacter::CanPlayMontage()
 		return false;
 	}
 
-	return !(AnimInst->IsAnyMontagePlaying());
+	if (AnimInst->IsAnyMontagePlaying())
+	{
+		FString CurrentSectionName = AnimInst->Montage_GetCurrentSection().ToString();
+		if (CurrentSectionName.Contains(TEXT("End")))
+		{
+			UE_LOG(LogTemp, Error, TEXT("End"));
+
+			return true;
+		}
+		UE_LOG(LogTemp, Error, TEXT("MontagePlaying"));
+
+		return false;
+	}
+	UE_LOG(LogTemp, Error, TEXT("Montage Not Playing"));
+
+	return true;
+}
+
+void AFHPlayerCharacter::Jump()
+{
+	if (!CanPlayMontage() || GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+
+	Super::Jump();
 }
 
 void AFHPlayerCharacter::Move(const FInputActionValue& Value)
@@ -319,18 +344,14 @@ void AFHPlayerCharacter::SmashAttack(const FInputActionValue& Value)
 	}
 }
 
-void AFHPlayerCharacter::Req_Attack_Implementation(int NormalAttackCount, bool bIsSmash)
+void AFHPlayerCharacter::Req_Attack_Implementation(class UAnimMontage* AttackMontage, FName SectionName)
 {
-	Res_Attack(NormalAttackCount, bIsSmash);
+	Res_Attack(AttackMontage, SectionName);
 }
 
-void AFHPlayerCharacter::Res_Attack_Implementation(int NormalAttackCount, bool bIsSmash)
+void AFHPlayerCharacter::Res_Attack_Implementation(class UAnimMontage* AttackMontage, FName SectionName)
 {
-	//play attack montage with anim status
-	CHECK_VALID(NormalAttackMontage);
-	CHECK_VALID(SmashAttackMontage);
-	
-	// PlayAnimMontage(NormalAttackMontage);
+	PlayAnimMontage(AttackMontage, 1.0f, SectionName);
 }
 
 void AFHPlayerCharacter::Interaction(const FInputActionValue& Value)
@@ -412,7 +433,7 @@ void AFHPlayerCharacter::Req_OnWeaponUpdate_Implementation(const FWeaponItemData
 
 void AFHPlayerCharacter::Res_OnWeaponUpdate_Implementation(const FWeaponItemData UpdateWeaponItemData, const bool bIsEquip)
 {
-	Weapon->SetEquipMesh(UpdateWeaponItemData.WeaponMesh, bIsEquip);
+	Weapon->SetEquipMesh(UpdateWeaponItemData.WeaponMesh, bIsEquip, UpdateWeaponItemData.NormalAttackMontage, UpdateWeaponItemData.SmashAttackMontage);
 }
 
 void AFHPlayerCharacter::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateEquipItem, const bool& bIsEquip)

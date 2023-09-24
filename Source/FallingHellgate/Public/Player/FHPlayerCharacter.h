@@ -146,6 +146,8 @@ public:
 	bool CanPlayMontage();
 
 protected:
+	virtual void Jump() override;
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -181,7 +183,7 @@ protected:
 	// Network
 public:
 	UFUNCTION(Server, Reliable)
-	void Req_Attack(int NormalAttackCount, bool bIsSmash);
+	void Req_Attack(class UAnimMontage* AttackMontage, FName SectionName);
 
 	UFUNCTION(Server, Reliable)
 	void Req_PickUp(FRotator LookAtRot);
@@ -197,7 +199,7 @@ protected:
 	void Res_Dash();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_Attack(int NormalAttackCount, bool bIsSmash);
+	void Res_Attack(class UAnimMontage* AttackMontage, FName SectionName);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_PickUp(FRotator LookAtRot);
@@ -233,12 +235,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> LootingMontage;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
-	TObjectPtr<class UAnimMontage> NormalAttackMontage;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
-	TObjectPtr<class UAnimMontage> SmashAttackMontage;
 
 protected:
 	UPROPERTY()

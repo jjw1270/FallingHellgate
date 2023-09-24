@@ -24,8 +24,7 @@ protected:
 public:
 	void InitDefaultSkeletalMesh();
 
-	UFUNCTION(BlueprintCallable, Category = Mesh)
-	void SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip);
+	virtual void SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip);
 
 protected:
 	EArmorType ArmorType;

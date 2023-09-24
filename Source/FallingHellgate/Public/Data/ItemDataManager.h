@@ -158,6 +158,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	class USkeletalMesh* WeaponMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	class UAnimMontage* NormalAttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	class UAnimMontage* SmashAttackMontage;
+
 public:
 	bool IsValid() const
 	{

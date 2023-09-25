@@ -49,6 +49,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
 	void DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex);
 
+	bool IsQuickSlotEmpty(int32 QuickSlotIndex);
+
 protected:
 	bool IsItemExistInQuickSlot(class UItemData* TargetItemData, int32& OutIndex);
 

@@ -60,8 +60,8 @@ void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32
 
 void UQuickSlotComponent::UseQuickSlotItem(const int32& TargetQuickSlotIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UseQuickSlotItem : %d"), TargetQuickSlotIndex)
-	/////////////////////////////////////////////////////////////
+	UE_LOG(LogTemp, Warning, TEXT("UseQuickSlotItem : %d"), TargetQuickSlotIndex+1)
+	
 }
 
 void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount)
@@ -116,9 +116,22 @@ void UQuickSlotComponent::DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex
 	}
 }
 
+bool UQuickSlotComponent::IsQuickSlotEmpty(int32 QuickSlotIndex)
+{
+	for (const auto& MyQuickslot : *GI->GetQuickSlotItems())
+	{
+		if(MyQuickslot.Key == QuickSlotIndex)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool UQuickSlotComponent::IsItemExistInQuickSlot(UItemData* TargetItemData, int32& OutIndex)
 {
-	for (auto& MyQuickslot : *GI->GetQuickSlotItems())
+	for (const auto& MyQuickslot : *GI->GetQuickSlotItems())
 	{
 		if (MyQuickslot.Value == TargetItemData)
 		{

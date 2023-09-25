@@ -252,6 +252,9 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
+	int32 JumpStamina{ 100 };
+
+	UPROPERTY(EditDefaultsOnly)
 	int32 DashStamina{ 100 };
 
 	UPROPERTY(EditDefaultsOnly)

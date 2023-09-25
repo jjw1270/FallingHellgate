@@ -210,6 +210,13 @@ void AFHPlayerCharacter::Jump()
 		return;
 	}
 
+	if (PlayerStatusComp->GetCurrentPlayerStmina() < JumpStamina)
+	{
+		return;
+	}
+
+	PlayerStatusComp->UpdateCurrentPlayerStats(0, -JumpStamina);
+
 	Super::Jump();
 }
 
@@ -347,6 +354,7 @@ void AFHPlayerCharacter::Req_Attack_Implementation(class UAnimMontage* AttackMon
 
 void AFHPlayerCharacter::Res_Attack_Implementation(class UAnimMontage* AttackMontage, FName SectionName)
 {
+	// Play Rate : getplayerstate->getattackspeed later
 	PlayAnimMontage(AttackMontage, 1.0f, SectionName);
 }
 
@@ -408,6 +416,11 @@ void AFHPlayerCharacter::Res_PickUp_Implementation(FRotator LookAtRot)
 
 void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)
 {
+	if (!QuickSlotComp->IsQuickSlotEmpty(SlotNum-1))
+	{
+		return;
+	}
+
 	QuickSlotComp->UseQuickSlotItem(SlotNum - 1);
 }
 

@@ -22,6 +22,8 @@ void UBaseWeapon::SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip
 	if (!bIsEquip)
 	{
 		SetSkeletalMeshAsset(DefaultSkeletalMeshAsset);
+		NormalAttackMontage = nullptr;
+		SmashAttackMontage = nullptr;
 
 		return;
 	}

@@ -49,9 +49,13 @@ protected:
 public:
 	void UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina);
 
-	const int32& GetCurrentPlayerHealth() const;
+	FORCEINLINE const int32& GetCurrentPlayerHealth() const { return CurrentHealth; }
 
-	const int32& GetCurrentPlayerStmina() const;
+	FORCEINLINE const int32& GetCurrentPlayerStmina() const { return CurrentStamina; }
+
+	FORCEINLINE const int32& GetCurrentAttack() const { return CurrentAttack; }
+
+	FORCEINLINE const float& GetCurrentCritical() const { return CurrentCritcal; }
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = Status)

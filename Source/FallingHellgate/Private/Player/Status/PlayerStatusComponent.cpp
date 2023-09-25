@@ -236,13 +236,3 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 		);
 	}
 }
-
-const int32& UPlayerStatusComponent::GetCurrentPlayerHealth() const
-{
-	return CurrentHealth;
-}
-
-const int32& UPlayerStatusComponent::GetCurrentPlayerStmina() const
-{
-	return CurrentStamina;
-}

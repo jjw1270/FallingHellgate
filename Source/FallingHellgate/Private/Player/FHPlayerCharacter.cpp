@@ -194,15 +194,11 @@ bool AFHPlayerCharacter::CanPlayMontage()
 		FString CurrentSectionName = AnimInst->Montage_GetCurrentSection().ToString();
 		if (CurrentSectionName.Contains(TEXT("End")))
 		{
-			UE_LOG(LogTemp, Error, TEXT("End"));
-
 			return true;
 		}
-		UE_LOG(LogTemp, Error, TEXT("MontagePlaying"));
 
 		return false;
 	}
-	UE_LOG(LogTemp, Error, TEXT("Montage Not Playing"));
 
 	return true;
 }

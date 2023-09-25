@@ -50,16 +50,6 @@ protected:
 
 	FTimerHandle ResetAttackCountHandle;
 
-//Attack Collision
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Collision)
-	FName AttackStartSocketName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Collision)
-	FName AttackEndSocketName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Collision)
-	float TraceSphereRadius;
-
 public:
 	//Return LeftClickCount
 	FORCEINLINE int32 GetNormalAttackCount() const { return NormalAttackCount; }

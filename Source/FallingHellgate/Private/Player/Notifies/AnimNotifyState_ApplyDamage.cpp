@@ -8,6 +8,7 @@
 #include "PlayerStatusComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
+#include "FHPlayerController.h"
 
 UAnimNotifyState_ApplyDamage::UAnimNotifyState_ApplyDamage(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -33,6 +34,11 @@ void UAnimNotifyState_ApplyDamage::NotifyBegin(USkeletalMeshComponent* MeshComp,
 void UAnimNotifyState_ApplyDamage::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
+
+	if (OwnCharacter->GetController() != MeshComp->GetWorld()->GetFirstPlayerController())
+	{
+		return;
+	}
 
 	CHECK_VALID(OwnCharacter);
 	CHECK_VALID(WeaponMesh);

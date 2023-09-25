@@ -12,8 +12,6 @@ UBaseWeapon::UBaseWeapon(const FObjectInitializer& ObjectInitializer) : Super(Ob
 void UBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-
-	ResetNormalAttackCount();
 }
 
 void UBaseWeapon::SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip, class UAnimMontage* NewNormalAttackMontage, class UAnimMontage* NewSmashAttackMontage)
@@ -33,20 +31,22 @@ void UBaseWeapon::SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip
 
 	NormalAttackMontage = NewNormalAttackMontage;
 	SmashAttackMontage = NewSmashAttackMontage;
+
+	ResetNormalAttackCount();
 }
 
 void UBaseWeapon::EventNormalAttack_Implementation(ACharacter* OwnCharacter)
 {
 	GetWorld()->GetTimerManager().ClearTimer(ResetAttackCountHandle);
 
-	NormalAttackCount++;
-
-	Attack(OwnCharacter, false);
-
-	if (NormalAttackCount > MaxNormalAttackCount)
+	if (NormalAttackCount == MaxNormalAttackCount)
 	{
 		ResetNormalAttackCount();
 	}
+
+	NormalAttackCount++;
+
+	Attack(OwnCharacter, false);
 }
 
 void UBaseWeapon::EventSmashAttack_Implementation(ACharacter* OwnCharacter)

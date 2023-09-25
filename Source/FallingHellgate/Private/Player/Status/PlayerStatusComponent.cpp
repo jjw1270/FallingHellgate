@@ -81,7 +81,7 @@ void UPlayerStatusComponent::InitCurrentPlayerStats()
 
 	PrevStamina = CurrentStamina;
 	bCanRegenStamina = true;
-	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.1f, true);
+	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.02f, true);
 }
 
 void UPlayerStatusComponent::RegenStamina()

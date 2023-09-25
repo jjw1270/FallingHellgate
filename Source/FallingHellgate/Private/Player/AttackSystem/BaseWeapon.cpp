@@ -39,14 +39,14 @@ void UBaseWeapon::EventNormalAttack_Implementation(ACharacter* OwnCharacter)
 {
 	GetWorld()->GetTimerManager().ClearTimer(ResetAttackCountHandle);
 
+	NormalAttackCount++;
+
+	Attack(OwnCharacter, false);
+
 	if (NormalAttackCount > MaxNormalAttackCount)
 	{
 		ResetNormalAttackCount();
 	}
-
-	NormalAttackCount++;
-
-	Attack(OwnCharacter, false);
 }
 
 void UBaseWeapon::EventSmashAttack_Implementation(ACharacter* OwnCharacter)

@@ -64,6 +64,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OpenBackgroundWidgets();
 
+	void ShowBloodScreen();
+
 // Component Getter
 public:
 	UFUNCTION(BlueprintCallable, Category = Component)
@@ -79,5 +81,11 @@ public:
 protected:
 	UPROPERTY()
 	class UHUDWidget* HUDWidget;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUserWidget> BloodScreenClass;
+
+	UPROPERTY()
+	class UUserWidget* BloodScreenWidget;
 
 };

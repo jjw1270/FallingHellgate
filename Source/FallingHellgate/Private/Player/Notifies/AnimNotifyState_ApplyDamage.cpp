@@ -98,9 +98,9 @@ void UAnimNotifyState_ApplyDamage::AddDamageToTargets(TArray<FHitResult>& OutRes
 
 		// apply damage to target
 		float Damage = PlayerStatusComp->GetCurrentPlayerStats().Attack * DamageCoefficient;
+		Damage = FMath::RandRange(Damage * 0.9f, Damage * 1.1f);
 		(FMath::FRand() <= PlayerStatusComp->GetCurrentPlayerStats().Critcal) ? Damage *= 1.5f : Damage;
 
 		UGameplayStatics::ApplyDamage(TargetActor, (int32)Damage, OwnCharacter->GetController(), OwnCharacter, NULL);
-		UE_LOG(LogTemp, Warning, TEXT("ApplyDamage : %d"), (int32)Damage);
 	}
 }

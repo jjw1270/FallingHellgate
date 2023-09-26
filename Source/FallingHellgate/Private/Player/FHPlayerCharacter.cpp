@@ -23,6 +23,8 @@
 #include "ItemData.h"
 #include "BaseWeapon.h"
 
+#include "Blueprint/UserWidget.h"
+
 AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularSkeletalMeshComponent>(ACharacter::MeshComponentName = TEXT("LowerBody")))
 {
@@ -197,7 +199,7 @@ bool AFHPlayerCharacter::CanPlayMontage()
 	if (AnimInst->IsAnyMontagePlaying())
 	{
 		FString CurrentSectionName = AnimInst->Montage_GetCurrentSection().ToString();
-		if (CurrentSectionName.Contains(TEXT("End")))
+		if (CurrentSectionName.Contains(TEXT("End"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 		{
 			return true;
 		}
@@ -470,6 +472,8 @@ void AFHPlayerCharacter::Req_TakeDamage_Implementation(EHitDirection HitDir, boo
 
 void AFHPlayerCharacter::Res_TakeDamage_Implementation(EHitDirection HitDir, bool bKnockBack)
 {
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.3f);
+
 	if (bKnockBack)
 	{
 		switch (HitDir)
@@ -508,6 +512,11 @@ void AFHPlayerCharacter::Res_TakeDamage_Implementation(EHitDirection HitDir, boo
 			break;
 		}
 	}
+
+	if (AFHPlayerController* PC = GetController<AFHPlayerController>())
+	{
+		PC->ShowBloodScreen();
+	}
 }
 
 void AFHPlayerCharacter::Req_Death_Implementation(EHitDirection HitDir)
@@ -517,7 +526,9 @@ void AFHPlayerCharacter::Req_Death_Implementation(EHitDirection HitDir)
 
 void AFHPlayerCharacter::Res_Death_Implementation(EHitDirection HitDir)
 {
-	float MontageTime;
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.3f);
+
+	float MontageTime = 0.f;
 
 	switch (HitDir)
 	{
@@ -539,8 +550,9 @@ void AFHPlayerCharacter::Res_Death_Implementation(EHitDirection HitDir)
 		Tags.Remove(EnemyTag);
 	}
 
+	MontageTime += 2.f;
 	FTimerHandle DeathHandle;
-	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Death, MontageTime + 1.f, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Death, MontageTime, false);
 }
 
 void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)
@@ -646,12 +658,13 @@ void AFHPlayerCharacter::Res_OnEquipVisibilityUpdate_Implementation(const EArmor
 	}
 }
 
-
 float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
 	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
+	UE_LOG(LogTemp, Warning, TEXT("Causer : %s"), *DamageCauser->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Damaged : %s"), *this->GetName());
 
 	GetPlayerStatusComp()->UpdateCurrentPlayerStats(-NewDamage, 0);
 
@@ -683,7 +696,7 @@ float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEve
 	}
 	else
 	{
-		bool bShouldKnockBack = NewDamage >= 0.25f * GetPlayerStatusComp()->GetDefaultPlayerStats().Health;
+		bool bShouldKnockBack = NewDamage >= 0.3f * GetPlayerStatusComp()->GetDefaultPlayerStats().Health;
 
 		Req_TakeDamage(HitDirection, bShouldKnockBack);
 	}
@@ -694,5 +707,5 @@ float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEve
 void AFHPlayerCharacter::Death()
 {
 	// Death UI?
-
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 }

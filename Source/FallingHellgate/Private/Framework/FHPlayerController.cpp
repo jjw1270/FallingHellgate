@@ -97,3 +97,14 @@ void AFHPlayerController::OpenBackgroundWidgets()
 
 	HUDWidget->OpenBackgroundWidgets();
 }
+
+void AFHPlayerController::ShowBloodScreen()
+{
+	if (BloodScreenWidget)
+	{
+		if (BloodScreenClass)
+		{
+			BloodScreenWidget = CreateWidget<UUserWidget>(this, BloodScreenClass);
+		}
+	}
+}

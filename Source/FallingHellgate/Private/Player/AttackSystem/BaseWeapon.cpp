@@ -82,6 +82,5 @@ void UBaseWeapon::Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator Attac
 		PlayerCharacter->Req_Attack(AttackRot, SmashAttackMontage, FName(*SectionName));
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(ResetAttackCountHandle, this, &UBaseWeapon::ResetNormalAttackCount, 2.f, false);
+	GetWorld()->GetTimerManager().SetTimer(ResetAttackCountHandle, this, &UBaseWeapon::ResetNormalAttackCount, 1.3f, false);
 }
-

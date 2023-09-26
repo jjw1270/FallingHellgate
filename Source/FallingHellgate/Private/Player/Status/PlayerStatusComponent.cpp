@@ -43,8 +43,6 @@ void UPlayerStatusComponent::BeginPlay()
 
 void UPlayerStatusComponent::InitCurrentPlayerStats()
 {
-	UE_LOG(LogTemp, Warning, TEXT("InitCurrentPlayerStats"));
-
 	DefaultPlayerStats = GI->GetDefaultPlayerStats();
 	Req_UpdateDefaultPlayerStats(DefaultPlayerStats);
 
@@ -212,7 +210,7 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 		CurrentPlayerStats.Health = 0;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%d / %d"), CurrentPlayerStats.Health, DefaultPlayerStats.Health);
+	// UE_LOG(LogTemp, Warning, TEXT("%d / %d"), CurrentPlayerStats.Health, DefaultPlayerStats.Health);
 
 	// if Updated default value is less then current value, current value = default vault
 	CurrentPlayerStats.Stamina += AddStamina;

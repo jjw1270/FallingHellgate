@@ -9,6 +9,15 @@
 
 class UModularSkeletalMeshComponent;
 
+UENUM(BlueprintType)
+enum class EHitDirection : uint8
+{
+	Front		UMETA(DisplayName = "Front"),
+	Back		UMETA(DisplayName = "Back"),
+	Left		UMETA(DisplayName = "Left"),
+	Right		UMETA(DisplayName = "Right")
+};
+
 // Delegate called when Cloak Visibility button Pressed
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Multi_EquipVisibilityUpdate, const EArmorType&, UpdateArmorType);
 
@@ -182,6 +191,8 @@ protected:
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	void Death();
+
 // Network
 public:
 	UFUNCTION(Server, Reliable)
@@ -189,9 +200,6 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Req_PickUp(FRotator LookAtRot);
-
-	UFUNCTION(Server, Reliable)
-	void Req_UpdateCurrentHealth(int32 DefaultHP, int32 CurHP);
 
 protected:
 	UFUNCTION(Server, Reliable)
@@ -205,6 +213,18 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_PickUp(FRotator LookAtRot);
+
+	UFUNCTION(Server, Reliable)
+	void Req_TakeDamage(EHitDirection HitDir, bool bKnockBack);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_TakeDamage(EHitDirection HitDir, bool bKnockBack);
+
+	UFUNCTION(Server, Reliable)
+	void Req_Death(EHitDirection HitDir);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_Death(EHitDirection HitDir);
 
 	UFUNCTION(Server, Reliable)
 	void Req_OnWeaponUpdate(const FWeaponItemData UpdateWeaponItemData, const bool bIsEquip);
@@ -224,9 +244,6 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_OnEquipVisibilityUpdate(const EArmorType UpdateArmorType);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Res_UpdateCurrentHealth(int32 DefaultHP, int32 CurHP);
-
 public:
 	FORCEINLINE class UPlayerStatusComponent* GetPlayerStatusComp() const { return PlayerStatusComp; }
 
@@ -237,6 +254,30 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> LootingMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> HitReactFrontMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> HitReactBackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> HitReactLeftMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> HitReactRightMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> KnockBackFrontMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> KnockBackBackMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> DeathFrontMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> DeathBackMontage;
 
 protected:
 	UPROPERTY()

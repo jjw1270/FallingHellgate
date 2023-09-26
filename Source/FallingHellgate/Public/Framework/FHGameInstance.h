@@ -11,35 +11,35 @@
  */
 
 USTRUCT(BlueprintType)
-struct FDefaultPlayerStats
+struct FPlayerStats
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	FDefaultPlayerStats()
-		: DefaultHealth(1000), DefaultStamina(1000), DefaultAttack(0),
-		DefaultAttackSpeed(0.f), DefaultCritcal(0.f), DefaultDefence(0)
+	FPlayerStats()
+		: Health(1000), Stamina(1000), Attack(0),
+		AttackSpeed(0.f), Critcal(0.f), Defence(0)
 	{
 	}
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 DefaultHealth;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	int32 Health;
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 DefaultStamina;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	int32 Stamina;
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 DefaultAttack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	int32 Attack;
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	float DefaultAttackSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	float AttackSpeed;
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	float DefaultCritcal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	float Critcal;
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 DefaultDefence;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
+	int32 Defence;
 };
 
 UCLASS()
@@ -107,7 +107,7 @@ protected:
 	int32 Money;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	FDefaultPlayerStats DefaultPlayerStats;
+	FPlayerStats DefaultPlayerStats;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Data)
@@ -117,5 +117,5 @@ public:
 	FORCEINLINE int32& GetPlayerMoney() { return Money; }
 
 	UFUNCTION(BlueprintCallable, Category = Status)
-	FORCEINLINE FDefaultPlayerStats& GetDefaultPlayerStats() { return DefaultPlayerStats; }
+	FORCEINLINE FPlayerStats& GetDefaultPlayerStats() { return DefaultPlayerStats; }
 };

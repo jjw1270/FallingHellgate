@@ -189,6 +189,11 @@ bool AFHPlayerCharacter::CanPlayMontage()
 		return false;
 	}
 
+	if (GetPlayerStatusComp()->GetCurrentPlayerStats().Health <= 0)
+	{
+		return false;
+	}
+
 	if (AnimInst->IsAnyMontagePlaying())
 	{
 		FString CurrentSectionName = AnimInst->Montage_GetCurrentSection().ToString();
@@ -210,7 +215,7 @@ void AFHPlayerCharacter::Jump()
 		return;
 	}
 
-	if (PlayerStatusComp->GetCurrentPlayerStmina() < JumpStamina)
+	if (PlayerStatusComp->GetCurrentPlayerStats().Stamina < JumpStamina)
 	{
 		return;
 	}
@@ -222,6 +227,11 @@ void AFHPlayerCharacter::Jump()
 
 void AFHPlayerCharacter::Move(const FInputActionValue& Value)
 {
+	if (!CanPlayMontage())
+	{
+		return;
+	}
+
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -268,7 +278,7 @@ void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 		return;
 	}
 
-	if (PlayerStatusComp->GetCurrentPlayerStmina() < DashStamina)
+	if (PlayerStatusComp->GetCurrentPlayerStats().Stamina < DashStamina)
 	{
 		return;
 	}
@@ -316,7 +326,7 @@ void AFHPlayerCharacter::NormalAttack(const FInputActionValue& Value)
 		return;
 	}
 
-	if (PlayerStatusComp->GetCurrentPlayerStmina() < NormalAttackStamina)
+	if (PlayerStatusComp->GetCurrentPlayerStats().Stamina < NormalAttackStamina)
 	{
 		return;
 	}
@@ -325,7 +335,7 @@ void AFHPlayerCharacter::NormalAttack(const FInputActionValue& Value)
 
 	FVector CurrentAcceleration = GetCharacterMovement()->GetCurrentAcceleration();
 
-	FRotator AttackRot = GetControlRotation();
+	FRotator AttackRot = FRotator(0, GetControlRotation().Yaw, 0);
 
 	(CurrentAcceleration.IsNearlyZero()) ? AttackRot : AttackRot = CurrentAcceleration.Rotation();
 
@@ -349,7 +359,7 @@ void AFHPlayerCharacter::SmashAttack(const FInputActionValue& Value)
 		return;
 	}
 
-	if (PlayerStatusComp->GetCurrentPlayerStmina() < SmashAttackStamina)
+	if (PlayerStatusComp->GetCurrentPlayerStats().Stamina < SmashAttackStamina)
 	{
 		return;
 	}
@@ -358,7 +368,7 @@ void AFHPlayerCharacter::SmashAttack(const FInputActionValue& Value)
 
 	FVector CurrentAcceleration = GetCharacterMovement()->GetCurrentAcceleration();
 
-	FRotator AttackRot = GetControlRotation();
+	FRotator AttackRot = FRotator(0, GetControlRotation().Yaw, 0);
 
 	(CurrentAcceleration.IsNearlyZero()) ? AttackRot : AttackRot = CurrentAcceleration.Rotation();
 
@@ -440,12 +450,97 @@ void AFHPlayerCharacter::Res_PickUp_Implementation(FRotator LookAtRot)
 
 void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)
 {
+	if (!CanPlayMontage())
+	{
+		return;
+	}
+
 	if (!QuickSlotComp->IsQuickSlotEmpty(SlotNum-1))
 	{
 		return;
 	}
 
 	QuickSlotComp->UseQuickSlotItem(SlotNum - 1);
+}
+
+void AFHPlayerCharacter::Req_TakeDamage_Implementation(EHitDirection HitDir, bool bKnockBack)
+{
+	Res_TakeDamage(HitDir, bKnockBack);
+}
+
+void AFHPlayerCharacter::Res_TakeDamage_Implementation(EHitDirection HitDir, bool bKnockBack)
+{
+	if (bKnockBack)
+	{
+		switch (HitDir)
+		{
+		case EHitDirection::Left:
+		case EHitDirection::Right:
+		case EHitDirection::Front:
+			CHECK_VALID(KnockBackFrontMontage);
+			PlayAnimMontage(KnockBackFrontMontage);
+			break;
+		case EHitDirection::Back:
+			CHECK_VALID(KnockBackBackMontage);
+			PlayAnimMontage(KnockBackBackMontage);
+			break;
+		}
+	}
+	else
+	{
+		switch (HitDir)
+		{
+		case EHitDirection::Front:
+			CHECK_VALID(HitReactFrontMontage);
+			PlayAnimMontage(HitReactFrontMontage);
+			break;
+		case EHitDirection::Back:
+			CHECK_VALID(HitReactBackMontage);
+			PlayAnimMontage(HitReactBackMontage);
+			break;
+		case EHitDirection::Left:
+			CHECK_VALID(HitReactLeftMontage);
+			PlayAnimMontage(HitReactLeftMontage);
+			break;
+		case EHitDirection::Right:
+			CHECK_VALID(HitReactRightMontage);
+			PlayAnimMontage(HitReactRightMontage);
+			break;
+		}
+	}
+}
+
+void AFHPlayerCharacter::Req_Death_Implementation(EHitDirection HitDir)
+{
+	Res_Death(HitDir);
+}
+
+void AFHPlayerCharacter::Res_Death_Implementation(EHitDirection HitDir)
+{
+	float MontageTime;
+
+	switch (HitDir)
+	{
+	case EHitDirection::Left:
+	case EHitDirection::Right:
+	case EHitDirection::Front:
+		CHECK_VALID(DeathFrontMontage);
+		MontageTime = PlayAnimMontage(DeathFrontMontage);
+		break;
+	case EHitDirection::Back:
+		CHECK_VALID(DeathBackMontage);
+		MontageTime = PlayAnimMontage(DeathBackMontage);
+		break;
+	}
+
+	FName EnemyTag = TEXT("Enemy");
+	if (Tags.Contains(EnemyTag))
+	{
+		Tags.Remove(EnemyTag);
+	}
+
+	FTimerHandle DeathHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Death, MontageTime + 1.f, false);
 }
 
 void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)
@@ -526,21 +621,6 @@ void AFHPlayerCharacter::OnEquipVisibilityUpdate(const EArmorType& UpdateArmorTy
 	Req_OnEquipVisibilityUpdate(UpdateArmorType);
 }
 
-float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
-
-	// DamageCauser 위치에 따른 Hit Reaction
-	// -CurHP
-	// 데미지가 DefaultHP의 20% 이상이면 넉백
-	// HP < 0 이면 사망
-	// HP call event/Replication
-
-	return NewDamage;
-}
-
 void AFHPlayerCharacter::Req_OnEquipVisibilityUpdate_Implementation(const EArmorType UpdateArmorType)
 {
 	Res_OnEquipVisibilityUpdate(UpdateArmorType);
@@ -566,11 +646,53 @@ void AFHPlayerCharacter::Res_OnEquipVisibilityUpdate_Implementation(const EArmor
 	}
 }
 
-void AFHPlayerCharacter::Req_UpdateCurrentHealth_Implementation(int32 DefaultHP, int32 CurHP)
+
+float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Res_UpdateCurrentHealth(DefaultHP, CurHP);
+	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
+
+	GetPlayerStatusComp()->UpdateCurrentPlayerStats(-NewDamage, 0);
+
+	FVector DirectionToDamageCauser = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	DirectionToDamageCauser.Z = 0.0f;
+	float DamagedYawRot = DirectionToDamageCauser.Rotation().Yaw + 90.f;
+
+	EHitDirection HitDirection = EHitDirection::Front;
+	if (DamagedYawRot < 60.f || DamagedYawRot >= 300.f)
+	{
+		HitDirection = EHitDirection::Front;
+	}
+	else if (DamagedYawRot >= 60.f && DamagedYawRot < 120.f)
+	{
+		HitDirection = EHitDirection::Right;
+	}
+	else if (DamagedYawRot >= 120.f && DamagedYawRot < 240.f)
+	{
+		HitDirection = EHitDirection::Back;
+	}
+	else if (DamagedYawRot >= 240.f && DamagedYawRot < 300.f)
+	{
+		HitDirection = EHitDirection::Left;
+	}
+
+	if (GetPlayerStatusComp()->GetCurrentPlayerStats().Health <= 0)
+	{
+		Req_Death(HitDirection);
+	}
+	else
+	{
+		bool bShouldKnockBack = NewDamage >= 0.25f * GetPlayerStatusComp()->GetDefaultPlayerStats().Health;
+
+		Req_TakeDamage(HitDirection, bShouldKnockBack);
+	}
+
+	return NewDamage;
 }
 
-void AFHPlayerCharacter::Res_UpdateCurrentHealth_Implementation(int32 DefaultHP, int32 CurHP)
+void AFHPlayerCharacter::Death()
 {
+	// Death UI?
+
 }

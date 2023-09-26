@@ -24,24 +24,24 @@ void UAnimNotifyState_ApplyDamage::NotifyBegin(USkeletalMeshComponent* MeshComp,
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
-	OwnCharacter = Cast<AFHPlayerCharacter>(MeshComp->GetOwner());
-	CHECK_VALID(OwnCharacter);
+	if (MeshComp->GetOwner() && MeshComp->GetOwner()->GetInstigatorController())
+	{
+		OwnCharacter = Cast<AFHPlayerCharacter>(MeshComp->GetOwner());
+		CHECK_VALID(OwnCharacter);
 
-	WeaponMesh = OwnCharacter->GetWeapon();
-	CHECK_VALID(WeaponMesh);
+		WeaponMesh = OwnCharacter->GetWeapon();
+		CHECK_VALID(WeaponMesh);
+	}
 }
 
 void UAnimNotifyState_ApplyDamage::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
 
-	if (OwnCharacter->GetController() != MeshComp->GetWorld()->GetFirstPlayerController())
+	if (!OwnCharacter)
 	{
 		return;
 	}
-
-	CHECK_VALID(OwnCharacter);
-	CHECK_VALID(WeaponMesh);
 
 	TArray<FHitResult> OutResults;
 	if (DetectWeaponCollsion(OutResults))
@@ -69,7 +69,7 @@ bool UAnimNotifyState_ApplyDamage::DetectWeaponCollsion(TArray<FHitResult>& OutR
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(OwnCharacter);
 	bool IsHit = UKismetSystemLibrary::SphereTraceMultiForObjects(OwnCharacter->GetWorld(), TraceStartPos, TraceEndPos, TraceSphereRadius,
-		ObjTypes, false, ActorsToIgnore, DrawDebugCollision.GetValue(), OutResults, true, FColor::Red, FColor::Green, 1.f);
+		ObjTypes, false, ActorsToIgnore, DrawDebugCollision.GetValue(), OutResults, false, FColor::Red, FColor::Green, 1.f);
 
 	return IsHit;
 }
@@ -97,9 +97,10 @@ void UAnimNotifyState_ApplyDamage::AddDamageToTargets(TArray<FHitResult>& OutRes
 		AlreadyDamagedTargets.Add(TargetActor);
 
 		// apply damage to target
-		float Damage = PlayerStatusComp->GetCurrentAttack() * DamageCoefficient;
-		(FMath::FRand() <= PlayerStatusComp->GetCurrentCritical()) ? Damage *= 1.5f : Damage;
+		float Damage = PlayerStatusComp->GetCurrentPlayerStats().Attack * DamageCoefficient;
+		(FMath::FRand() <= PlayerStatusComp->GetCurrentPlayerStats().Critcal) ? Damage *= 1.5f : Damage;
 
 		UGameplayStatics::ApplyDamage(TargetActor, (int32)Damage, OwnCharacter->GetController(), OwnCharacter, NULL);
+		UE_LOG(LogTemp, Warning, TEXT("ApplyDamage : %d"), (int32)Damage);
 	}
 }

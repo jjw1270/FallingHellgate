@@ -6,14 +6,17 @@
 #include "ItemData.h"
 #include "Kismet/GameplayStatics.h"
 #include "FHPlayerController.h"
-#include "FHGameInstance.h"
 #include "EquipmentComponent.h"
 #include "FHPlayerCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UPlayerStatusComponent::UPlayerStatusComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	SetIsReplicated(true);
+
 }
 
 // Called when the game starts
@@ -25,11 +28,6 @@ void UPlayerStatusComponent::BeginPlay()
 	// Only for Local client
 	AFHPlayerController* PC = GetOwner()->GetInstigatorController<AFHPlayerController>();
 	CHECK_VALID(PC);
-
-	//if (PC != UGameplayStatics::GetPlayerController(GetWorld(), 0))
-	//{
-	//	return;
-	//}
 
 	GI = PC->GetGameInstance<UFHGameInstance>();
 	CHECK_VALID(GI);
@@ -47,39 +45,13 @@ void UPlayerStatusComponent::InitCurrentPlayerStats()
 {
 	UE_LOG(LogTemp, Warning, TEXT("InitCurrentPlayerStats"));
 
-	CurrentHealth = GI->GetDefaultPlayerStats().DefaultHealth;
-	CurrentStamina = GI->GetDefaultPlayerStats().DefaultStamina;
-	CurrentAttack = GI->GetDefaultPlayerStats().DefaultAttack;
-	CurrentAttackSpeed = GI->GetDefaultPlayerStats().DefaultAttackSpeed;
-	CurrentCritcal = GI->GetDefaultPlayerStats().DefaultCritcal;
-	CurrentDefence = GI->GetDefaultPlayerStats().DefaultDefence;
+	DefaultPlayerStats = GI->GetDefaultPlayerStats();
+	Req_UpdateDefaultPlayerStats(DefaultPlayerStats);
 
-	//BroadCast to stat UI
-	if (DefaultStatusUpdateDelegate.IsBound())
-	{
-		DefaultStatusUpdateDelegate.Broadcast(
-			CurrentHealth,
-			CurrentStamina,
-			CurrentAttack,
-			CurrentAttackSpeed,
-			CurrentCritcal,
-			CurrentDefence
-		);
-	}
+	CurrentPlayerStats = DefaultPlayerStats;
+	Req_UpdateCurrentPlayerStats(CurrentPlayerStats);
 
-	if (CurrentStatusUpdateDelegate.IsBound())
-	{
-		CurrentStatusUpdateDelegate.Broadcast(
-			CurrentHealth,
-			CurrentStamina,
-			CurrentAttack,
-			CurrentAttackSpeed,
-			CurrentCritcal,
-			CurrentDefence
-		);
-	}
-
-	PrevStamina = CurrentStamina;
+	PrevStamina = CurrentPlayerStats.Stamina;
 	bCanRegenStamina = true;
 	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.02f, true);
 }
@@ -91,36 +63,82 @@ void UPlayerStatusComponent::RegenStamina()
 		return;
 	}
 
-	if (PrevStamina > CurrentStamina)
+	if (PrevStamina > CurrentPlayerStats.Stamina)
 	{
 		bCanRegenStamina = false;
 
 		FTimerHandle StaminaRegenWaitHandle;
 		GetWorld()->GetTimerManager().SetTimer(StaminaRegenWaitHandle, [&]() { bCanRegenStamina = true; }, 1.f, false);
-		PrevStamina = CurrentStamina;
+		PrevStamina = CurrentPlayerStats.Stamina;
 		
 		return;
 	}
 
-	CurrentStamina += 1;
+	CurrentPlayerStats.Stamina += 1;
 
-	PrevStamina = CurrentStamina;
+	PrevStamina = CurrentPlayerStats.Stamina;
 
-	if (CurrentStamina > GI->GetDefaultPlayerStats().DefaultStamina)
+	if (CurrentPlayerStats.Stamina > DefaultPlayerStats.Stamina)
 	{
-		CurrentStamina = GI->GetDefaultPlayerStats().DefaultStamina;
+		CurrentPlayerStats.Stamina = DefaultPlayerStats.Stamina;
 		return;
 	}
 
 	if (CurrentStatusUpdateDelegate.IsBound())
 	{
 		CurrentStatusUpdateDelegate.Broadcast(
-			CurrentHealth,
-			CurrentStamina,
-			CurrentAttack,
-			CurrentAttackSpeed,
-			CurrentCritcal,
-			CurrentDefence
+			CurrentPlayerStats.Health,
+			CurrentPlayerStats.Stamina,
+			CurrentPlayerStats.Attack,
+			CurrentPlayerStats.AttackSpeed,
+			CurrentPlayerStats.Critcal,
+			CurrentPlayerStats.Defence
+		);
+	}
+}
+
+void UPlayerStatusComponent::Req_UpdateDefaultPlayerStats_Implementation(FPlayerStats NewDefultPlayerStats)
+{
+	Res_UpdateDefaultPlayerStats(NewDefultPlayerStats);
+}
+
+void UPlayerStatusComponent::Res_UpdateDefaultPlayerStats_Implementation(FPlayerStats NewDefultPlayerStats)
+{
+	DefaultPlayerStats = NewDefultPlayerStats;
+
+	//BroadCast to stat UI
+	if (DefaultStatusUpdateDelegate.IsBound())
+	{
+		DefaultStatusUpdateDelegate.Broadcast(
+			DefaultPlayerStats.Health,
+			DefaultPlayerStats.Stamina,
+			DefaultPlayerStats.Attack,
+			DefaultPlayerStats.AttackSpeed,
+			DefaultPlayerStats.Critcal,
+			DefaultPlayerStats.Defence
+		);
+	}
+}
+
+void UPlayerStatusComponent::Req_UpdateCurrentPlayerStats_Implementation(FPlayerStats NewCurrentPlayerStats)
+{
+	Res_UpdateCurrentPlayerStats(NewCurrentPlayerStats);
+}
+
+void UPlayerStatusComponent::Res_UpdateCurrentPlayerStats_Implementation(FPlayerStats NewCurrentPlayerStats)
+{
+	CurrentPlayerStats = NewCurrentPlayerStats;
+
+	//BroadCast to stat UI
+	if (CurrentStatusUpdateDelegate.IsBound())
+	{
+		CurrentStatusUpdateDelegate.Broadcast(
+			CurrentPlayerStats.Health,
+			CurrentPlayerStats.Stamina,
+			CurrentPlayerStats.Attack,
+			CurrentPlayerStats.AttackSpeed,
+			CurrentPlayerStats.Critcal,
+			CurrentPlayerStats.Defence
 		);
 	}
 }
@@ -153,86 +171,65 @@ void UPlayerStatusComponent::UpdateDefaultPlayerStats(const bool& bIsEquip, cons
 {
 	if (bIsEquip)
 	{
-		GI->GetDefaultPlayerStats().DefaultHealth += AddHealth;
-		GI->GetDefaultPlayerStats().DefaultStamina += AddStamina;
-		GI->GetDefaultPlayerStats().DefaultAttack += AddAttack;
-		GI->GetDefaultPlayerStats().DefaultAttackSpeed += AddAttackSpeed;
-		GI->GetDefaultPlayerStats().DefaultCritcal += AddCritcal;
-		GI->GetDefaultPlayerStats().DefaultDefence += AddDefence;
+		DefaultPlayerStats.Health += AddHealth;
+		DefaultPlayerStats.Stamina += AddStamina;
+		DefaultPlayerStats.Attack += AddAttack;
+		DefaultPlayerStats.AttackSpeed += AddAttackSpeed;
+		DefaultPlayerStats.Critcal += AddCritcal;
+		DefaultPlayerStats.Defence += AddDefence;
 
-		//UpdateCurrentPlayerStats(AddHealth, AddStamina);
+		UpdateCurrentPlayerStats(0, 0, AddAttack, AddAttackSpeed, AddCritcal, AddDefence);
 	}
 	else
 	{
-		GI->GetDefaultPlayerStats().DefaultHealth -= AddHealth;
-		GI->GetDefaultPlayerStats().DefaultStamina -= AddStamina;
-		GI->GetDefaultPlayerStats().DefaultAttack -= AddAttack;
-		GI->GetDefaultPlayerStats().DefaultAttackSpeed -= AddAttackSpeed;
-		GI->GetDefaultPlayerStats().DefaultCritcal -= AddCritcal;
-		GI->GetDefaultPlayerStats().DefaultDefence -= AddDefence;
+		DefaultPlayerStats.Health -= AddHealth;
+		DefaultPlayerStats.Stamina -= AddStamina;
+		DefaultPlayerStats.Attack -= AddAttack;
+		DefaultPlayerStats.AttackSpeed -= AddAttackSpeed;
+		DefaultPlayerStats.Critcal -= AddCritcal;
+		DefaultPlayerStats.Defence -= AddDefence;
 
-		//UpdateCurrentPlayerStats(-AddHealth, -AddStamina);
+		UpdateCurrentPlayerStats(0, 0, -AddAttack, -AddAttackSpeed, -AddCritcal, -AddDefence);
 	}
 
-	AFHPlayerCharacter* PlayerChar = GetOwner<AFHPlayerCharacter>();
-	CHECK_VALID(PlayerChar);
-	PlayerChar->Req_UpdateCurrentHealth(GI->GetDefaultPlayerStats().DefaultHealth, CurrentHealth);
-
-	//BroadCast to stat UI
-	if (DefaultStatusUpdateDelegate.IsBound())
-	{
-		DefaultStatusUpdateDelegate.Broadcast(
-			GI->GetDefaultPlayerStats().DefaultHealth,
-			GI->GetDefaultPlayerStats().DefaultStamina,
-			GI->GetDefaultPlayerStats().DefaultAttack,
-			GI->GetDefaultPlayerStats().DefaultAttackSpeed,
-			GI->GetDefaultPlayerStats().DefaultCritcal,
-			GI->GetDefaultPlayerStats().DefaultDefence
-		);
-	}
+	Req_UpdateDefaultPlayerStats(DefaultPlayerStats);
 }
 
-void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina)
+void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina, const int32& AddAttack, const float& AddAttackSpeed, const float& AddCritcal, const int32& AddDefence)
 {
-	// if Updated default value is less then current value, current value = default vault
-	if (GI->GetDefaultPlayerStats().DefaultHealth < CurrentHealth)
-	{
-		CurrentHealth = GI->GetDefaultPlayerStats().DefaultHealth;
-	}
-	else
-	{
-		CurrentHealth += AddHealth;
-	}
-
 	AFHPlayerCharacter* PlayerChar = GetOwner<AFHPlayerCharacter>();
 	CHECK_VALID(PlayerChar);
-	PlayerChar->Req_UpdateCurrentHealth(GI->GetDefaultPlayerStats().DefaultHealth, CurrentHealth);
 
 	// if Updated default value is less then current value, current value = default vault
-	if (GI->GetDefaultPlayerStats().DefaultStamina < CurrentStamina)
+	CurrentPlayerStats.Health += AddHealth;
+
+	if (DefaultPlayerStats.Health < CurrentPlayerStats.Health)
 	{
-		CurrentStamina = GI->GetDefaultPlayerStats().DefaultStamina;
+		CurrentPlayerStats.Health = DefaultPlayerStats.Health;
 	}
-	else
+	else if(CurrentPlayerStats.Health <= 0)
 	{
-		CurrentStamina += AddStamina;
+		CurrentPlayerStats.Health = 0;
 	}
 
-	CurrentAttack = GI->GetDefaultPlayerStats().DefaultAttack;
-	CurrentAttackSpeed = GI->GetDefaultPlayerStats().DefaultAttackSpeed;
-	CurrentCritcal = GI->GetDefaultPlayerStats().DefaultCritcal;
-	CurrentDefence = GI->GetDefaultPlayerStats().DefaultDefence;
+	UE_LOG(LogTemp, Warning, TEXT("%d / %d"), CurrentPlayerStats.Health, DefaultPlayerStats.Health);
 
-	//BroadCast to stat UI
-	if (CurrentStatusUpdateDelegate.IsBound())
+	// if Updated default value is less then current value, current value = default vault
+	CurrentPlayerStats.Stamina += AddStamina;
+	if (DefaultPlayerStats.Stamina < CurrentPlayerStats.Stamina)
 	{
-		CurrentStatusUpdateDelegate.Broadcast(
-			CurrentHealth,
-			CurrentStamina,
-			CurrentAttack,
-			CurrentAttackSpeed,
-			CurrentCritcal,
-			CurrentDefence
-		);
+		CurrentPlayerStats.Stamina = DefaultPlayerStats.Stamina;
 	}
+	else if(CurrentPlayerStats.Stamina <= 0)
+	{
+		CurrentPlayerStats.Stamina = 0;
+	}
+
+	CurrentPlayerStats.Attack += AddAttack;
+	CurrentPlayerStats.AttackSpeed += AddAttackSpeed;
+	CurrentPlayerStats.Critcal += AddCritcal;
+	CurrentPlayerStats.Defence += AddDefence;
+
+	Req_UpdateCurrentPlayerStats(CurrentPlayerStats);
+
 }

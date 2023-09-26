@@ -24,7 +24,7 @@ protected:
 public:
 	void InitDefaultSkeletalMesh();
 
-	virtual void SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip);
+	void SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip);
 
 protected:
 	EArmorType ArmorType;

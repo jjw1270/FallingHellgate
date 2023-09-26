@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FHGameInstance.h"
 #include "Components/ActorComponent.h"
 #include "PlayerStatusComponent.generated.h"
 
@@ -33,9 +34,6 @@ protected:
 	void OnArmorUpdate(const EArmorType& UpdateArmorType, class UItemData* UpdateEquipItem, const bool& bIsEquip);
 
 protected:
-	UFUNCTION()
-	void UpdateDefaultPlayerStats(const bool& bIsEquip, const int32& AddHealth, const int32& AddStamina, const int32& AddAttack, const float& AddAttackSpeed, const float& AddCritcal, const int32& AddDefence);
-
 	void InitCurrentPlayerStats();
 
 	FTimerHandle RegenStaminaHandle;
@@ -46,35 +44,34 @@ protected:
 
 	void RegenStamina();
 
-public:
-	void UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina);
+	UPROPERTY(VisibleAnywhere)
+	FPlayerStats DefaultPlayerStats;
 
-	FORCEINLINE const int32& GetCurrentPlayerHealth() const { return CurrentHealth; }
-
-	FORCEINLINE const int32& GetCurrentPlayerStmina() const { return CurrentStamina; }
-
-	FORCEINLINE const int32& GetCurrentAttack() const { return CurrentAttack; }
-
-	FORCEINLINE const float& GetCurrentCritical() const { return CurrentCritcal; }
+	UPROPERTY(VisibleAnywhere)
+	FPlayerStats CurrentPlayerStats;
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 CurrentHealth;
+	UFUNCTION(Server, Reliable)
+	void Req_UpdateDefaultPlayerStats(FPlayerStats NewDefultPlayerStats);
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 CurrentStamina;
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_UpdateDefaultPlayerStats(FPlayerStats NewDefultPlayerStats);
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 CurrentAttack;
+	UFUNCTION(Server, Reliable)
+	void Req_UpdateCurrentPlayerStats(FPlayerStats NewCurrentPlayerStats);
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	float CurrentAttackSpeed;
+	UFUNCTION(NetMulticast, Reliable)
+	void Res_UpdateCurrentPlayerStats(FPlayerStats NewCurrentPlayerStats);
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	float CurrentCritcal;
+public:
+	UFUNCTION()
+	void UpdateDefaultPlayerStats(const bool& bIsEquip, const int32& AddHealth, const int32& AddStamina, const int32& AddAttack, const float& AddAttackSpeed, const float& AddCritcal, const int32& AddDefence);
 
-	UPROPERTY(BlueprintReadOnly, Category = Status)
-	int32 CurrentDefence;
+	void UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina, const int32& AddAttack = 0, const float& AddAttackSpeed = 0, const float& AddCritcal = 0, const int32& AddDefence = 0);
+
+	FORCEINLINE const FPlayerStats& GetDefaultPlayerStats() const { return DefaultPlayerStats; }
+
+	FORCEINLINE const FPlayerStats& GetCurrentPlayerStats() const { return CurrentPlayerStats; }
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)

@@ -279,16 +279,25 @@ void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 	FTimerHandle DashCoolTimeHandle;
 	GetWorldTimerManager().SetTimer(DashCoolTimeHandle, [&]() { bIsDash = false; }, 1.5f, false);
 
-	Req_Dash();
+	FVector CurrentAcceleration = GetCharacterMovement()->GetCurrentAcceleration();
+
+	FRotator DashRot = GetActorForwardVector().Rotation();
+
+	(CurrentAcceleration.IsNearlyZero()) ? DashRot : DashRot = CurrentAcceleration.Rotation();
+
+	Req_Dash(DashRot);
 }
 
-void AFHPlayerCharacter::Req_Dash_Implementation()
+void AFHPlayerCharacter::Req_Dash_Implementation(FRotator DashRot)
 {
-	Res_Dash();
+	Res_Dash(DashRot);
 }
 
-void AFHPlayerCharacter::Res_Dash_Implementation()
+void AFHPlayerCharacter::Res_Dash_Implementation(FRotator DashRot)
 {
+	// Set Onwer Character Rotation to Look at this Item
+	SetActorRotation(DashRot);
+
 	CHECK_VALID(DashMontage);
 	PlayAnimMontage(DashMontage);
 }
@@ -314,9 +323,15 @@ void AFHPlayerCharacter::NormalAttack(const FInputActionValue& Value)
 
 	PlayerStatusComp->UpdateCurrentPlayerStats(0, -NormalAttackStamina);
 
+	FVector CurrentAcceleration = GetCharacterMovement()->GetCurrentAcceleration();
+
+	FRotator AttackRot = GetControlRotation();
+
+	(CurrentAcceleration.IsNearlyZero()) ? AttackRot : AttackRot = CurrentAcceleration.Rotation();
+
 	if (IWeaponInterface* WeaponInterfaceObj = Cast<IWeaponInterface>(Weapon))
 	{
-		WeaponInterfaceObj->Execute_EventNormalAttack(Weapon, this);
+		WeaponInterfaceObj->Execute_EventNormalAttack(Weapon, this, AttackRot);
 	}
 }
 
@@ -341,19 +356,28 @@ void AFHPlayerCharacter::SmashAttack(const FInputActionValue& Value)
 
 	PlayerStatusComp->UpdateCurrentPlayerStats(0, -SmashAttackStamina);
 
+	FVector CurrentAcceleration = GetCharacterMovement()->GetCurrentAcceleration();
+
+	FRotator AttackRot = GetControlRotation();
+
+	(CurrentAcceleration.IsNearlyZero()) ? AttackRot : AttackRot = CurrentAcceleration.Rotation();
+
 	if (IWeaponInterface* WeaponInterfaceObj = Cast<IWeaponInterface>(Weapon))
 	{
-		WeaponInterfaceObj->Execute_EventSmashAttack(Weapon, this);
+		WeaponInterfaceObj->Execute_EventSmashAttack(Weapon, this, AttackRot);
 	}
 }
 
-void AFHPlayerCharacter::Req_Attack_Implementation(class UAnimMontage* AttackMontage, FName SectionName)
+void AFHPlayerCharacter::Req_Attack_Implementation(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName)
 {
-	Res_Attack(AttackMontage, SectionName);
+	Res_Attack(AttackRot, AttackMontage, SectionName);
 }
 
-void AFHPlayerCharacter::Res_Attack_Implementation(class UAnimMontage* AttackMontage, FName SectionName)
+void AFHPlayerCharacter::Res_Attack_Implementation(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName)
 {
+	// Set Onwer Character Rotation to Look at this Item
+	SetActorRotation(AttackRot);
+
 	// Play Rate : getplayerstate->getattackspeed later
 	PlayAnimMontage(AttackMontage, 1.0f, SectionName);
 }
@@ -500,6 +524,21 @@ void AFHPlayerCharacter::Res_OnArmorUpdate_Implementation(const EArmorType Updat
 void AFHPlayerCharacter::OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType)
 {
 	Req_OnEquipVisibilityUpdate(UpdateArmorType);
+}
+
+float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
+
+	// DamageCauser 위치에 따른 Hit Reaction
+	// -CurHP
+	// 데미지가 DefaultHP의 20% 이상이면 넉백
+	// HP < 0 이면 사망
+	// HP call event/Replication
+
+	return NewDamage;
 }
 
 void AFHPlayerCharacter::Req_OnEquipVisibilityUpdate_Implementation(const EArmorType UpdateArmorType)

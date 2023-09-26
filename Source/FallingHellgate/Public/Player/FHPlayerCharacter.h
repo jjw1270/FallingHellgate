@@ -180,10 +180,12 @@ protected:
 	UFUNCTION()
 	void OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
 
-	// Network
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+// Network
 public:
 	UFUNCTION(Server, Reliable)
-	void Req_Attack(class UAnimMontage* AttackMontage, FName SectionName);
+	void Req_Attack(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName);
 
 	UFUNCTION(Server, Reliable)
 	void Req_PickUp(FRotator LookAtRot);
@@ -193,13 +195,13 @@ public:
 
 protected:
 	UFUNCTION(Server, Reliable)
-	void Req_Dash();
+	void Req_Dash(FRotator DashRot);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_Dash();
+	void Res_Dash(FRotator DashRot);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_Attack(class UAnimMontage* AttackMontage, FName SectionName);
+	void Res_Attack(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Res_PickUp(FRotator LookAtRot);

@@ -23,8 +23,8 @@ class FALLINGHELLGATE_API IWeaponInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Event)
-	void EventNormalAttack(ACharacter* OwnCharacter);
+	void EventNormalAttack(ACharacter* OwnCharacter, FRotator AttackRot);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Event)
-	void EventSmashAttack(ACharacter* OwnCharacter);
+	void EventSmashAttack(ACharacter* OwnCharacter, FRotator AttackRot);
 };

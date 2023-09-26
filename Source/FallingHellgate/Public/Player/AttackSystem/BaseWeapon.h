@@ -25,15 +25,15 @@ public:
 public:
 	// Normal Attack
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void EventNormalAttack(ACharacter* OwnCharacter);
+	void EventNormalAttack(ACharacter* OwnCharacter, FRotator AttackRot);
 
-	virtual void EventNormalAttack_Implementation(ACharacter* OwnCharacter) override;
+	virtual void EventNormalAttack_Implementation(ACharacter* OwnCharacter, FRotator AttackRot) override;
 
 	// Smash Attack
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void EventSmashAttack(ACharacter* OwnCharacter);
+	void EventSmashAttack(ACharacter* OwnCharacter, FRotator AttackRot);
 
-	virtual void EventSmashAttack_Implementation(ACharacter* OwnCharacter) override;
+	virtual void EventSmashAttack_Implementation(ACharacter* OwnCharacter, FRotator AttackRot) override;
 
 protected:
 	//----------[ Value ]----------
@@ -61,6 +61,6 @@ public:
 	void ResetNormalAttackCount();
 
 public:
-	void Attack(ACharacter* OwnCharacter, bool bIsSmash);
+	void Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator AttackRot);
 
 };

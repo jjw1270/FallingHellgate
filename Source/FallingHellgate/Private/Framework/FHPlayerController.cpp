@@ -100,11 +100,12 @@ void AFHPlayerController::OpenBackgroundWidgets()
 
 void AFHPlayerController::ShowBloodScreen()
 {
-	if (BloodScreenWidget)
+	if (!BloodScreenWidget)
 	{
 		if (BloodScreenClass)
 		{
 			BloodScreenWidget = CreateWidget<UUserWidget>(this, BloodScreenClass);
+			BloodScreenWidget->AddToViewport();
 		}
 	}
 }

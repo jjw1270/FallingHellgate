@@ -36,6 +36,9 @@ public:
 	virtual void EventSmashAttack_Implementation(ACharacter* OwnCharacter, FRotator AttackRot) override;
 
 protected:
+	void Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator AttackRot);
+
+protected:
 	//----------[ Value ]----------
 	//Add Count When Completed Left Click Attack, Reset Count When Right Click Attack
 	int32 NormalAttackCount;
@@ -60,7 +63,5 @@ public:
 	//Initialize LeftClickCount
 	void ResetNormalAttackCount();
 
-public:
-	void Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator AttackRot);
 
 };

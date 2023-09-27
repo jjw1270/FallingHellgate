@@ -26,9 +26,11 @@ public:
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 protected:
+	UFUNCTION(BlueprintCallable)
 	bool DetectWeaponCollsion(TArray<FHitResult>& OutResults);
 
-	void AddDamageToTargets(TArray<FHitResult>& OutResults);
+	UFUNCTION(BlueprintCallable)
+	void AddDamageToTargets(TArray<FHitResult> OutResults);
 
 protected:
 	//Attack Collision
@@ -51,9 +53,10 @@ protected:
 	TEnumAsByte<EDrawDebugTrace::Type> DrawDebugCollision;
 
 protected:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	class AFHPlayerCharacter* OwnCharacter;
 
+	UPROPERTY(BlueprintReadOnly)
 	class USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY()

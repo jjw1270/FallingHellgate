@@ -102,5 +102,5 @@ void ADropItem::EventInteraction_Implementation(ACharacter* OwnCharacter)
 	FVector TargetDir = (GetActorLocation() - OwnPlayerCharacter->GetActorLocation()).GetSafeNormal();
 	FRotator LookAtRot = FVector(TargetDir.X, TargetDir.Y, 0).Rotation();
 
-	OwnPlayerCharacter->Req_PickUp(LookAtRot);
+	OwnPlayerCharacter->C2S_PickUp(LookAtRot);
 }

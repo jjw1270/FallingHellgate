@@ -10,16 +10,15 @@
 #include "FHPlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
 
-// Sets default values for this component's properties
 UPlayerStatusComponent::UPlayerStatusComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	SetIsReplicated(true);
+	//SetIsReplicated(true);
 
+	SetIsReplicatedByDefault(true);
 }
 
-// Called when the game starts
 void UPlayerStatusComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -44,14 +43,52 @@ void UPlayerStatusComponent::BeginPlay()
 void UPlayerStatusComponent::InitCurrentPlayerStats()
 {
 	DefaultPlayerStats = GI->GetDefaultPlayerStats();
-	Req_UpdateDefaultPlayerStats(DefaultPlayerStats);
+	C2S_UpdateDefaultPlayerStats(DefaultPlayerStats);
 
 	CurrentPlayerStats = DefaultPlayerStats;
-	Req_UpdateCurrentPlayerStats(CurrentPlayerStats);
+	C2S_UpdateCurrentPlayerStats(CurrentPlayerStats);
 
 	PrevStamina = CurrentPlayerStats.Stamina;
 	bCanRegenStamina = true;
 	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.02f, true);
+}
+
+void UPlayerStatusComponent::UpdateDefaultStatusToGameInst()
+{
+	CHECK_VALID(GI);
+	GI->GetDefaultPlayerStats() = DefaultPlayerStats;
+}
+
+void UPlayerStatusComponent::UpdateDefaultStatusUI()
+{
+	if (DefaultStatusUpdateDelegate.IsBound())
+	{
+		DefaultStatusUpdateDelegate.Broadcast(
+			DefaultPlayerStats.Health,
+			DefaultPlayerStats.Stamina,
+			DefaultPlayerStats.Attack,
+			DefaultPlayerStats.AttackSpeed,
+			DefaultPlayerStats.Critcal,
+			DefaultPlayerStats.Defence
+		);
+	}
+
+	UpdateDefaultStatusToGameInst();
+}
+
+void UPlayerStatusComponent::UpdateCurrentStatusUI()
+{
+	if (CurrentStatusUpdateDelegate.IsBound())
+	{
+		CurrentStatusUpdateDelegate.Broadcast(
+			CurrentPlayerStats.Health,
+			CurrentPlayerStats.Stamina,
+			CurrentPlayerStats.Attack,
+			CurrentPlayerStats.AttackSpeed,
+			CurrentPlayerStats.Critcal,
+			CurrentPlayerStats.Defence
+		);
+	}
 }
 
 void UPlayerStatusComponent::RegenStamina()
@@ -82,63 +119,30 @@ void UPlayerStatusComponent::RegenStamina()
 		return;
 	}
 
-	if (CurrentStatusUpdateDelegate.IsBound())
-	{
-		CurrentStatusUpdateDelegate.Broadcast(
-			CurrentPlayerStats.Health,
-			CurrentPlayerStats.Stamina,
-			CurrentPlayerStats.Attack,
-			CurrentPlayerStats.AttackSpeed,
-			CurrentPlayerStats.Critcal,
-			CurrentPlayerStats.Defence
-		);
-	}
+	UpdateCurrentStatusUI();
 }
 
-void UPlayerStatusComponent::Req_UpdateDefaultPlayerStats_Implementation(FPlayerStats NewDefultPlayerStats)
+void UPlayerStatusComponent::C2S_UpdateDefaultPlayerStats_Implementation(const FPlayerStats& NewDefultPlayerStats)
 {
-	Res_UpdateDefaultPlayerStats(NewDefultPlayerStats);
+	S2M_UpdateDefaultPlayerStats(NewDefultPlayerStats);
 }
 
-void UPlayerStatusComponent::Res_UpdateDefaultPlayerStats_Implementation(FPlayerStats NewDefultPlayerStats)
+void UPlayerStatusComponent::S2M_UpdateDefaultPlayerStats_Implementation(const FPlayerStats& NewDefultPlayerStats)
 {
 	DefaultPlayerStats = NewDefultPlayerStats;
-
-	//BroadCast to stat UI
-	if (DefaultStatusUpdateDelegate.IsBound())
-	{
-		DefaultStatusUpdateDelegate.Broadcast(
-			DefaultPlayerStats.Health,
-			DefaultPlayerStats.Stamina,
-			DefaultPlayerStats.Attack,
-			DefaultPlayerStats.AttackSpeed,
-			DefaultPlayerStats.Critcal,
-			DefaultPlayerStats.Defence
-		);
-	}
+	UpdateDefaultStatusUI();
 }
 
-void UPlayerStatusComponent::Req_UpdateCurrentPlayerStats_Implementation(FPlayerStats NewCurrentPlayerStats)
+void UPlayerStatusComponent::C2S_UpdateCurrentPlayerStats_Implementation(const FPlayerStats& NewCurrentPlayerStats)
 {
-	Res_UpdateCurrentPlayerStats(NewCurrentPlayerStats);
+	S2M_UpdateCurrentPlayerStats(NewCurrentPlayerStats);
 }
 
-void UPlayerStatusComponent::Res_UpdateCurrentPlayerStats_Implementation(FPlayerStats NewCurrentPlayerStats)
+void UPlayerStatusComponent::S2M_UpdateCurrentPlayerStats_Implementation(const FPlayerStats& NewCurrentPlayerStats)
 {
 	CurrentPlayerStats = NewCurrentPlayerStats;
 
-	//BroadCast to stat UI
-	if (CurrentStatusUpdateDelegate.IsBound())
-	{
-		CurrentStatusUpdateDelegate.Broadcast(
-			CurrentPlayerStats.Health,
-			CurrentPlayerStats.Stamina,
-			CurrentPlayerStats.Attack,
-			CurrentPlayerStats.AttackSpeed,
-			CurrentPlayerStats.Critcal,
-			CurrentPlayerStats.Defence
-		);
-	}
+	UpdateCurrentStatusUI();
 }
 
 void UPlayerStatusComponent::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)
@@ -149,8 +153,7 @@ void UPlayerStatusComponent::OnWeaponUpdate(UItemData* UpdateEquipItem, const bo
 		return;
 	}
 
-	UpdateDefaultPlayerStats(bIsEquip, 0, 0,
-		UpdateWeaponItemData.AttackPower, UpdateWeaponItemData.AttackSpeed, UpdateWeaponItemData.CriticalChance, 0);
+	UpdateDefaultPlayerStats(bIsEquip, 0, 0, UpdateWeaponItemData.AttackPower, UpdateWeaponItemData.AttackSpeed, UpdateWeaponItemData.CriticalChance, 0);
 }
 
 void UPlayerStatusComponent::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateEquipItem, const bool& bIsEquip)
@@ -189,8 +192,8 @@ void UPlayerStatusComponent::UpdateDefaultPlayerStats(const bool& bIsEquip, cons
 
 		UpdateCurrentPlayerStats(0, 0, -AddAttack, -AddAttackSpeed, -AddCritcal, -AddDefence);
 	}
-
-	Req_UpdateDefaultPlayerStats(DefaultPlayerStats);
+	
+	C2S_UpdateDefaultPlayerStats(DefaultPlayerStats);
 }
 
 void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, const int32& AddStamina, const int32& AddAttack, const float& AddAttackSpeed, const float& AddCritcal, const int32& AddDefence)
@@ -210,7 +213,13 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 		CurrentPlayerStats.Health = 0;
 	}
 
-	// UE_LOG(LogTemp, Warning, TEXT("%d / %d"), CurrentPlayerStats.Health, DefaultPlayerStats.Health);
+	//if (AddHealth < 0 && (CurrentPlayerStats.Health != DefaultPlayerStats.Health))
+	//{
+	//	if (AFHPlayerController* PC = PlayerChar->GetController<AFHPlayerController>())
+	//	{
+	//		PC->ShowBloodScreen();
+	//	}
+	//}
 
 	// if Updated default value is less then current value, current value = default vault
 	CurrentPlayerStats.Stamina += AddStamina;
@@ -228,6 +237,12 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 	CurrentPlayerStats.Critcal += AddCritcal;
 	CurrentPlayerStats.Defence += AddDefence;
 
-	Req_UpdateCurrentPlayerStats(CurrentPlayerStats);
-
+	if (PlayerChar->HasAuthority())
+	{
+		S2M_UpdateCurrentPlayerStats(CurrentPlayerStats);
+	}
+	else
+	{
+		C2S_UpdateCurrentPlayerStats(CurrentPlayerStats);
+	}
 }

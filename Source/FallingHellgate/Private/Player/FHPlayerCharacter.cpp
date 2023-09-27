@@ -129,7 +129,10 @@ void AFHPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	AFHPlayerController* PC = GetController<AFHPlayerController>();
-	CHECK_VALID(PC);
+	if (!PC)
+	{
+		return;
+	}
 
 	//Add Input Mapping Context
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
@@ -155,7 +158,7 @@ void AFHPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFHPlayerCharacter::Move);
@@ -270,12 +273,7 @@ void AFHPlayerCharacter::Look(const FInputActionValue& Value)
 
 void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 {
-	if (bIsDash)
-	{
-		return;
-	}
-
-	if (!CanPlayMontage() || GetCharacterMovement()->IsFalling())
+	if (bIsDash || !CanPlayMontage() || GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
@@ -297,21 +295,48 @@ void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 
 	(CurrentAcceleration.IsNearlyZero()) ? DashRot : DashRot = CurrentAcceleration.Rotation();
 
-	Req_Dash(DashRot);
+	C2S_Dash(DashRot);
 }
 
-void AFHPlayerCharacter::Req_Dash_Implementation(FRotator DashRot)
+void AFHPlayerCharacter::Interaction(const FInputActionValue& Value)
 {
-	Res_Dash(DashRot);
-}
+	if (!CanPlayMontage() || GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
 
-void AFHPlayerCharacter::Res_Dash_Implementation(FRotator DashRot)
-{
-	// Set Onwer Character Rotation to Look at this Item
-	SetActorRotation(DashRot);
+	// return if interacting is executing
+	if (InteractingActor)
+	{
+		return;
+	}
 
-	CHECK_VALID(DashMontage);
-	PlayAnimMontage(DashMontage);
+	TArray<AActor*> OverlappingActors;
+	InteractCollision->GetOverlappingActors(OverlappingActors);
+
+	// Find NeaS2Ct InterfaceObj
+	double NeaS2CtLength = 9999.0f;
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		double distance = FVector::Dist(Actor->GetActorLocation(), GetActorLocation());
+		if (NeaS2CtLength < distance)
+		{
+			continue;
+		}
+
+		// Check If Actor Inherits any Interfaces
+		if (Cast<IInteractionInterface>(Actor))
+		{
+			NeaS2CtLength = distance;
+			InteractingActor = Actor;
+		}
+	}
+
+	if (IInteractionInterface* NeaS2CtItemInterfaceObj = Cast<IInteractionInterface>(InteractingActor))
+	{
+		NeaS2CtItemInterfaceObj->Execute_EventInteraction(InteractingActor, this);
+	}
 }
 
 void AFHPlayerCharacter::NormalAttack(const FInputActionValue& Value)
@@ -380,67 +405,41 @@ void AFHPlayerCharacter::SmashAttack(const FInputActionValue& Value)
 	}
 }
 
-void AFHPlayerCharacter::Req_Attack_Implementation(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName)
+void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)
 {
-	Res_Attack(AttackRot, AttackMontage, SectionName);
+	if (!CanPlayMontage())
+	{
+		return;
+	}
+
+	if (!QuickSlotComp->IsQuickSlotEmpty(SlotNum - 1))
+	{
+		return;
+	}
+
+	QuickSlotComp->UseQuickSlotItem(SlotNum - 1);
 }
 
-void AFHPlayerCharacter::Res_Attack_Implementation(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName)
+void AFHPlayerCharacter::C2S_Dash_Implementation(const FRotator& DashRot)
+{
+	S2M_Dash(DashRot);
+}
+
+void AFHPlayerCharacter::S2M_Dash_Implementation(const FRotator& DashRot)
 {
 	// Set Onwer Character Rotation to Look at this Item
-	SetActorRotation(AttackRot);
+	SetActorRotation(DashRot);
 
-	// Play Rate : getplayerstate->getattackspeed later
-	PlayAnimMontage(AttackMontage, 1.0f, SectionName);
+	CHECK_VALID(DashMontage);
+	PlayAnimMontage(DashMontage);
 }
 
-void AFHPlayerCharacter::Interaction(const FInputActionValue& Value)
+void AFHPlayerCharacter::C2S_PickUp_Implementation(const FRotator& LookAtRot)
 {
-	if (!CanPlayMontage() || GetCharacterMovement()->IsFalling())
-	{
-		return;
-	}
-
-	// return if interacting is executing
-	if (InteractingActor)
-	{
-		return;
-	}
-
-	TArray<AActor*> OverlappingActors;
-	InteractCollision->GetOverlappingActors(OverlappingActors);
-
-	// Find Nearest InterfaceObj
-	double NearestLength = 9999.0f;
-
-	for (AActor* Actor : OverlappingActors)
-	{
-		double distance = FVector::Dist(Actor->GetActorLocation(), GetActorLocation());
-		if (NearestLength < distance)
-		{
-			continue;
-		}
-
-		// Check If Actor Inherits any Interfaces
-		if (Cast<IInteractionInterface>(Actor))
-		{
-			NearestLength = distance;
-			InteractingActor = Actor;
-		}
-	}
-
-	if (IInteractionInterface* NearestItemInterfaceObj = Cast<IInteractionInterface>(InteractingActor))
-	{
-		NearestItemInterfaceObj->Execute_EventInteraction(InteractingActor, this);
-	}
+	S2M_PickUp(LookAtRot);
 }
 
-void AFHPlayerCharacter::Req_PickUp_Implementation(FRotator LookAtRot)
-{
-	Res_PickUp(LookAtRot);
-}
-
-void AFHPlayerCharacter::Res_PickUp_Implementation(FRotator LookAtRot)
+void AFHPlayerCharacter::S2M_PickUp_Implementation(const FRotator& LookAtRot)
 {
 	// Set Onwer Character Rotation to Look at this Item
 	SetActorRotation(LookAtRot);
@@ -450,29 +449,80 @@ void AFHPlayerCharacter::Res_PickUp_Implementation(FRotator LookAtRot)
 	PlayAnimMontage(LootingMontage);
 }
 
-void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)
+void AFHPlayerCharacter::C2S_Attack_Implementation(const FRotator& AttackRot, class UAnimMontage* AttackMontage, const FName& SectionName, const float& AttackSpeed)
 {
-	if (!CanPlayMontage())
-	{
-		return;
-	}
-
-	if (!QuickSlotComp->IsQuickSlotEmpty(SlotNum-1))
-	{
-		return;
-	}
-
-	QuickSlotComp->UseQuickSlotItem(SlotNum - 1);
+	S2M_Attack(AttackRot, AttackMontage, SectionName, AttackSpeed);
 }
 
-void AFHPlayerCharacter::Req_TakeDamage_Implementation(EHitDirection HitDir, bool bKnockBack)
+void AFHPlayerCharacter::S2M_Attack_Implementation(const FRotator& AttackRot, class UAnimMontage* AttackMontage, const FName& SectionName, const float& AttackSpeed)
 {
-	Res_TakeDamage(HitDir, bKnockBack);
+	// Set Onwer Character Rotation to Look at this Item
+	SetActorRotation(AttackRot);
+
+	PlayAnimMontage(AttackMontage, AttackSpeed, SectionName);
 }
 
-void AFHPlayerCharacter::Res_TakeDamage_Implementation(EHitDirection HitDir, bool bKnockBack)
+// Only Run on Server
+void AFHPlayerCharacter::ApplyDamage(AActor* TargetActor, const float& DamageCoefficient)
 {
-	GetMesh()->GetAnimInstance()->StopAllMontages(0.3f);
+	// apply damage to target
+	float Damage = PlayerStatusComp->GetCurrentPlayerStats().Attack * DamageCoefficient;
+	Damage = FMath::RandRange(Damage * 0.9f, Damage * 1.1f);
+	(FMath::FRand() <= PlayerStatusComp->GetCurrentPlayerStats().Critcal) ? Damage *= 1.5f : Damage;
+
+	UGameplayStatics::ApplyDamage(TargetActor, (int32)Damage, GetController(), this, NULL);
+}
+
+// Only Run on Server
+float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
+	UE_LOG(LogTemp, Warning, TEXT("Causer : %s"), *DamageCauser->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Damaged : %s"), *this->GetName());
+
+	GetPlayerStatusComp()->UpdateCurrentPlayerStats(-NewDamage, 0);
+
+	FVector DirectionToDamageCauser = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	DirectionToDamageCauser.Z = 0.0f;
+	float DamagedYawRot = DirectionToDamageCauser.Rotation().Yaw + 90.f;
+
+	EHitDirection HitDirection = EHitDirection::Front;
+	if (DamagedYawRot < 60.f || DamagedYawRot >= 300.f)
+	{
+		HitDirection = EHitDirection::Front;
+	}
+	else if (DamagedYawRot >= 60.f && DamagedYawRot < 120.f)
+	{
+		HitDirection = EHitDirection::Right;
+	}
+	else if (DamagedYawRot >= 120.f && DamagedYawRot < 240.f)
+	{
+		HitDirection = EHitDirection::Back;
+	}
+	else if (DamagedYawRot >= 240.f && DamagedYawRot < 300.f)
+	{
+		HitDirection = EHitDirection::Left;
+	}
+
+	if (GetPlayerStatusComp()->GetCurrentPlayerStats().Health <= 0)
+	{
+		C2S_Death(HitDirection);
+	}
+	else
+	{
+		bool bShouldKnockBack = NewDamage >= 0.3f * GetPlayerStatusComp()->GetDefaultPlayerStats().Health;
+
+		C2S_TakeDamage(HitDirection, bShouldKnockBack);
+	}
+
+	return NewDamage;
+}
+
+void AFHPlayerCharacter::C2S_TakeDamage_Implementation(const EHitDirection& HitDir, const bool bKnockBack)
+{
+	UAnimMontage* HitReactMontage = nullptr;
 
 	if (bKnockBack)
 	{
@@ -481,12 +531,10 @@ void AFHPlayerCharacter::Res_TakeDamage_Implementation(EHitDirection HitDir, boo
 		case EHitDirection::Left:
 		case EHitDirection::Right:
 		case EHitDirection::Front:
-			CHECK_VALID(KnockBackFrontMontage);
-			PlayAnimMontage(KnockBackFrontMontage);
+			HitReactMontage = KnockBackFrontMontage;
 			break;
 		case EHitDirection::Back:
-			CHECK_VALID(KnockBackBackMontage);
-			PlayAnimMontage(KnockBackBackMontage);
+			HitReactMontage = KnockBackBackMontage;
 			break;
 		}
 	}
@@ -495,40 +543,34 @@ void AFHPlayerCharacter::Res_TakeDamage_Implementation(EHitDirection HitDir, boo
 		switch (HitDir)
 		{
 		case EHitDirection::Front:
-			CHECK_VALID(HitReactFrontMontage);
-			PlayAnimMontage(HitReactFrontMontage);
+			HitReactMontage = HitReactFrontMontage;
 			break;
 		case EHitDirection::Back:
-			CHECK_VALID(HitReactBackMontage);
-			PlayAnimMontage(HitReactBackMontage);
+			HitReactMontage = HitReactBackMontage;
 			break;
 		case EHitDirection::Left:
-			CHECK_VALID(HitReactLeftMontage);
-			PlayAnimMontage(HitReactLeftMontage);
+			HitReactMontage = HitReactLeftMontage;
 			break;
 		case EHitDirection::Right:
-			CHECK_VALID(HitReactRightMontage);
-			PlayAnimMontage(HitReactRightMontage);
+			HitReactMontage = HitReactRightMontage;
 			break;
 		}
 	}
 
-	if (AFHPlayerController* PC = GetController<AFHPlayerController>())
-	{
-		PC->ShowBloodScreen();
-	}
+	S2M_TakeDamage(HitReactMontage);
 }
 
-void AFHPlayerCharacter::Req_Death_Implementation(EHitDirection HitDir)
-{
-	Res_Death(HitDir);
-}
-
-void AFHPlayerCharacter::Res_Death_Implementation(EHitDirection HitDir)
+void AFHPlayerCharacter::S2M_TakeDamage_Implementation(class UAnimMontage* HitReactMontage)
 {
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.3f);
 
-	float MontageTime = 0.f;
+	CHECK_VALID(HitReactMontage);
+	PlayAnimMontage(HitReactMontage);
+}
+
+void AFHPlayerCharacter::C2S_Death_Implementation(const EHitDirection& HitDir)
+{
+	UAnimMontage* DeathMontage = nullptr;
 
 	switch (HitDir)
 	{
@@ -536,23 +578,37 @@ void AFHPlayerCharacter::Res_Death_Implementation(EHitDirection HitDir)
 	case EHitDirection::Right:
 	case EHitDirection::Front:
 		CHECK_VALID(DeathFrontMontage);
-		MontageTime = PlayAnimMontage(DeathFrontMontage);
+		DeathMontage = DeathFrontMontage;
 		break;
 	case EHitDirection::Back:
 		CHECK_VALID(DeathBackMontage);
-		MontageTime = PlayAnimMontage(DeathBackMontage);
+		DeathMontage = DeathBackMontage;
 		break;
 	}
 
-	FName EnemyTag = TEXT("Enemy");
-	if (Tags.Contains(EnemyTag))
+	S2M_Death(DeathMontage);
+}
+
+void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMontage)
+{
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.3f);
+
+	float MontageTime = PlayAnimMontage(DeathMontage);
+
+	if (Tags.Contains(TEXT("Enemy")))
 	{
-		Tags.Remove(EnemyTag);
+		Tags.Remove(TEXT("Enemy"));
 	}
 
 	MontageTime += 2.f;
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Death, MontageTime, false);
+}
+
+void AFHPlayerCharacter::Death()
+{
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
+	Destroy();
 }
 
 void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)
@@ -563,15 +619,15 @@ void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& 
 		return;
 	}
 
-	Req_OnWeaponUpdate(UpdateWeaponItemData, bIsEquip);
+	C2S_OnWeaponUpdate(UpdateWeaponItemData, bIsEquip);
 }
 
-void AFHPlayerCharacter::Req_OnWeaponUpdate_Implementation(const FWeaponItemData UpdateWeaponItemData, const bool bIsEquip)
+void AFHPlayerCharacter::C2S_OnWeaponUpdate_Implementation(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip)
 {
-	Res_OnWeaponUpdate(UpdateWeaponItemData, bIsEquip);
+	S2M_OnWeaponUpdate(UpdateWeaponItemData, bIsEquip);
 }
 
-void AFHPlayerCharacter::Res_OnWeaponUpdate_Implementation(const FWeaponItemData UpdateWeaponItemData, const bool bIsEquip)
+void AFHPlayerCharacter::S2M_OnWeaponUpdate_Implementation(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip)
 {
 	Weapon->SetEquipMesh(UpdateWeaponItemData.WeaponMesh, bIsEquip, UpdateWeaponItemData.NormalAttackMontage, UpdateWeaponItemData.SmashAttackMontage);
 }
@@ -584,15 +640,15 @@ void AFHPlayerCharacter::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemD
 		return;
 	}
 
-	Req_OnArmorUpdate(UpdateArmorType, UpdateArmorItemData, bIsEquip);
+	C2S_OnArmorUpdate(UpdateArmorType, UpdateArmorItemData, bIsEquip);
 }
 
-void AFHPlayerCharacter::Req_OnArmorUpdate_Implementation(const EArmorType UpdateArmorType, const FArmorItemData UpdateArmorItemData, const bool bIsEquip)
+void AFHPlayerCharacter::C2S_OnArmorUpdate_Implementation(const EArmorType& UpdateArmorType, const FArmorItemData& UpdateArmorItemData, const bool bIsEquip)
 {
-	Res_OnArmorUpdate(UpdateArmorType, UpdateArmorItemData, bIsEquip);
+	S2M_OnArmorUpdate(UpdateArmorType, UpdateArmorItemData, bIsEquip);
 }
 
-void AFHPlayerCharacter::Res_OnArmorUpdate_Implementation(const EArmorType UpdateArmorType, const FArmorItemData UpdateArmorItemData, const bool bIsEquip)
+void AFHPlayerCharacter::S2M_OnArmorUpdate_Implementation(const EArmorType& UpdateArmorType, const FArmorItemData& UpdateArmorItemData, const bool bIsEquip)
 {
 	for (auto ArmorMSMComp : ArmorMSMCompArray)
 	{
@@ -630,15 +686,15 @@ void AFHPlayerCharacter::Res_OnArmorUpdate_Implementation(const EArmorType Updat
 
 void AFHPlayerCharacter::OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType)
 {
-	Req_OnEquipVisibilityUpdate(UpdateArmorType);
+	C2S_OnEquipVisibilityUpdate(UpdateArmorType);
 }
 
-void AFHPlayerCharacter::Req_OnEquipVisibilityUpdate_Implementation(const EArmorType UpdateArmorType)
+void AFHPlayerCharacter::C2S_OnEquipVisibilityUpdate_Implementation(const EArmorType& UpdateArmorType)
 {
-	Res_OnEquipVisibilityUpdate(UpdateArmorType);
+	S2M_OnEquipVisibilityUpdate(UpdateArmorType);
 }
 
-void AFHPlayerCharacter::Res_OnEquipVisibilityUpdate_Implementation(const EArmorType UpdateArmorType)
+void AFHPlayerCharacter::S2M_OnEquipVisibilityUpdate_Implementation(const EArmorType& UpdateArmorType)
 {
 	switch (UpdateArmorType)
 	{
@@ -656,56 +712,4 @@ void AFHPlayerCharacter::Res_OnEquipVisibilityUpdate_Implementation(const EArmor
 	default:
 		break;
 	}
-}
-
-float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
-	UE_LOG(LogTemp, Warning, TEXT("Causer : %s"), *DamageCauser->GetName());
-	UE_LOG(LogTemp, Warning, TEXT("Damaged : %s"), *this->GetName());
-
-	GetPlayerStatusComp()->UpdateCurrentPlayerStats(-NewDamage, 0);
-
-	FVector DirectionToDamageCauser = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-	DirectionToDamageCauser.Z = 0.0f;
-	float DamagedYawRot = DirectionToDamageCauser.Rotation().Yaw + 90.f;
-
-	EHitDirection HitDirection = EHitDirection::Front;
-	if (DamagedYawRot < 60.f || DamagedYawRot >= 300.f)
-	{
-		HitDirection = EHitDirection::Front;
-	}
-	else if (DamagedYawRot >= 60.f && DamagedYawRot < 120.f)
-	{
-		HitDirection = EHitDirection::Right;
-	}
-	else if (DamagedYawRot >= 120.f && DamagedYawRot < 240.f)
-	{
-		HitDirection = EHitDirection::Back;
-	}
-	else if (DamagedYawRot >= 240.f && DamagedYawRot < 300.f)
-	{
-		HitDirection = EHitDirection::Left;
-	}
-
-	if (GetPlayerStatusComp()->GetCurrentPlayerStats().Health <= 0)
-	{
-		Req_Death(HitDirection);
-	}
-	else
-	{
-		bool bShouldKnockBack = NewDamage >= 0.3f * GetPlayerStatusComp()->GetDefaultPlayerStats().Health;
-
-		Req_TakeDamage(HitDirection, bShouldKnockBack);
-	}
-
-	return NewDamage;
-}
-
-void AFHPlayerCharacter::Death()
-{
-	// Death UI?
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 }

@@ -18,7 +18,7 @@ enum class EHitDirection : uint8
 	Right		UMETA(DisplayName = "Right")
 };
 
-// Delegate called when Cloak Visibility button Pressed
+// Delegate called when Cloak Visibility button PS2Csed
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Multi_EquipVisibilityUpdate, const EArmorType&, UpdateArmorType);
 
 UCLASS()
@@ -47,7 +47,7 @@ protected:
 			<UpperBody>
 				<Cloak>
 				<Glove_L>
-					<Weapon_L> (Reserved)
+					<Weapon_L> (S2Cerved)
 				<Glove_R>
 					<Weapon_R>
 				<Head>
@@ -196,53 +196,55 @@ protected:
 // Network
 public:
 	UFUNCTION(Server, Reliable)
-	void Req_Attack(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName);
-
+	void C2S_PickUp(const FRotator& LookAtRot);
+	
 	UFUNCTION(Server, Reliable)
-	void Req_PickUp(FRotator LookAtRot);
+	void C2S_Attack(const FRotator& AttackRot, class UAnimMontage* AttackMontage, const FName& SectionName, const float& AttackSpeed);
+
+	void ApplyDamage(AActor* TargetActor, const float& DamageCoefficient);
 
 protected:
 	UFUNCTION(Server, Reliable)
-	void Req_Dash(FRotator DashRot);
+	void C2S_Dash(const FRotator& DashRot);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_Dash(FRotator DashRot);
+	void S2M_Dash(const FRotator& DashRot);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_Attack(FRotator AttackRot, class UAnimMontage* AttackMontage, FName SectionName);
+	void S2M_PickUp(const FRotator& LookAtRot);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_PickUp(FRotator LookAtRot);
+	void S2M_Attack(const FRotator& AttackRot, class UAnimMontage* AttackMontage, const FName& SectionName, const float& AttackSpeed);
 
 	UFUNCTION(Server, Reliable)
-	void Req_TakeDamage(EHitDirection HitDir, bool bKnockBack);
+	void C2S_TakeDamage(const EHitDirection& HitDir, const bool bKnockBack);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_TakeDamage(EHitDirection HitDir, bool bKnockBack);
+	void S2M_TakeDamage(class UAnimMontage* HitReactMontage);
 
 	UFUNCTION(Server, Reliable)
-	void Req_Death(EHitDirection HitDir);
+	void C2S_Death(const EHitDirection& HitDir);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_Death(EHitDirection HitDir);
+	void S2M_Death(class UAnimMontage* DeathMontage);
 
 	UFUNCTION(Server, Reliable)
-	void Req_OnWeaponUpdate(const FWeaponItemData UpdateWeaponItemData, const bool bIsEquip);
+	void C2S_OnWeaponUpdate(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_OnWeaponUpdate(const FWeaponItemData UpdateWeaponItemData, const bool bIsEquip);
+	void S2M_OnWeaponUpdate(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip);
 
 	UFUNCTION(Server, Reliable)
-	void Req_OnArmorUpdate(const EArmorType UpdateArmorType, const FArmorItemData UpdateArmorItemData, const bool bIsEquip);
+	void C2S_OnArmorUpdate(const EArmorType& UpdateArmorType, const FArmorItemData& UpdateArmorItemData, const bool bIsEquip);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_OnArmorUpdate(const EArmorType UpdateArmorType, const FArmorItemData UpdateArmorItemData, const bool bIsEquip);
+	void S2M_OnArmorUpdate(const EArmorType& UpdateArmorType, const FArmorItemData& UpdateArmorItemData, const bool bIsEquip);
 
 	UFUNCTION(Server, Reliable)
-	void Req_OnEquipVisibilityUpdate(const EArmorType UpdateArmorType);
+	void C2S_OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_OnEquipVisibilityUpdate(const EArmorType UpdateArmorType);
+	void S2M_OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
 
 public:
 	FORCEINLINE class UPlayerStatusComponent* GetPlayerStatusComp() const { return PlayerStatusComp; }

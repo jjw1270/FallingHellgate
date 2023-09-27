@@ -4,6 +4,7 @@
 #include "BaseWeapon.h"
 #include "FallingHellgate.h"
 #include "FHPlayerCharacter.h"
+#include "PlayerStatusComponent.h"
 
 UBaseWeapon::UBaseWeapon(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -66,21 +67,33 @@ void UBaseWeapon::ResetNormalAttackCount()
 void UBaseWeapon::Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator AttackRot)
 {
 	AFHPlayerCharacter* PlayerCharacter = Cast<AFHPlayerCharacter>(OwnCharacter);
-	
+	CHECK_VALID(PlayerCharacter);
+	FPlayerStats CurrentPlayerStats = PlayerCharacter->GetPlayerStatusComp()->GetCurrentPlayerStats();
+
 	if (!bIsSmash)
 	{
 		FString SectionName = FString::Printf(TEXT("NAt%d"), NormalAttackCount);
 
 		CHECK_VALID(NormalAttackMontage);
-		PlayerCharacter->Req_Attack(AttackRot, NormalAttackMontage, FName(*SectionName));
+		PlayerCharacter->C2S_Attack(AttackRot, NormalAttackMontage, FName(*SectionName), CurrentPlayerStats.AttackSpeed);
 	}
 	else
 	{
 		FString SectionName = FString::Printf(TEXT("SAt%d"), NormalAttackCount);
 
 		CHECK_VALID(SmashAttackMontage);
-		PlayerCharacter->Req_Attack(AttackRot, SmashAttackMontage, FName(*SectionName));
+		PlayerCharacter->C2S_Attack(AttackRot, SmashAttackMontage, FName(*SectionName), CurrentPlayerStats.AttackSpeed);
 	}
 
+	float ResetComboTime = 1.7f;
+	if (CurrentPlayerStats.AttackSpeed < 1.0f)
+	{
+		ResetComboTime = ResetComboTime * (1.0f + (1.0f - CurrentPlayerStats.AttackSpeed));
+	}
+	else if (CurrentPlayerStats.AttackSpeed > 1.0f)
+	{
+		ResetComboTime = ResetComboTime * (1.0f - (CurrentPlayerStats.AttackSpeed - 1.0f));
+	}
+	
 	GetWorld()->GetTimerManager().SetTimer(ResetAttackCountHandle, this, &UBaseWeapon::ResetNormalAttackCount, 1.3f, false);
 }

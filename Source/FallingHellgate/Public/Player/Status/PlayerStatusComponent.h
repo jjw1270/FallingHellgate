@@ -27,6 +27,13 @@ protected:
 	class UFHGameInstance* GI;
 
 protected:
+	void UpdateDefaultStatusToGameInst();
+
+	void UpdateDefaultStatusUI();
+
+	void UpdateCurrentStatusUI();
+
+protected:
 	UFUNCTION()
 	void OnWeaponUpdate(class UItemData* UpdateEquipItem, const bool& bIsEquip);
 
@@ -52,16 +59,16 @@ protected:
 
 protected:
 	UFUNCTION(Server, Reliable)
-	void Req_UpdateDefaultPlayerStats(FPlayerStats NewDefultPlayerStats);
+	void C2S_UpdateDefaultPlayerStats(const FPlayerStats& NewDefultPlayerStats);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_UpdateDefaultPlayerStats(FPlayerStats NewDefultPlayerStats);
+	void S2M_UpdateDefaultPlayerStats(const FPlayerStats& NewDefultPlayerStats);
 
 	UFUNCTION(Server, Reliable)
-	void Req_UpdateCurrentPlayerStats(FPlayerStats NewCurrentPlayerStats);
+	void C2S_UpdateCurrentPlayerStats(const FPlayerStats& NewCurrentPlayerStats);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Res_UpdateCurrentPlayerStats(FPlayerStats NewCurrentPlayerStats);
+	void S2M_UpdateCurrentPlayerStats(const FPlayerStats& NewCurrentPlayerStats);
 
 public:
 	UFUNCTION()

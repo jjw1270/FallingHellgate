@@ -213,14 +213,6 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 		CurrentPlayerStats.Health = 0;
 	}
 
-	//if (AddHealth < 0 && (CurrentPlayerStats.Health != DefaultPlayerStats.Health))
-	//{
-	//	if (AFHPlayerController* PC = PlayerChar->GetController<AFHPlayerController>())
-	//	{
-	//		PC->ShowBloodScreen();
-	//	}
-	//}
-
 	// if Updated default value is less then current value, current value = default vault
 	CurrentPlayerStats.Stamina += AddStamina;
 	if (DefaultPlayerStats.Stamina < CurrentPlayerStats.Stamina)

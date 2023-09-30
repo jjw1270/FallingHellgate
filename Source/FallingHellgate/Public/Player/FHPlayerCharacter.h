@@ -216,6 +216,9 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void S2M_Attack(const FRotator& AttackRot, class UAnimMontage* AttackMontage, const FName& SectionName, const float& AttackSpeed);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void S2M_ApplyDamage();
+
 	UFUNCTION(Server, Reliable)
 	void C2S_TakeDamage(const EHitDirection& HitDir, const bool bKnockBack);
 
@@ -280,6 +283,19 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> DeathBackMontage;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class UNiagaraSystem* BloodEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	TSubclassOf<class ADecalActor> BloodDecalClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class UMaterialInterface* BodyBloodDecalMat;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	TSubclassOf<class UCameraShakeBase> ApplyDamageCameraShakeClass;
 
 protected:
 	UPROPERTY()

@@ -25,6 +25,11 @@
 
 #include "Blueprint/UserWidget.h"
 
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Components/DecalComponent.h"
+#include "Engine/DecalActor.h"
+
 AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UModularSkeletalMeshComponent>(ACharacter::MeshComponentName = TEXT("LowerBody")))
 {
@@ -471,6 +476,14 @@ void AFHPlayerCharacter::ApplyDamage(AActor* TargetActor, const float& DamageCoe
 	(FMath::FRand() <= PlayerStatusComp->GetCurrentPlayerStats().Critcal) ? Damage *= 1.5f : Damage;
 
 	UGameplayStatics::ApplyDamage(TargetActor, (int32)Damage, GetController(), this, NULL);
+
+	S2M_ApplyDamage();
+}
+
+void AFHPlayerCharacter::S2M_ApplyDamage_Implementation()
+{
+	CHECK_VALID(ApplyDamageCameraShakeClass);
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), ApplyDamageCameraShakeClass, GetActorLocation(), 0.f, 1000.f);
 }
 
 // Only Run on Server
@@ -481,8 +494,7 @@ float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEve
 	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
 	UE_LOG(LogTemp, Warning, TEXT("Causer : %s"), *DamageCauser->GetName());
 	UE_LOG(LogTemp, Warning, TEXT("Damaged : %s"), *this->GetName());
-
-	GetPlayerStatusComp()->UpdateCurrentPlayerStats(-NewDamage, 0);
+	UE_LOG(LogTemp, Warning, TEXT("Prev Health : %d"), GetPlayerStatusComp()->GetCurrentPlayerStats().Health);
 
 	FVector DirectionToDamageCauser = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 	DirectionToDamageCauser.Z = 0.0f;
@@ -506,7 +518,7 @@ float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEve
 		HitDirection = EHitDirection::Left;
 	}
 
-	if (GetPlayerStatusComp()->GetCurrentPlayerStats().Health <= 0)
+	if (GetPlayerStatusComp()->GetCurrentPlayerStats().Health - NewDamage <= 0)
 	{
 		C2S_Death(HitDirection);
 	}
@@ -516,6 +528,8 @@ float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEve
 
 		C2S_TakeDamage(HitDirection, bShouldKnockBack);
 	}
+
+	GetPlayerStatusComp()->UpdateCurrentPlayerStats(-NewDamage, 0);
 
 	return NewDamage;
 }
@@ -566,6 +580,42 @@ void AFHPlayerCharacter::S2M_TakeDamage_Implementation(class UAnimMontage* HitRe
 
 	CHECK_VALID(HitReactMontage);
 	PlayAnimMontage(HitReactMontage);
+
+	CHECK_VALID(BloodEffect);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation());
+
+	FRandomStream Stream(FMath::Rand());
+
+	CHECK_VALID(BloodDecalClass);
+	for (int32 i = 0; i < Stream.RandRange(1, 4); i++)
+	{
+		FVector DecalLoc = GetMesh()->GetComponentLocation();
+		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
+		DecalLoc.Y = Stream.FRandRange(DecalLoc.Y - 60.f, DecalLoc.Y + 60.f);
+
+		ADecalActor* BloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, DecalLoc, FRotator(0.f, -90.f, 0.f));
+		if (BloodDecal)
+		{
+			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(5.f, 40.f));
+			BloodDecal->GetDecal()->SetFadeOut(8, 3, true);
+		}
+
+		Stream.GenerateNewSeed();
+	}
+
+	//ADecalActor* BodyBloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, GetActorLocation(), FRotator(0.f, -90.f, 0.f));
+	//BodyBloodDecal->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	//if (BodyBloodDecal)
+	//{
+	//	BodyBloodDecal->SetDecalMaterial(BodyBloodDecalMat);
+	//	BodyBloodDecal->GetDecal()->DecalSize = FVector(30.f, 30.f, 100.f);
+	//	BodyBloodDecal->GetDecal()->SetFadeOut(10, 3, true);
+	//}
+
+	if (AFHPlayerController* PC = GetController<AFHPlayerController>())
+	{
+		PC->ShowBloodScreen(false);
+	}
 }
 
 void AFHPlayerCharacter::C2S_Death_Implementation(const EHitDirection& HitDir)
@@ -600,6 +650,14 @@ void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMonta
 		Tags.Remove(TEXT("Enemy"));
 	}
 
+	CHECK_VALID(BloodEffect);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation());
+
+	if (AFHPlayerController* PC = GetController<AFHPlayerController>())
+	{
+		PC->ShowBloodScreen(true);
+	}
+
 	MontageTime += 2.f;
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Death, MontageTime, false);
@@ -608,6 +666,9 @@ void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMonta
 void AFHPlayerCharacter::Death()
 {
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
+
+	// RESPAWN ////////////////////////////////////
+
 	Destroy();
 }
 

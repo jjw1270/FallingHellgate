@@ -24,18 +24,21 @@ void UAnimNotifyState_ApplyDamage::NotifyBegin(USkeletalMeshComponent* MeshComp,
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
-	OwnCharacter = Cast<AFHPlayerCharacter>(MeshComp->GetOwner());
-	CHECK_VALID(OwnCharacter);
-	
-	WeaponMesh = OwnCharacter->GetWeapon();
-	CHECK_VALID(WeaponMesh);
+	if (MeshComp->GetOwnerRole() == ENetRole::ROLE_Authority)
+	{
+		OwnCharacter = Cast<AFHPlayerCharacter>(MeshComp->GetOwner());
+		CHECK_VALID(OwnCharacter);
+
+		WeaponMesh = OwnCharacter->GetWeapon();
+		CHECK_VALID(WeaponMesh);
+	}
 }
 
 void UAnimNotifyState_ApplyDamage::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
 
-	if (!OwnCharacter->HasAuthority())
+	if (!OwnCharacter)
 	{
 		return;
 	}
@@ -47,11 +50,12 @@ void UAnimNotifyState_ApplyDamage::NotifyTick(USkeletalMeshComponent* MeshComp, 
 	}
 }
 
+
 void UAnimNotifyState_ApplyDamage::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
-	// AlreadyDamagedTargets.Empty();
+	AlreadyDamagedTargets.Empty();
 }
 
 bool UAnimNotifyState_ApplyDamage::DetectWeaponCollsion(TArray<FHitResult>& OutResults)
@@ -89,8 +93,6 @@ void UAnimNotifyState_ApplyDamage::AddDamageToTargets(TArray<FHitResult> Results
 		}
 
 		AlreadyDamagedTargets.Add(TargetActor);
-
-		UE_LOG(LogTemp, Warning, TEXT("ApplyDamage"));
 
 		OwnCharacter->ApplyDamage(TargetActor, DamageCoefficient);
 	}

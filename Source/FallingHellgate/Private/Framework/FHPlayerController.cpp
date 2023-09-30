@@ -12,6 +12,7 @@
 // UI
 #include "FHHUD.h"
 #include "HUDWidget.h"
+#include "BloodScreenWidget.h"
 
 AFHPlayerController::AFHPlayerController()
 {
@@ -27,6 +28,14 @@ void AFHPlayerController::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(UIMappingContext, 0);
+	}
+
+	if (IsLocalController())
+	{
+		check(BloodScreenClass);
+		BloodScreenWidget = CreateWidget<UBloodScreenWidget>(this, BloodScreenClass);
+		BloodScreenWidget->AddToViewport(99);
+		BloodScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -98,14 +107,11 @@ void AFHPlayerController::OpenBackgroundWidgets()
 	HUDWidget->OpenBackgroundWidgets();
 }
 
-void AFHPlayerController::ShowBloodScreen()
+void AFHPlayerController::ShowBloodScreen(bool bIsDead)
 {
-	if (!BloodScreenWidget)
+	if (BloodScreenWidget)
 	{
-		if (BloodScreenClass)
-		{
-			BloodScreenWidget = CreateWidget<UUserWidget>(this, BloodScreenClass);
-			BloodScreenWidget->AddToViewport();
-		}
+		BloodScreenWidget->SetVisibility(ESlateVisibility::Visible);
+		BloodScreenWidget->ShowBloodScreen(bIsDead);
 	}
 }

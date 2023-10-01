@@ -16,6 +16,9 @@ public:
 	ANPCBase();
 
 protected:
+	UPROPERTY(EditAnywhere)
+	bool bShouldRotate;
+
 	UPROPERTY()
 	class AFHPlayerCharacter* TargetPlayer;
 

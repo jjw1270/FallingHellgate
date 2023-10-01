@@ -49,12 +49,13 @@ void ANPCBase::UpdateCharacterRotation()
 
 void ANPCBase::EventInteraction_Implementation(ACharacter* OwnCharacter)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interact NPC"));
-
     TargetPlayer = Cast<AFHPlayerCharacter>(OwnCharacter);
 	CHECK_VALID(TargetPlayer);
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANPCBase::UpdateCharacterRotation, UpdateInterval, true);
+    if (bShouldRotate)
+    {
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ANPCBase::UpdateCharacterRotation, UpdateInterval, true);
+    }
 
     AFHPlayerController* PC = TargetPlayer->GetController<AFHPlayerController>();
     CHECK_VALID(PC);
@@ -88,6 +89,7 @@ void ANPCBase::EndInteraction()
     }
 
     NPCWidget->RemoveFromParent();
+    NPCWidget = nullptr;
 
     PC->OpenBackgroundWidgets();
 

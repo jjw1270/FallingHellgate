@@ -39,6 +39,7 @@ public class FallingHellgate : ModuleRules
                 Path.Combine(ModuleDirectory, "Public/Player/Status"),
                 Path.Combine(ModuleDirectory, "Public/NPC"),
                 Path.Combine(ModuleDirectory, "Public/NPC/Shop"),
+                Path.Combine(ModuleDirectory, "Public/NPC/FindParty"),
 
             }
         );

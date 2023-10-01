@@ -51,6 +51,14 @@ protected:
 
 	void RegenStamina();
 
+	FTimerHandle RegenHealthHandle;
+
+	int32 PrevHealth;
+
+	bool bCanRegenHealth;
+
+	void RegenHealth();
+
 	UPROPERTY(VisibleAnywhere)
 	FPlayerStats DefaultPlayerStats;
 

@@ -7,6 +7,7 @@
 #include "FHGameInstance.h"
 #include "FHPlayerController.h"
 #include "InventoryComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 UQuickSlotComponent::UQuickSlotComponent()
 {
@@ -42,6 +43,7 @@ void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32
 	if (IsItemExistInQuickSlot(TargetItemData, ItemExistInQuickSlotIndex))
 	{
 		DeleteItemFromQuickSlot(ItemExistInQuickSlotIndex);
+		UGameplayStatics::PlaySound2D(GetWorld(), QuickSlotSound);
 
 		return;
 	}
@@ -56,6 +58,8 @@ void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32
 
 	// Set Item to QuickSlot
 	SetItemToQuickSlot(QuickSlotIndex, TargetItemData, TargetItemAmount);
+	UGameplayStatics::PlaySound2D(GetWorld(), QuickSlotSound);
+
 }
 
 void UQuickSlotComponent::UseQuickSlotItem(const int32& TargetQuickSlotIndex)

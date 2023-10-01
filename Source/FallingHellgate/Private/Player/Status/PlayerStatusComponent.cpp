@@ -51,6 +51,10 @@ void UPlayerStatusComponent::InitCurrentPlayerStats()
 	PrevStamina = CurrentPlayerStats.Stamina;
 	bCanRegenStamina = true;
 	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.02f, true);
+
+	PrevHealth = CurrentPlayerStats.Health;
+	bCanRegenHealth = true;
+	GetWorld()->GetTimerManager().SetTimer(RegenHealthHandle, this, &UPlayerStatusComponent::RegenHealth, .5f, true);
 }
 
 void UPlayerStatusComponent::UpdateDefaultStatusToGameInst()
@@ -109,17 +113,42 @@ void UPlayerStatusComponent::RegenStamina()
 		return;
 	}
 
-	CurrentPlayerStats.Stamina += 1;
-
-	PrevStamina = CurrentPlayerStats.Stamina;
-
-	if (CurrentPlayerStats.Stamina > DefaultPlayerStats.Stamina)
+	if (CurrentPlayerStats.Stamina == DefaultPlayerStats.Stamina)
 	{
-		CurrentPlayerStats.Stamina = DefaultPlayerStats.Stamina;
 		return;
 	}
 
-	UpdateCurrentStatusUI();
+	UpdateCurrentPlayerStats(0, 1);
+
+	PrevStamina = CurrentPlayerStats.Stamina;
+}
+
+void UPlayerStatusComponent::RegenHealth()
+{
+	if (!bCanRegenHealth)
+	{
+		return;
+	}
+
+	if (PrevHealth > CurrentPlayerStats.Health)
+	{
+		bCanRegenHealth = false;
+
+		FTimerHandle HealthRegenWaitHandle;
+		GetWorld()->GetTimerManager().SetTimer(HealthRegenWaitHandle, [&]() { bCanRegenHealth = true; }, 4.f, false);
+		PrevHealth = CurrentPlayerStats.Health;
+
+		return;
+	}
+
+	if (CurrentPlayerStats.Health == DefaultPlayerStats.Health)
+	{
+		return;
+	}
+
+	UpdateCurrentPlayerStats(1, 0);
+
+	PrevHealth = CurrentPlayerStats.Health;
 }
 
 void UPlayerStatusComponent::C2S_UpdateDefaultPlayerStats_Implementation(const FPlayerStats& NewDefultPlayerStats)
@@ -210,6 +239,9 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 	}
 	else if(CurrentPlayerStats.Health <= 0)
 	{
+		GetWorld()->GetTimerManager().ClearTimer(RegenHealthHandle);
+		GetWorld()->GetTimerManager().ClearTimer(RegenStaminaHandle);
+
 		CurrentPlayerStats.Health = 0;
 	}
 

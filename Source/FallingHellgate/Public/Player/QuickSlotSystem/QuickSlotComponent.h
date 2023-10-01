@@ -32,6 +32,9 @@ protected:
 	UPROPERTY()
 	class UInventoryComponent* InventoryComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* QuickSlotSound;
+
 // UI Delegate
 public:
 	FDele_Multi_QuickSlotUpdate QuickSlotUpdateDelegate;

@@ -48,6 +48,9 @@ protected:
 	UPROPERTY()
 	class UInventoryComponent* InventoryComp;
 
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* EquipmentSound;
+
 // UI Delegate
 public:
 	FDele_Multi_WeaponUpdate WeaponUpdateDelegate;

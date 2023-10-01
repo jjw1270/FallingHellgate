@@ -8,6 +8,7 @@
 #include "InventoryComponent.h"
 #include "FHGameInstance.h"
 #include "FHPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 UEquipmentComponent::UEquipmentComponent()
 {
@@ -45,12 +46,14 @@ void UEquipmentComponent::ManageEquipment(UItemData* TargetItemData)
 	if (IsItemExistInEquipmentSlot(TargetItemData, ExistItemType, ExistArmorType))
 	{
 		UnEquip(TargetItemData);
+		UGameplayStatics::PlaySound2D(GetWorld(), EquipmentSound);
 
 		return;
 	}
 
 	// else, EquipItem
 	Equip(TargetItemData);
+	UGameplayStatics::PlaySound2D(GetWorld(), EquipmentSound);
 }
 
 void UEquipmentComponent::Equip(class UItemData* NewItemData)

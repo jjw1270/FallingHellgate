@@ -39,7 +39,7 @@ protected:
 
 	UPROPERTY()
 	class UQuickSlotComponent* QuickSlotComp;
-	
+
 // UI delegate
 public:
 	FDele_Multi_ItemUpdate ItemUpdateDelegate;

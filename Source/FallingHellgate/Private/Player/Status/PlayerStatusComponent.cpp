@@ -42,6 +42,8 @@ void UPlayerStatusComponent::BeginPlay()
 
 void UPlayerStatusComponent::InitCurrentPlayerStats()
 {
+	CHECK_VALID(GI);
+
 	DefaultPlayerStats = GI->GetDefaultPlayerStats();
 	C2S_UpdateDefaultPlayerStats(DefaultPlayerStats);
 
@@ -127,6 +129,15 @@ void UPlayerStatusComponent::RegenHealth()
 {
 	if (!bCanRegenHealth)
 	{
+		return;
+	}
+
+	// On Death
+	if (CurrentPlayerStats.Health <= 0)
+	{
+		bCanRegenHealth = false;
+		GetWorld()->GetTimerManager().ClearTimer(RegenStaminaHandle);
+		GetWorld()->GetTimerManager().ClearTimer(RegenHealthHandle);
 		return;
 	}
 
@@ -239,9 +250,6 @@ void UPlayerStatusComponent::UpdateCurrentPlayerStats(const int32& AddHealth, co
 	}
 	else if(CurrentPlayerStats.Health <= 0)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(RegenHealthHandle);
-		GetWorld()->GetTimerManager().ClearTimer(RegenStaminaHandle);
-
 		CurrentPlayerStats.Health = 0;
 	}
 

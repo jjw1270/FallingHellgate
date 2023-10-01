@@ -191,7 +191,7 @@ protected:
 
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	void Death();
+	void Respawn();
 
 // Network
 public:
@@ -230,6 +230,9 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void S2M_Death(class UAnimMontage* DeathMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void S2M_Respawn();
 
 	UFUNCTION(Server, Reliable)
 	void C2S_OnWeaponUpdate(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip);

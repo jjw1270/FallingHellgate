@@ -41,8 +41,6 @@ protected:
 	void OnArmorUpdate(const EArmorType& UpdateArmorType, class UItemData* UpdateEquipItem, const bool& bIsEquip);
 
 protected:
-	void InitCurrentPlayerStats();
-
 	FTimerHandle RegenStaminaHandle;
 
 	int32 PrevStamina;
@@ -79,6 +77,8 @@ protected:
 	void S2M_UpdateCurrentPlayerStats(const FPlayerStats& NewCurrentPlayerStats);
 
 public:
+	void InitCurrentPlayerStats();
+
 	UFUNCTION()
 	void UpdateDefaultPlayerStats(const bool& bIsEquip, const int32& AddHealth, const int32& AddStamina, const int32& AddAttack, const float& AddAttackSpeed, const float& AddCritcal, const int32& AddDefence);
 

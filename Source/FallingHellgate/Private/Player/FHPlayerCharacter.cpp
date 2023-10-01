@@ -3,6 +3,7 @@
 
 #include "FHPlayerCharacter.h"
 #include "FallingHellgate.h"
+#include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -602,7 +603,7 @@ void AFHPlayerCharacter::S2M_TakeDamage_Implementation(class UAnimMontage* HitRe
 	FRandomStream Stream(FMath::Rand());
 
 	CHECK_VALID(BloodDecalClass);
-	for (int32 i = 0; i < Stream.RandRange(1, 3); i++)
+	for (int32 i = 0; i < Stream.RandRange(1, 4); i++)
 	{
 		FVector DecalLoc = GetMesh()->GetComponentLocation();
 		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
@@ -611,21 +612,12 @@ void AFHPlayerCharacter::S2M_TakeDamage_Implementation(class UAnimMontage* HitRe
 		ADecalActor* BloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, DecalLoc, FRotator(0.f, -90.f, 0.f));
 		if (BloodDecal)
 		{
-			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(5.f, 40.f));
+			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(20.f, 70.f));
 			BloodDecal->GetDecal()->SetFadeOut(8, 3, true);
 		}
 
 		Stream.GenerateNewSeed();
 	}
-
-	//ADecalActor* BodyBloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, GetActorLocation(), FRotator(0.f, -90.f, 0.f));
-	//BodyBloodDecal->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	//if (BodyBloodDecal)
-	//{
-	//	BodyBloodDecal->SetDecalMaterial(BodyBloodDecalMat);
-	//	BodyBloodDecal->GetDecal()->DecalSize = FVector(30.f, 30.f, 100.f);
-	//	BodyBloodDecal->GetDecal()->SetFadeOut(10, 3, true);
-	//}
 
 	if (AFHPlayerController* PC = GetController<AFHPlayerController>())
 	{
@@ -671,17 +663,17 @@ void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMonta
 	FRandomStream Stream(FMath::Rand());
 
 	CHECK_VALID(BloodDecalClass);
-	for (int32 i = 0; i < Stream.RandRange(1, 3); i++)
+	for (int32 i = 0; i < Stream.RandRange(1, 7); i++)
 	{
 		FVector DecalLoc = GetMesh()->GetComponentLocation();
-		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
-		DecalLoc.Y = Stream.FRandRange(DecalLoc.Y - 60.f, DecalLoc.Y + 60.f);
+		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 80.f, DecalLoc.X + 80.f);
+		DecalLoc.Y = Stream.FRandRange(DecalLoc.Y - 80.f, DecalLoc.Y + 80.f);
 
 		ADecalActor* BloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, DecalLoc, FRotator(0.f, -90.f, 0.f));
 		if (BloodDecal)
 		{
-			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(5.f, 40.f));
-			BloodDecal->GetDecal()->SetFadeOut(8, 3, true);
+			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(30.f, 80.f));
+			BloodDecal->GetDecal()->SetFadeOut(10, 5, true);
 		}
 
 		Stream.GenerateNewSeed();
@@ -694,16 +686,25 @@ void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMonta
 
 	MontageTime += 2.f;
 	FTimerHandle DeathHandle;
-	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Death, MontageTime, false);
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, this, &AFHPlayerCharacter::Respawn, MontageTime, false);
 }
 
-void AFHPlayerCharacter::Death()
+void AFHPlayerCharacter::Respawn()
 {
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.f);
 
-	// RESPAWN ////////////////////////////////////
+	if (AGameModeBase* GM = GetWorld()->GetAuthGameMode())
+	{
+		GM->RestartPlayer(GetController());
+		S2M_Respawn();
+	}
+}
 
-	Destroy();
+void AFHPlayerCharacter::S2M_Respawn_Implementation()
+{
+	//SetActorLocation();
+	GetPlayerStatusComp()->InitCurrentPlayerStats();
+	Tags.Add("Enemy");
 }
 
 void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)

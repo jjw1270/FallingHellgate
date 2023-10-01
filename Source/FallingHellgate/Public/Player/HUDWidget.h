@@ -52,9 +52,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = Widget)
 	class UEquipmentWidget* EquipmentWidget;
 
-	//UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = Widget)
-	//class 
-
 protected:
 	UUserWidget* GetUserwidgetFromFName(const FName& WidgetName);
 

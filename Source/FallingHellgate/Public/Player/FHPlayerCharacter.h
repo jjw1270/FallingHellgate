@@ -297,6 +297,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
 	TSubclassOf<class UCameraShakeBase> ApplyDamageCameraShakeClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	TArray<class USoundBase*> ApplyDamageSounds;
+
 protected:
 	UPROPERTY()
 	class UQuickSlotComponent* QuickSlotComp;
@@ -324,6 +327,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	int32 SmashAttackStamina{ 150 };
 
-	bool bIsDash;
+	bool bIsDashCool;
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	bool bDodge;
 
 };

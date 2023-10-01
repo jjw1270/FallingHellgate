@@ -278,7 +278,7 @@ void AFHPlayerCharacter::Look(const FInputActionValue& Value)
 
 void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 {
-	if (bIsDash || !CanPlayMontage() || GetCharacterMovement()->IsFalling())
+	if (bIsDashCool || !CanPlayMontage() || GetCharacterMovement()->IsFalling())
 	{
 		return;
 	}
@@ -290,9 +290,9 @@ void AFHPlayerCharacter::Dash(const FInputActionValue& Value)
 
 	PlayerStatusComp->UpdateCurrentPlayerStats(0, -DashStamina);
 
-	bIsDash = true;
+	bIsDashCool = true;
 	FTimerHandle DashCoolTimeHandle;
-	GetWorldTimerManager().SetTimer(DashCoolTimeHandle, [&]() { bIsDash = false; }, 1.5f, false);
+	GetWorldTimerManager().SetTimer(DashCoolTimeHandle, [&]() { bIsDashCool = false; }, 1.5f, false);
 
 	FVector CurrentAcceleration = GetCharacterMovement()->GetCurrentAcceleration();
 
@@ -437,6 +437,8 @@ void AFHPlayerCharacter::S2M_Dash_Implementation(const FRotator& DashRot)
 
 	CHECK_VALID(DashMontage);
 	PlayAnimMontage(DashMontage);
+
+	bDodge = true;
 }
 
 void AFHPlayerCharacter::C2S_PickUp_Implementation(const FRotator& LookAtRot)
@@ -484,11 +486,24 @@ void AFHPlayerCharacter::S2M_ApplyDamage_Implementation()
 {
 	CHECK_VALID(ApplyDamageCameraShakeClass);
 	UGameplayStatics::PlayWorldCameraShake(GetWorld(), ApplyDamageCameraShakeClass, GetActorLocation(), 0.f, 1000.f);
+
+	if (ApplyDamageSounds.IsEmpty())
+	{
+		return;
+	}
+	int32 RandomIdx = FMath::RandRange(0, ApplyDamageSounds.Num() - 1);
+	USoundBase* ApplyDamageSound = ApplyDamageSounds[RandomIdx];
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ApplyDamageSound, GetActorLocation());
 }
 
 // Only Run on Server
 float AFHPlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bDodge)
+	{
+		return 0.f;
+	}
+
 	float NewDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
 	UE_LOG(LogTemp, Warning, TEXT("Damaged : -%f"), Damage);
@@ -542,11 +557,11 @@ void AFHPlayerCharacter::C2S_TakeDamage_Implementation(const EHitDirection& HitD
 	{
 		switch (HitDir)
 		{
-		case EHitDirection::Left:
-		case EHitDirection::Right:
 		case EHitDirection::Front:
 			HitReactMontage = KnockBackFrontMontage;
 			break;
+		case EHitDirection::Left:
+		case EHitDirection::Right:
 		case EHitDirection::Back:
 			HitReactMontage = KnockBackBackMontage;
 			break;
@@ -587,7 +602,7 @@ void AFHPlayerCharacter::S2M_TakeDamage_Implementation(class UAnimMontage* HitRe
 	FRandomStream Stream(FMath::Rand());
 
 	CHECK_VALID(BloodDecalClass);
-	for (int32 i = 0; i < Stream.RandRange(1, 4); i++)
+	for (int32 i = 0; i < Stream.RandRange(1, 3); i++)
 	{
 		FVector DecalLoc = GetMesh()->GetComponentLocation();
 		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
@@ -652,6 +667,25 @@ void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMonta
 
 	CHECK_VALID(BloodEffect);
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation());
+
+	FRandomStream Stream(FMath::Rand());
+
+	CHECK_VALID(BloodDecalClass);
+	for (int32 i = 0; i < Stream.RandRange(1, 3); i++)
+	{
+		FVector DecalLoc = GetMesh()->GetComponentLocation();
+		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
+		DecalLoc.Y = Stream.FRandRange(DecalLoc.Y - 60.f, DecalLoc.Y + 60.f);
+
+		ADecalActor* BloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, DecalLoc, FRotator(0.f, -90.f, 0.f));
+		if (BloodDecal)
+		{
+			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(5.f, 40.f));
+			BloodDecal->GetDecal()->SetFadeOut(8, 3, true);
+		}
+
+		Stream.GenerateNewSeed();
+	}
 
 	if (AFHPlayerController* PC = GetController<AFHPlayerController>())
 	{

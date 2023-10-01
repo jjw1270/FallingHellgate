@@ -85,7 +85,7 @@ void UBaseWeapon::Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator Attac
 		PlayerCharacter->C2S_Attack(AttackRot, SmashAttackMontage, FName(*SectionName), CurrentPlayerStats.AttackSpeed);
 	}
 
-	float ResetComboTime = 1.7f;
+	float ResetComboTime = 1.8f;
 	if (CurrentPlayerStats.AttackSpeed < 1.0f)
 	{
 		ResetComboTime = ResetComboTime * (1.0f + (1.0f - CurrentPlayerStats.AttackSpeed));

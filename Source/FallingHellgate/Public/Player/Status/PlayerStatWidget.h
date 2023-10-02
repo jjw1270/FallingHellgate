@@ -33,6 +33,9 @@ protected:
 	class UButton* UIDragBtn;
 
 	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* TextBlock_PlayerName;
+
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TextBlock_MaxHP;
 
 	UPROPERTY(meta = (BindWidget))

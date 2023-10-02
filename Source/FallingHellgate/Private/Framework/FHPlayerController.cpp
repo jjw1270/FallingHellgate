@@ -30,6 +30,13 @@ void AFHPlayerController::BeginPlay()
 		Subsystem->AddMappingContext(UIMappingContext, 0);
 	}
 
+	APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	if (PC)
+	{
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->bShowMouseCursor = false;
+	}
+
 	if (IsLocalController())
 	{
 		check(BloodScreenClass);

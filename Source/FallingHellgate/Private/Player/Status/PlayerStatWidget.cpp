@@ -3,6 +3,7 @@
 
 #include "PlayerStatWidget.h"
 #include "FallingHellgate.h"
+#include "FHGameInstance.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
@@ -21,6 +22,11 @@ void UPlayerStatWidget::NativeConstruct()
 
 	// Bind QuickSlotComponent Delegates
 	BindStatusCompEvents();
+
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
+	TextBlock_PlayerName->SetText(GI->GetPlayerName());
 }
 
 void UPlayerStatWidget::BindStatusCompEvents()

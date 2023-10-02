@@ -111,6 +111,9 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE void SetPlayerName(const FText& NewPlayerName) { PlayerName = NewPlayerName; }
+
+	UFUNCTION(BlueprintCallable, Category = Data)
 	FORCEINLINE FText& GetPlayerName() { return PlayerName; }
 
 	UFUNCTION(BlueprintCallable, Category = Status)

@@ -203,6 +203,9 @@ public:
 
 	void ApplyDamage(AActor* TargetActor, const float& DamageCoefficient);
 
+	UFUNCTION(Server, Reliable)
+	void C2S_PlayUseItemEffect(const EEffectTarget& EffectTarget);
+
 protected:
 	UFUNCTION(Server, Reliable)
 	void C2S_Dash(const FRotator& DashRot);
@@ -233,6 +236,15 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void S2M_Respawn();
+
+	UFUNCTION(Server, Reliable)
+	void C2S_UseItem(const int32& QuickSlotIdx);
+
+	UFUNCTION(Client, Reliable)
+	void S2C_UseItem(const int32& QuickSlotIdx);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void S2M_PlayUseItemEffect(const EEffectTarget& EffectTarget);
 
 	UFUNCTION(Server, Reliable)
 	void C2S_OnWeaponUpdate(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip);
@@ -287,6 +299,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
 	TObjectPtr<class UAnimMontage> DeathBackMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Montage)
+	TObjectPtr<class UAnimMontage> DrinkMontage;
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
 	class UNiagaraSystem* BloodEffect;
@@ -302,6 +317,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
 	TArray<class USoundBase*> ApplyDamageSounds;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class UParticleSystem* HealthParticleSystem;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class UParticleSystem* StaminaParticleSystem;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class UParticleSystem* AttackPowerParticleSystem;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class UParticleSystem* DefensivePowerParticleSystem;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)
+	class USoundBase* ApplyItemSound;
 
 protected:
 	UPROPERTY()
@@ -313,6 +343,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Interaction)
 	AActor* LootingEffect;
+
+	UPROPERTY()
+	class UItemData* TempUseItem;
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FDele_Multi_EquipVisibilityUpdate EquipVisibilityUpdateDelegate;

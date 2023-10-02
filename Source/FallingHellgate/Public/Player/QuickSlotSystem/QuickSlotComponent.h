@@ -47,7 +47,7 @@ public:
 	void ManageQuickSlot(UItemData* TargetItemData, const int32& TargetItemAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
-	void UseQuickSlotItem(const int32& TargetQuickSlotIndex);
+	void UseQuickSlotItem();
 
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
 	void SetItemToQuickSlot(const int32& NewQuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount);

@@ -3,6 +3,7 @@
 
 #include "FHPlayerCharacter.h"
 #include "FallingHellgate.h"
+#include "FHGameInstance.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -208,9 +209,10 @@ bool AFHPlayerCharacter::CanPlayMontage()
 	if (AnimInst->IsAnyMontagePlaying())
 	{
 		FString CurrentSectionName = AnimInst->Montage_GetCurrentSection().ToString();
+
 		if (CurrentSectionName.Contains(TEXT("End"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 		{
-			AnimInst->StopAllMontages(.25f);
+			AnimInst->StopAllMontages(.1f);
 			return true;
 		}
 
@@ -244,11 +246,6 @@ void AFHPlayerCharacter::Jump()
 
 void AFHPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	if (!CanPlayMontage())
-	{
-		return;
-	}
-
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -429,7 +426,7 @@ void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)
 		return;
 	}
 
-	QuickSlotComp->UseQuickSlotItem(SlotNum - 1);
+	C2S_UseItem(SlotNum - 1);
 }
 
 void AFHPlayerCharacter::C2S_Dash_Implementation(const FRotator& DashRot)
@@ -711,6 +708,65 @@ void AFHPlayerCharacter::S2M_Respawn_Implementation()
 	//SetActorLocation();
 	GetPlayerStatusComp()->InitCurrentPlayerStats();
 	Tags.Add("Enemy");
+}
+
+void AFHPlayerCharacter::C2S_UseItem_Implementation(const int32& QuickSlotIdx)
+{
+	CHECK_VALID(DrinkMontage);
+	PlayAnimMontage(DrinkMontage);
+
+	S2C_UseItem(QuickSlotIdx);
+}
+
+void AFHPlayerCharacter::S2C_UseItem_Implementation(const int32& QuickSlotIdx)
+{
+	CHECK_VALID(DrinkMontage);
+	PlayAnimMontage(DrinkMontage);
+
+	if (!GetController())
+	{
+		return;
+	}
+
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
+	TempUseItem = *GI->GetQuickSlotItems()->Find(QuickSlotIdx);
+}
+
+void AFHPlayerCharacter::C2S_PlayUseItemEffect_Implementation(const EEffectTarget& EffectTarget)
+{
+	S2M_PlayUseItemEffect(EffectTarget);
+}
+
+void AFHPlayerCharacter::S2M_PlayUseItemEffect_Implementation(const EEffectTarget& EffectTarget)
+{
+	switch(EffectTarget)
+	{
+	case EEffectTarget::Health:
+		CHECK_VALID(HealthParticleSystem);
+		UGameplayStatics::SpawnEmitterAttached(HealthParticleSystem, GetMesh());
+		break;
+	case EEffectTarget::Stamina:
+		CHECK_VALID(StaminaParticleSystem);
+		UGameplayStatics::SpawnEmitterAttached(StaminaParticleSystem, GetMesh());
+		break;
+	case EEffectTarget::AttackPower:
+		CHECK_VALID(AttackPowerParticleSystem);
+		UGameplayStatics::SpawnEmitterAttached(AttackPowerParticleSystem, GetMesh());
+		break;
+	case EEffectTarget::DefensivePower:
+		CHECK_VALID(DefensivePowerParticleSystem);
+		UGameplayStatics::SpawnEmitterAttached(DefensivePowerParticleSystem, GetMesh());
+		break;
+	case EEffectTarget::AttackSpeed:
+	case EEffectTarget::CriticalChance:
+	default:
+		break;
+	}
+
+	CHECK_VALID(ApplyItemSound);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ApplyItemSound, GetActorLocation());
 }
 
 void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)

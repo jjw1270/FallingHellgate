@@ -63,18 +63,23 @@ void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32
 	UGameplayStatics::PlaySound2D(GetWorld(), QuickSlotSound);
 }
 
-void UQuickSlotComponent::UseQuickSlotItem(const int32& TargetQuickSlotIndex)
+void UQuickSlotComponent::UseQuickSlotItem()
 {
-	UItemData* QuickSlotItemData = *GI->GetQuickSlotItems()->Find(TargetQuickSlotIndex);
-
-	FConsumableItemData QuickSlotConsumableItemData;
-	QuickSlotItemData->GetConsumableData(QuickSlotConsumableItemData);
-
-	UE_LOG(LogTemp, Warning, TEXT("ItemData : %s"), *QuickSlotConsumableItemData.BaseData.Name);
-
+	CHECK_VALID(GI);
 	CHECK_VALID(PC);
+
 	AFHPlayerCharacter* PlayerChar = PC->GetPawn<AFHPlayerCharacter>();
 	CHECK_VALID(PlayerChar);
+
+	UItemData* UsingItemData = PlayerChar->TempUseItem;
+	CHECK_VALID(UsingItemData);
+	PlayerChar->TempUseItem = nullptr;
+
+	FConsumableItemData QuickSlotConsumableItemData;
+	UsingItemData->GetConsumableData(QuickSlotConsumableItemData);
+
+	PlayerChar->C2S_PlayUseItemEffect(QuickSlotConsumableItemData.EffectTarget);
+
 	UPlayerStatusComponent* PlayerStatusComp = PlayerChar->GetPlayerStatusComp();
 	CHECK_VALID(PlayerStatusComp);
 
@@ -96,7 +101,7 @@ void UQuickSlotComponent::UseQuickSlotItem(const int32& TargetQuickSlotIndex)
 		break;
 	}
 
-	InventoryComp->RemoveItemFromInventory(QuickSlotItemData, 1);
+	InventoryComp->RemoveItemFromInventory(UsingItemData, 1);
 }
 
 void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount)

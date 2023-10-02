@@ -210,6 +210,12 @@ bool AFHPlayerCharacter::CanPlayMontage()
 		FString CurrentSectionName = AnimInst->Montage_GetCurrentSection().ToString();
 		if (CurrentSectionName.Contains(TEXT("End"), ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 		{
+			AnimInst->StopAllMontages(.25f);
+			return true;
+		}
+
+		if (CurrentSectionName.Contains(TEXT("None")))
+		{
 			return true;
 		}
 
@@ -418,7 +424,7 @@ void AFHPlayerCharacter::UseQuickSlot(int32 SlotNum)
 		return;
 	}
 
-	if (!QuickSlotComp->IsQuickSlotEmpty(SlotNum - 1))
+	if (QuickSlotComp->IsQuickSlotEmpty(SlotNum - 1))
 	{
 		return;
 	}

@@ -6,6 +6,8 @@
 #include "ItemData.h"
 #include "FHGameInstance.h"
 #include "FHPlayerController.h"
+#include "FHPlayerCharacter.h"
+#include "PlayerStatusComponent.h"
 #include "InventoryComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -25,7 +27,7 @@ void UQuickSlotComponent::BeginPlay()
 
 void UQuickSlotComponent::InitComponent()
 {
-	AFHPlayerController* PC = Cast<AFHPlayerController>(GetOwner());
+	PC = Cast<AFHPlayerController>(GetOwner());
 	CHECK_VALID(PC);
 
 	GI = PC->GetGameInstance<UFHGameInstance>();
@@ -59,13 +61,42 @@ void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32
 	// Set Item to QuickSlot
 	SetItemToQuickSlot(QuickSlotIndex, TargetItemData, TargetItemAmount);
 	UGameplayStatics::PlaySound2D(GetWorld(), QuickSlotSound);
-
 }
 
 void UQuickSlotComponent::UseQuickSlotItem(const int32& TargetQuickSlotIndex)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UseQuickSlotItem : %d"), TargetQuickSlotIndex+1)
-	
+	UItemData* QuickSlotItemData = *GI->GetQuickSlotItems()->Find(TargetQuickSlotIndex);
+
+	FConsumableItemData QuickSlotConsumableItemData;
+	QuickSlotItemData->GetConsumableData(QuickSlotConsumableItemData);
+
+	UE_LOG(LogTemp, Warning, TEXT("ItemData : %s"), *QuickSlotConsumableItemData.BaseData.Name);
+
+	CHECK_VALID(PC);
+	AFHPlayerCharacter* PlayerChar = PC->GetPawn<AFHPlayerCharacter>();
+	CHECK_VALID(PlayerChar);
+	UPlayerStatusComponent* PlayerStatusComp = PlayerChar->GetPlayerStatusComp();
+	CHECK_VALID(PlayerStatusComp);
+
+	switch (QuickSlotConsumableItemData.EffectTarget)
+	{
+	case EEffectTarget::Health:
+		PlayerStatusComp->UpdateCurrentPlayerStats(QuickSlotConsumableItemData.EffectValue, 0);
+		break;
+	case EEffectTarget::Stamina:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, QuickSlotConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::AttackPower:
+	case EEffectTarget::AttackSpeed:
+	case EEffectTarget::CriticalChance:
+	case EEffectTarget::DefensivePower:
+		UseTemporaryItem(QuickSlotConsumableItemData, PlayerStatusComp);
+		break;
+	default:
+		break;
+	}
+
+	InventoryComp->RemoveItemFromInventory(QuickSlotItemData, 1);
 }
 
 void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount)
@@ -164,4 +195,57 @@ int32 UQuickSlotComponent::GetEmptyQuickSlotSlotIndex()
 	}
 
 	return EmptyIndex;
+}
+
+void UQuickSlotComponent::UseTemporaryItem(const FConsumableItemData& ConsumableItemData, UPlayerStatusComponent* PlayerStatusComp)
+{
+	switch (ConsumableItemData.EffectTarget)
+	{
+	case EEffectTarget::Health:
+	case EEffectTarget::Stamina:
+		break;
+	case EEffectTarget::AttackPower:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, ConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::AttackSpeed:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, 0, ConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::CriticalChance:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, 0, 0, ConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::DefensivePower:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, 0, 0, 0, ConsumableItemData.EffectValue);
+		break;
+	default:
+		break;
+	}
+
+	FTimerHandle RestoreStatsHandle;
+	FTimerDelegate RestoreStatsDelegate;
+	RestoreStatsDelegate.BindUFunction(this, TEXT("RestorePlayerStatus"), ConsumableItemData, PlayerStatusComp);
+	GetWorld()->GetTimerManager().SetTimer(RestoreStatsHandle, RestoreStatsDelegate, ConsumableItemData.Duration, false);
+}
+
+void UQuickSlotComponent::RestorePlayerStatus(const FConsumableItemData& ConsumableItemData, UPlayerStatusComponent* PlayerStatusComp)
+{
+	switch (ConsumableItemData.EffectTarget)
+	{
+	case EEffectTarget::Health:
+	case EEffectTarget::Stamina:
+		break;
+	case EEffectTarget::AttackPower:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, -ConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::AttackSpeed:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, 0, -ConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::CriticalChance:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, 0, 0, -ConsumableItemData.EffectValue);
+		break;
+	case EEffectTarget::DefensivePower:
+		PlayerStatusComp->UpdateCurrentPlayerStats(0, 0, 0, 0, 0, -ConsumableItemData.EffectValue);
+		break;
+	default:
+		break;
+	}
 }

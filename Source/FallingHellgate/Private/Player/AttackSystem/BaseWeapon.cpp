@@ -38,22 +38,18 @@ void UBaseWeapon::SetEquipMesh(USkeletalMesh* NewArmorMesh, const bool& bIsEquip
 
 void UBaseWeapon::EventNormalAttack_Implementation(ACharacter* OwnCharacter, FRotator AttackRot)
 {
-	GetWorld()->GetTimerManager().ClearTimer(ResetAttackCountHandle);
-
-	if (NormalAttackCount == MaxNormalAttackCount)
+	if (NormalAttackCount > MaxNormalAttackCount)
 	{
 		ResetNormalAttackCount();
 	}
 
-	NormalAttackCount++;
+	++NormalAttackCount;
 
 	Attack(OwnCharacter, false, AttackRot);
 }
 
 void UBaseWeapon::EventSmashAttack_Implementation(ACharacter* OwnCharacter, FRotator AttackRot)
 {
-	GetWorld()->GetTimerManager().ClearTimer(ResetAttackCountHandle);
-
 	Attack(OwnCharacter, true, AttackRot);
 
 	ResetNormalAttackCount();
@@ -66,6 +62,11 @@ void UBaseWeapon::ResetNormalAttackCount()
 
 void UBaseWeapon::Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator AttackRot)
 {
+	if (ResetAttackCountHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ResetAttackCountHandle);
+	}
+
 	AFHPlayerCharacter* PlayerCharacter = Cast<AFHPlayerCharacter>(OwnCharacter);
 	CHECK_VALID(PlayerCharacter);
 	FPlayerStats CurrentPlayerStats = PlayerCharacter->GetPlayerStatusComp()->GetCurrentPlayerStats();
@@ -94,6 +95,6 @@ void UBaseWeapon::Attack(ACharacter* OwnCharacter, bool bIsSmash, FRotator Attac
 	{
 		ResetComboTime = ResetComboTime * (1.0f - (CurrentPlayerStats.AttackSpeed - 1.0f));
 	}
-	
-	GetWorld()->GetTimerManager().SetTimer(ResetAttackCountHandle, this, &UBaseWeapon::ResetNormalAttackCount, 1.3f, false);
+
+	GetWorld()->GetTimerManager().SetTimer(ResetAttackCountHandle, this, &UBaseWeapon::ResetNormalAttackCount, ResetComboTime, false);
 }

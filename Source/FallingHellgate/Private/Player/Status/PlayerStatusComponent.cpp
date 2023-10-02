@@ -52,7 +52,7 @@ void UPlayerStatusComponent::InitCurrentPlayerStats()
 
 	PrevStamina = CurrentPlayerStats.Stamina;
 	bCanRegenStamina = true;
-	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.02f, true);
+	GetWorld()->GetTimerManager().SetTimer(RegenStaminaHandle, this, &UPlayerStatusComponent::RegenStamina, 0.05f, true);
 
 	PrevHealth = CurrentPlayerStats.Health;
 	bCanRegenHealth = true;
@@ -109,7 +109,7 @@ void UPlayerStatusComponent::RegenStamina()
 		bCanRegenStamina = false;
 
 		FTimerHandle StaminaRegenWaitHandle;
-		GetWorld()->GetTimerManager().SetTimer(StaminaRegenWaitHandle, [&]() { bCanRegenStamina = true; }, 1.f, false);
+		GetWorld()->GetTimerManager().SetTimer(StaminaRegenWaitHandle, [&]() { bCanRegenStamina = true; }, 1.5f, false);
 		PrevStamina = CurrentPlayerStats.Stamina;
 		
 		return;

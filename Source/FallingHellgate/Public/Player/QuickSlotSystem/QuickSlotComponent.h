@@ -30,6 +30,9 @@ protected:
 	class UFHGameInstance* GI;
 
 	UPROPERTY()
+	class AFHPlayerController* PC;
+
+	UPROPERTY()
 	class UInventoryComponent* InventoryComp;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -59,4 +62,8 @@ protected:
 
 	int32 GetEmptyQuickSlotSlotIndex();
 
+	void UseTemporaryItem(const struct FConsumableItemData& ConsumableItemData, UPlayerStatusComponent* PlayerStatusComp);
+
+	UFUNCTION()
+	void RestorePlayerStatus(const struct FConsumableItemData& ConsumableItemData, UPlayerStatusComponent* PlayerStatusComp);
 };

@@ -22,10 +22,16 @@ protected:
 	FText NPCMenu2Text;
 
 	UPROPERTY(EditDefaultsOnly, Category = Widget)
-	TSubclassOf<class UUserWidget> FindPartyWidgetClass;
+	TSubclassOf<class UCreatePartyWidget> CreatePartyWidgetClass;
 
 	UPROPERTY()
-	class UUserWidget* FindPartyWidget;
+	class UCreatePartyWidget* CreatePartyWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = Widget)
+	TSubclassOf<class UFindPartyWidget> FindPartyWidgetClass;
+
+	UPROPERTY()
+	class UFindPartyWidget* FindPartyWidget;
 	
 public:
 	virtual void EventInteraction_Implementation(ACharacter* OwnCharacter) override;

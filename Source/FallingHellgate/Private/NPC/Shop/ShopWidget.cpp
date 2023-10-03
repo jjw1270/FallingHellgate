@@ -23,13 +23,6 @@
 #include "Components/BackgroundBlur.h"
 
 
-void UShopWidget::NativePreConstruct()
-{
-	Super::NativePreConstruct();
-
-	// set shop slots -> All Consumabe Items
-}
-
 void UShopWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

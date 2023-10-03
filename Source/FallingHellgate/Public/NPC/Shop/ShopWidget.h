@@ -17,8 +17,6 @@ class FALLINGHELLGATE_API UShopWidget : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
-	virtual void NativePreConstruct() override;
-
 	virtual void NativeConstruct() override;
 
 protected:

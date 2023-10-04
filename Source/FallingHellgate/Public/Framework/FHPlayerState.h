@@ -18,21 +18,4 @@ class FALLINGHELLGATE_API AFHPlayerState : public APlayerState
 public:
 	AFHPlayerState();
 
-protected:
-	virtual void BeginPlay() override;
-
-protected:
-	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_UserName, Category = State)
-	FText UserName;
-
-public:
-	UFUNCTION(BlueprintCallable, Category = State)
-	void SetUserName(const FText& NewName);
-
-	UFUNCTION(BlueprintPure, Category = State)
-	FORCEINLINE FText& GetUserName() { return UserName; };
-
-	UFUNCTION()
-	void OnRep_UserName();
-
 };

@@ -21,16 +21,21 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* EditableTextBox_NickName;
 
-	UPROPERTY(meta = (BindWidget))
-	class UButton* Btn_GameStart;
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
+	class UButton* Btn_CreateParty;
 
-	UPROPERTY(EditDefaultsOnly)
-	FString LevelName;
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
+	class UButton* Btn_FindParty;
 	
 protected:
 	FText GetRandomNickName();
 
-	UFUNCTION()
-	void GameStart();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnBtn_CreatePartyClicked();
+	virtual void OnBtn_CreatePartyClicked_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnBtn_FindPartyClicked();
+	virtual void OnBtn_FindPartyClicked_Implementation();
 
 };

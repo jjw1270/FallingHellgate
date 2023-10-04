@@ -712,17 +712,19 @@ void AFHPlayerCharacter::S2M_Respawn_Implementation()
 
 void AFHPlayerCharacter::C2S_UseItem_Implementation(const int32& QuickSlotIdx)
 {
-	CHECK_VALID(DrinkMontage);
-	PlayAnimMontage(DrinkMontage);
+	S2M_UseItem();
 
 	S2C_UseItem(QuickSlotIdx);
 }
 
-void AFHPlayerCharacter::S2C_UseItem_Implementation(const int32& QuickSlotIdx)
+void AFHPlayerCharacter::S2M_UseItem_Implementation()
 {
 	CHECK_VALID(DrinkMontage);
 	PlayAnimMontage(DrinkMontage);
+}
 
+void AFHPlayerCharacter::S2C_UseItem_Implementation(const int32& QuickSlotIdx)
+{
 	if (!GetController())
 	{
 		return;

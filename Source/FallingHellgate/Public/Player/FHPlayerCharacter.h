@@ -240,6 +240,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void C2S_UseItem(const int32& QuickSlotIdx);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void S2M_UseItem();
+
 	UFUNCTION(Client, Reliable)
 	void S2C_UseItem(const int32& QuickSlotIdx);
 

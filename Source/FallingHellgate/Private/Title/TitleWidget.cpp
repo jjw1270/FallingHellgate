@@ -11,7 +11,8 @@ void UTitleWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Btn_GameStart->OnClicked.AddDynamic(this, &UTitleWidget::GameStart);
+	Btn_CreateParty->OnClicked.AddDynamic(this, &UTitleWidget::OnBtn_CreatePartyClicked);
+	Btn_FindParty->OnClicked.AddDynamic(this, &UTitleWidget::OnBtn_FindPartyClicked);
 
 	EditableTextBox_NickName->SetText(GetRandomNickName());
 }
@@ -27,7 +28,7 @@ FText UTitleWidget::GetRandomNickName()
 	return FText::FromString(TempNickName);
 }
 
-void UTitleWidget::GameStart()
+void UTitleWidget::OnBtn_CreatePartyClicked_Implementation()
 {
 	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
 	if (!GI)
@@ -38,5 +39,16 @@ void UTitleWidget::GameStart()
 	FText NickName = EditableTextBox_NickName->GetText();
 	GI->SetPlayerName(NickName);
 
-	UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelName), true);
+}
+
+void UTitleWidget::OnBtn_FindPartyClicked_Implementation()
+{
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	if (!GI)
+	{
+		return;
+	}
+
+	FText NickName = EditableTextBox_NickName->GetText();
+	GI->SetPlayerName(NickName);
 }

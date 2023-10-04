@@ -31,6 +31,8 @@ void UPlayerStatusComponent::BeginPlay()
 	GI = PC->GetGameInstance<UFHGameInstance>();
 	CHECK_VALID(GI);
 
+	C2S_SetPlayerName();
+
 	InitCurrentPlayerStats();
 
 	UEquipmentComponent* EquipmentComp = PC->GetEquipmentComp();
@@ -160,6 +162,34 @@ void UPlayerStatusComponent::RegenHealth()
 	UpdateCurrentPlayerStats(1, 0);
 
 	PrevHealth = CurrentPlayerStats.Health;
+}
+
+void UPlayerStatusComponent::C2S_SetPlayerName_Implementation()
+{
+	for (auto Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
+	{
+		AController* PC = Cast<AController>(*Iter);
+		if (PC)
+		{
+			S2C_SetPlayerName();
+		}
+	}
+}
+
+void UPlayerStatusComponent::S2C_SetPlayerName_Implementation()
+{
+	CHECK_VALID(GI);
+	C2S_SyncPlayerName(GI->GetPlayerName());
+}
+
+void UPlayerStatusComponent::C2S_SyncPlayerName_Implementation(const FText& NewPlayerName)
+{
+	S2M_SyncPlayerName(NewPlayerName);
+}
+
+void UPlayerStatusComponent::S2M_SyncPlayerName_Implementation(const FText& NewPlayerName)
+{
+	PlayerName = NewPlayerName;
 }
 
 void UPlayerStatusComponent::C2S_UpdateDefaultPlayerStats_Implementation(const FPlayerStats& NewDefultPlayerStats)

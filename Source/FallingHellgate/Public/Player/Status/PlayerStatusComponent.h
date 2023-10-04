@@ -41,6 +41,9 @@ protected:
 	void OnArmorUpdate(const EArmorType& UpdateArmorType, class UItemData* UpdateEquipItem, const bool& bIsEquip);
 
 protected:
+	UPROPERTY(VisibleAnywhere)
+	FText PlayerName;
+
 	FTimerHandle RegenStaminaHandle;
 
 	int32 PrevStamina;
@@ -65,6 +68,18 @@ protected:
 
 protected:
 	UFUNCTION(Server, Reliable)
+	void C2S_SetPlayerName();
+
+	UFUNCTION(Client, Reliable)
+	void S2C_SetPlayerName();
+
+	UFUNCTION(Server, Reliable)
+	void C2S_SyncPlayerName(const FText& NewPlayerName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void S2M_SyncPlayerName(const FText& NewPlayerName);
+
+	UFUNCTION(Server, Reliable)
 	void C2S_UpdateDefaultPlayerStats(const FPlayerStats& NewDefultPlayerStats);
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -87,6 +102,9 @@ public:
 	FORCEINLINE const FPlayerStats& GetDefaultPlayerStats() const { return DefaultPlayerStats; }
 
 	FORCEINLINE const FPlayerStats& GetCurrentPlayerStats() const { return CurrentPlayerStats; }
+
+	UFUNCTION(BlueprintPure, Category = State)
+	FORCEINLINE FText& GetPlayerName() { return PlayerName; };
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)

@@ -29,6 +29,7 @@ protected:
 protected:
 	void UpdateDefaultStatusToGameInst();
 
+public:
 	void UpdateDefaultStatusUI();
 
 	void UpdateCurrentStatusUI();
@@ -68,16 +69,10 @@ protected:
 
 protected:
 	UFUNCTION(Server, Reliable)
-	void C2S_SetPlayerName();
-
-	UFUNCTION(Client, Reliable)
-	void S2C_SetPlayerName();
-
-	UFUNCTION(Server, Reliable)
-	void C2S_SyncPlayerName(const FText& NewPlayerName);
+	void C2S_UpdatePlayerName(const FText& NewPlayerName);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void S2M_SyncPlayerName(const FText& NewPlayerName);
+	void S2M_UpdatePlayerName(const FText& NewPlayerName);
 
 	UFUNCTION(Server, Reliable)
 	void C2S_UpdateDefaultPlayerStats(const FPlayerStats& NewDefultPlayerStats);

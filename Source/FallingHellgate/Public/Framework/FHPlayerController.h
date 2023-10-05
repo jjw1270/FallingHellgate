@@ -77,6 +77,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Component)
 	FORCEINLINE class UEquipmentComponent* GetEquipmentComp() const { return EquipmentComp; }
 
+public:
+	UFUNCTION(Client, Reliable)
+	void S2C_CreateEnterDungeonWidget(const FString& NewDungeonName);
+
+	UFUNCTION(Server, Reliable)
+	void C2S_SyncPlayerStats();
+
+	UFUNCTION(Client, Reliable)
+	void S2C_SyncPlayerStats();
+
+
 // UI
 protected:
 	UPROPERTY()
@@ -87,5 +98,9 @@ protected:
 
 	UPROPERTY()
 	class UBloodScreenWidget* BloodScreenWidget;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UEnterDungeonWidget> EnterDungeonWidgetClass;
+
 
 };

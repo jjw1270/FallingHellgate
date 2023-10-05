@@ -2,6 +2,7 @@
 
 
 #include "FHPlayerController.h"
+#include "FallingHellgate.h"
 // Input
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -13,6 +14,12 @@
 #include "FHHUD.h"
 #include "HUDWidget.h"
 #include "BloodScreenWidget.h"
+#include "EnterDungeonWidget.h"
+#include "PartyInfoWidget.h"
+
+#include "FHPlayerCharacter.h"
+#include "PlayerStatusComponent.h"
+#include "EngineUtils.h"
 
 AFHPlayerController::AFHPlayerController()
 {
@@ -43,7 +50,12 @@ void AFHPlayerController::BeginPlay()
 		BloodScreenWidget = CreateWidget<UBloodScreenWidget>(this, BloodScreenClass);
 		BloodScreenWidget->AddToViewport(99);
 		BloodScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+
 	}
+
+	FTimerHandle SyncPlayerStatsHandle;
+	GetWorldTimerManager().SetTimer(SyncPlayerStatsHandle, [&]() { C2S_SyncPlayerStats(); }, 3.f, false);
 }
 
 void AFHPlayerController::SetupInputComponent()
@@ -120,5 +132,56 @@ void AFHPlayerController::ShowBloodScreen(bool bIsDead)
 	{
 		BloodScreenWidget->SetVisibility(ESlateVisibility::Visible);
 		BloodScreenWidget->ShowBloodScreen(bIsDead);
+	}
+}
+
+void AFHPlayerController::S2C_CreateEnterDungeonWidget_Implementation(const FString& NewDungeonName)
+{
+	FString DungeonName = NewDungeonName;
+
+	UEnterDungeonWidget* EnterDungeonWidget = CreateWidget<UEnterDungeonWidget>(this, EnterDungeonWidgetClass);
+	EnterDungeonWidget->SetDungeonName(DungeonName);
+	EnterDungeonWidget->AddToViewport();
+
+	SetInputMode(FInputModeGameAndUI());
+	SetShowMouseCursor(true);
+}
+
+void AFHPlayerController::C2S_SyncPlayerStats_Implementation()
+{
+	if (GetWorld()->GetMapName().Contains(TEXT("Village")))
+	{
+		return;
+	}
+
+	//Find All PC
+	for (auto Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
+	{
+		AFHPlayerController* PC = Cast<AFHPlayerController>(*Iter);
+		if (PC)
+		{
+			PC->S2C_SyncPlayerStats();
+		}
+	}
+}
+
+void AFHPlayerController::S2C_SyncPlayerStats_Implementation()
+{
+	AFHHUD* FHHUD = GetHUD<AFHHUD>();
+	CHECK_VALID(FHHUD);
+	UPartyInfoWidget* PartyInfoWidget = FHHUD->GetHUDWidget()->GetPartyInfoWidget();
+	CHECK_VALID(PartyInfoWidget);
+
+	for (TActorIterator<AFHPlayerCharacter> Iter(GetWorld()); Iter; ++Iter)
+	{
+		AFHPlayerCharacter* PlayerChar = *Iter;
+		if (PlayerChar)
+		{
+			UPlayerStatusComponent* PlayerStatusComp = PlayerChar->GetPlayerStatusComp();
+			if (PlayerStatusComp)
+			{
+				PartyInfoWidget->SetPartyMember(PlayerStatusComp->GetPlayerName(), PlayerStatusComp, true);
+			}
+		}
 	}
 }

@@ -9,6 +9,9 @@
 #include "EquipmentComponent.h"
 #include "FHPlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "FHHUD.h"
+#include "HUDWidget.h"
+#include "PartyInfoWidget.h"
 
 UPlayerStatusComponent::UPlayerStatusComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -31,20 +34,21 @@ void UPlayerStatusComponent::BeginPlay()
 	GI = PC->GetGameInstance<UFHGameInstance>();
 	CHECK_VALID(GI);
 
-	C2S_SetPlayerName();
-
-	InitCurrentPlayerStats();
-
 	UEquipmentComponent* EquipmentComp = PC->GetEquipmentComp();
 	CHECK_VALID(EquipmentComp);
 
 	EquipmentComp->WeaponUpdateDelegate.AddUObject(this, &UPlayerStatusComponent::OnWeaponUpdate);
 	EquipmentComp->ArmorUpdateDelegate.AddUObject(this, &UPlayerStatusComponent::OnArmorUpdate);
+
+	FTimerHandle InitCurrentPlayerStatsHandle;
+	GetWorld()->GetTimerManager().SetTimer(InitCurrentPlayerStatsHandle, [&]() {InitCurrentPlayerStats(); }, 1.f, false);
 }
 
 void UPlayerStatusComponent::InitCurrentPlayerStats()
 {
 	CHECK_VALID(GI);
+	PlayerName = GI->GetPlayerName();
+	C2S_UpdatePlayerName(PlayerName);
 
 	DefaultPlayerStats = GI->GetDefaultPlayerStats();
 	C2S_UpdateDefaultPlayerStats(DefaultPlayerStats);
@@ -164,30 +168,12 @@ void UPlayerStatusComponent::RegenHealth()
 	PrevHealth = CurrentPlayerStats.Health;
 }
 
-void UPlayerStatusComponent::C2S_SetPlayerName_Implementation()
+void UPlayerStatusComponent::C2S_UpdatePlayerName_Implementation(const FText& NewPlayerName)
 {
-	for (auto Iter = GetWorld()->GetPlayerControllerIterator(); Iter; ++Iter)
-	{
-		AController* PC = Cast<AController>(*Iter);
-		if (PC)
-		{
-			S2C_SetPlayerName();
-		}
-	}
+	S2M_UpdatePlayerName(NewPlayerName);
 }
 
-void UPlayerStatusComponent::S2C_SetPlayerName_Implementation()
-{
-	CHECK_VALID(GI);
-	C2S_SyncPlayerName(GI->GetPlayerName());
-}
-
-void UPlayerStatusComponent::C2S_SyncPlayerName_Implementation(const FText& NewPlayerName)
-{
-	S2M_SyncPlayerName(NewPlayerName);
-}
-
-void UPlayerStatusComponent::S2M_SyncPlayerName_Implementation(const FText& NewPlayerName)
+void UPlayerStatusComponent::S2M_UpdatePlayerName_Implementation(const FText& NewPlayerName)
 {
 	PlayerName = NewPlayerName;
 }

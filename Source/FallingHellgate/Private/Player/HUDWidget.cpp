@@ -11,6 +11,7 @@
 #include "QuickSlotWidget.h"
 #include "InventoryWidget.h"
 #include "EquipmentWidget.h"
+#include "PartyInfoWidget.h"
 
 #include "Blueprint/WidgetLayoutLibrary.h"
 
@@ -103,11 +104,13 @@ void UHUDWidget::CloseAllWidgets()
 	QuickSlotWidget->SetVisibility(ESlateVisibility::Collapsed);
 	InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 	EquipmentWidget->SetVisibility(ESlateVisibility::Collapsed);
+	PartyInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UHUDWidget::OpenBackgroundWidgets()
 {
 	QuickSlotWidget->SetVisibility(ESlateVisibility::Visible);
+	PartyInfoWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 bool UHUDWidget::CheckAllHandleableWidgetCollapsed()
@@ -137,6 +140,10 @@ UUserWidget* UHUDWidget::GetUserwidgetFromFName(const FName& WidgetName)
 	if (WidgetName == EquipmentWidget->GetFName())
 	{
 		return EquipmentWidget;
+	}
+	if (WidgetName == PartyInfoWidget->GetFName())
+	{
+		return PartyInfoWidget;
 	}
 
 	return nullptr;

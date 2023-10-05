@@ -54,10 +54,6 @@ protected:
 	class UProgressBar* ProgressBar_Stamina;
 
 protected:
-	FVector2D MousePosOnDragStart;
-
-	FTimerHandle DragTimerHandle;
-
 	int32 CurHP;
 	int32 DefaultHP;
 	int32 CurStamina;

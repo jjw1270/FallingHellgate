@@ -19,11 +19,7 @@ void UTitleWidget::NativeConstruct()
 
 FText UTitleWidget::GetRandomNickName()
 {
-	FRandomStream Stream(FMath::Rand());
-
-	int32 RandomIdx = Stream.RandRange(1, 9999);
-
-	FString TempNickName = FString::Printf(TEXT("Player%d"), RandomIdx);
+	FString TempNickName = FString::Printf(TEXT("Player%d"), FMath::RandRange(1, 9999));
 
 	return FText::FromString(TempNickName);
 }

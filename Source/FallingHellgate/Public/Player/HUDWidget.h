@@ -52,6 +52,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = Widget)
 	class UEquipmentWidget* EquipmentWidget;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget), Category = Widget)
+	class UPartyInfoWidget* PartyInfoWidget;
+
 protected:
 	UUserWidget* GetUserwidgetFromFName(const FName& WidgetName);
 
@@ -64,5 +67,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	FORCEINLINE class UEquipmentWidget* GetEquipmentWidget() const { return EquipmentWidget; }
+
+	UFUNCTION(BlueprintCallable, Category = Widget)
+	FORCEINLINE class UPartyInfoWidget* GetPartyInfoWidget() const { return PartyInfoWidget; }
 
 };

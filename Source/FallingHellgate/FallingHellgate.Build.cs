@@ -9,7 +9,8 @@ public class FallingHellgate : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Niagara", "OnlineSubsystem", "OnlineSubsystemUtils" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Niagara", "OnlineSubsystem", "OnlineSubsystemUtils",
+                                                            "AIModule", "GameplayTasks", "NavigationSystem"});
 
         // Uncomment if you are using Slate UI
         PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
@@ -39,6 +40,9 @@ public class FallingHellgate : ModuleRules
                 Path.Combine(ModuleDirectory, "Public/NPC"),
                 Path.Combine(ModuleDirectory, "Public/NPC/Shop"),
                 Path.Combine(ModuleDirectory, "Public/Title"),
+                Path.Combine(ModuleDirectory, "Public/Monster/BTTask"),
+                Path.Combine(ModuleDirectory, "Public/Monster/MonsterCharacter"),
+                Path.Combine(ModuleDirectory, "Public/Monster/MonsterWeapon"),
 
             }
         );

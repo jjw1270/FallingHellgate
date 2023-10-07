@@ -74,6 +74,9 @@ AFHPlayerCharacter::AFHPlayerCharacter(const FObjectInitializer& ObjectInitializ
 	InteractCollision->SetCapsuleSize(60.f, 120.f);
 
 	PlayerStatusComp = CreateDefaultSubobject<UPlayerStatusComponent>(TEXT("PlayerStatus"));
+
+	//Player Tag
+	Tags.Add(FName("Player"));
 }
 
 void AFHPlayerCharacter::InitModularMeshComp()
@@ -655,9 +658,9 @@ void AFHPlayerCharacter::S2M_Death_Implementation(class UAnimMontage* DeathMonta
 
 	float MontageTime = PlayAnimMontage(DeathMontage);
 
-	if (Tags.Contains(TEXT("Enemy")))
+	if (Tags.Contains(TEXT("Player")))
 	{
-		Tags.Remove(TEXT("Enemy"));
+		Tags.Remove(TEXT("Player"));
 	}
 
 	CHECK_VALID(BloodEffect);

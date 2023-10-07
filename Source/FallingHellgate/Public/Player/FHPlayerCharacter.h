@@ -361,10 +361,10 @@ protected:
 	int32 DashStamina{ 100 };
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 NormalAttackStamina{ 80 };
+	int32 NormalAttackStamina{ 40 };
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 SmashAttackStamina{ 150 };
+	int32 SmashAttackStamina{ 80 };
 
 	bool bIsDashCool;
 

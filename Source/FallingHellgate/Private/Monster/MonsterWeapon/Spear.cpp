@@ -61,6 +61,7 @@ void ASpear::ReqAttack_Implementation(FVector vStart, FVector vEnd)
             {
                 if (OwnChar->GetController())
                 {
+                    S2CHitSound();
                     UGameplayStatics::ApplyDamage(HitActor, Damage, OwnChar->GetController(), this, nullptr);
                     HitActors.Add(HitActor);
                 }

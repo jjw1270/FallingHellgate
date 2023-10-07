@@ -40,6 +40,9 @@ public:
 	UPROPERTY()
 	class UAnimMontage* WeaponMontage;
 
+	UPROPERTY(EditAnywhere, Category = "MonsterWeapon")
+	class USoundBase* HitSound;
+
 	UPROPERTY(Replicated)
 	ACharacter* OwnChar;
 
@@ -85,5 +88,8 @@ public:
 	void EventPhase();
 
 	virtual void EventPhase_Implementation() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void S2CHitSound();
 
 };

@@ -5,6 +5,7 @@
 #include "FHMCharacter.h"
 #include "GameFramework/Character.h"
 #include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -66,6 +67,11 @@ void AWeapon::EventPhase_Implementation()
 	{
 		PlayPhaseChangeMontage();
 	}
+}
+
+void AWeapon::S2CHitSound_Implementation()
+{
+	UGameplayStatics::PlaySound2D(this, HitSound);
 }
 
 void AWeapon::PlayAttackMontage_Implementation()

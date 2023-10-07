@@ -51,7 +51,7 @@ void ASword::ReqAttack_Implementation(FVector vStart, FVector vEnd)
     if (bHit)
     {
         TSet<AActor*> HitActors;
-
+        UGameplayStatics::PlaySound2D(this, HitSound);
         for (auto& Hit : OutHits)
         {
             AActor* HitActor = Hit.GetActor();
@@ -59,6 +59,7 @@ void ASword::ReqAttack_Implementation(FVector vStart, FVector vEnd)
             {
                 if (OwnChar->GetController())
                 {
+                    S2CHitSound();
                     UGameplayStatics::ApplyDamage(HitActor, Damage, OwnChar->GetController(), this, nullptr);
                     HitActors.Add(HitActor);
                 }

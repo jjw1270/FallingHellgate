@@ -267,12 +267,16 @@ void AFHMCharacter::OnGroggyEnded(UAnimMontage* Montage, bool bInterrupted)
 
 float AFHMCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%f"), DamageAmount);
-	AFHMonsterState* ps = Cast<AFHMonsterState>(GetPlayerState());
-	if (IsValid(ps) == false)
-		return 0.0f;
+	UE_LOG(LogTemp, Warning, TEXT("Enermy Take %f"), DamageAmount);
 
-	ps->AddDamage(DamageAmount);
+	AFHMonsterAIController* AICntrl = Cast<AFHMonsterAIController>(GetController());
+	if (!IsValid(AICntrl))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AI Controller is null"));
+		return 0.f;
+	}
+
+	//AICntrl->AddDamage(DamageAmount);
 
 	//Aggro score calculation
 	ACharacter* Player = Cast<ACharacter>(EventInstigator->GetPawn());

@@ -38,7 +38,7 @@ public:
 	int32 Phase;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "MonsterState")
+	UFUNCTION(Server, Reliable, Category = "MonsterState")
 	virtual void AddDamage(float Damage);
 
 public:

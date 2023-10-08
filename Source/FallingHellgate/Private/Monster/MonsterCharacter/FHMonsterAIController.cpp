@@ -10,6 +10,7 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Net/UnrealNetwork.h"
+#include "FHMonsterState.h"
 #include "FHPlayerCharacter.h"
 
 const FName AFHMonsterAIController::TargetActor(TEXT("TargetActor"));
@@ -58,6 +59,15 @@ AFHMonsterAIController::AFHMonsterAIController()
 void AFHMonsterAIController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
+
+    if (IsValid(InPawn))
+    {
+        AFHMonsterState* MonsterState = NewObject<AFHMonsterState>();
+        if (IsValid(MonsterState))
+        {
+            InPawn->SetPlayerState(MonsterState);
+        }
+    }
 }
 
 void AFHMonsterAIController::BeginPlay()
@@ -120,18 +130,13 @@ void AFHMonsterAIController::AddAggroFromDamage_Implementation(ACharacter* Playe
         *CurrentScore += AggroScoreFromDamage;
 
         FindHighestAggroPlayer();
-        if (LastHighestAggroPlayer == Player)
-        {
-            GetBlackboardComponent()->SetValueAsObject(TargetActor, Player);
-        }
     }
     else
     {
         PlayerAggroScores.Add(Player, AggroScoreFromDamage);
-
-        LastHighestAggroPlayer = Player;
-        GetBlackboardComponent()->SetValueAsObject(TargetActor, Player);
     }
+
+    SetHighestAggroPlayerToBlackboard();
 }
 
 void AFHMonsterAIController::CalculateAggroScoreFromDamage_Implementation(float DamageAmount)
@@ -164,6 +169,12 @@ void AFHMonsterAIController::FindHighestAggroPlayer_Implementation()
     }
 
     LastHighestAggroPlayer = HighestAggroPlayer;
+
+    if (IsValid(HighestAggroPlayer))
+    {
+        FString PlayerName = HighestAggroPlayer->GetName();
+        UE_LOG(LogTemp, Log, TEXT("The player with the highest agro score is: %s with score: %f"), *PlayerName, HighestAggroScore);
+    }
 }
 
 void AFHMonsterAIController::UpdateLocation_Implementation(AActor* Actor)

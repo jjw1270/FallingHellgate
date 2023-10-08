@@ -16,8 +16,8 @@ void AFHMonsterState::BeginPlay()
 
 	if (bIsBoss)
 	{
-		CurHp = 50000;
-		MaxHp = 50000;
+		CurHp = 1000;
+		MaxHp = 1000;
 	}
 	else
 	{
@@ -36,8 +36,10 @@ void AFHMonsterState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 }
 
 
-void AFHMonsterState::AddDamage(float Damage)
+void AFHMonsterState::AddDamage_Implementation(float Damage)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Enermy Take %f"), Damage);
+
 	CurHp = CurHp - Damage;
 
 	//그로기 수치
@@ -46,9 +48,9 @@ void AFHMonsterState::AddDamage(float Damage)
 	if (bIsBoss)
 	{
 		//보스몹
-		while (AccumulatedDamage >= 10000.0f)
+		while (AccumulatedDamage >= 100.0f)
 		{
-			AccumulatedDamage -= 10000.0f;
+			AccumulatedDamage -= 100.0f;
 
 			if (OwnerCharacter != nullptr)
 				OwnerCharacter->TakeGroggy();
@@ -88,8 +90,11 @@ void AFHMonsterState::AddDamage(float Damage)
 
 	if (CurHp < 0)
 	{
+		UE_LOG(LogTemp, Log, TEXT("My Hp 0 : %f"), CurHp);
 		OwnerCharacter->DoRagdoll();
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Current HP after damage: %f"), CurHp);
 
 	OnRep_CurHp();
 }

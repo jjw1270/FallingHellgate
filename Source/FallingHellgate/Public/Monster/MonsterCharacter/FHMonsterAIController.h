@@ -20,6 +20,8 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 
 protected:
+
+
 	virtual void BeginPlay() override;
 
 public:

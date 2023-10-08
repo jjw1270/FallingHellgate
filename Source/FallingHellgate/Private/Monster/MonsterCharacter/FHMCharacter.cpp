@@ -9,7 +9,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
-#include "FHMonsterState.h"
+#include "FHMonsterStateComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BTServiceLookPlayer.h"
 #include "FHMonsterAIController.h"
@@ -24,6 +24,7 @@
 #include "GreatSword.h"
 #include "Components/DecalComponent.h"
 #include "Engine/DecalActor.h"
+#include "Blueprint/UserWidget.h"
 
 
 // Sets default values
@@ -60,6 +61,8 @@ AFHMCharacter::AFHMCharacter()
 	IsRagdoll = false;
 	bHasDown = false;
 
+	MonsterStateComponent = CreateDefaultSubobject<UFHMonsterStateComponent>(TEXT("FHMonsterState"));
+
 	//Enermy Tag
 	Tags.Add(FName("Enemy"));
 }
@@ -72,6 +75,8 @@ void AFHMCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutL
 	DOREPLIFETIME(AFHMCharacter, bIsBossCheck);
 	DOREPLIFETIME(AFHMCharacter, PhaseCheck);
 	DOREPLIFETIME(AFHMCharacter, WeaponTypes);
+	DOREPLIFETIME(AFHMCharacter, bIsGroggy);
+	DOREPLIFETIME(AFHMCharacter, IsRagdoll);
 }
 
 
@@ -86,14 +91,14 @@ void AFHMCharacter::BeginPlay()
 
 	BindPlayerState();
 
-	AFHMonsterState* ps = Cast<AFHMonsterState>(GetPlayerState());
-	if (IsValid(ps))
+	UFHMonsterStateComponent* StateComponent = Cast<UFHMonsterStateComponent>(GetComponentByClass(UFHMonsterStateComponent::StaticClass()));
+	if (IsValid(StateComponent))
 	{
-		ps->OwnerCharacter = this;
+		StateComponent->OwnerCharacter = this;
 
 		if (bIsBossCheck)
 		{
-			ps->bIsBoss = true;
+			StateComponent->bIsBoss = true;
 		}
 	}
 }
@@ -135,15 +140,54 @@ void AFHMCharacter::OnUpdateHp_Implementation(float CurHp, float MaxHp)
 
 void AFHMCharacter::BindPlayerState()
 {
-	AFHMonsterState* ps = Cast<AFHMonsterState>(GetPlayerState());
-	if (IsValid(ps))
+	UFHMonsterStateComponent* StateComponent = Cast<UFHMonsterStateComponent>(GetComponentByClass(UFHMonsterStateComponent::StaticClass()));
+	if (IsValid(StateComponent))
 	{
-		ps->Fuc_Dele_UpdateHp.AddDynamic(this, &AFHMCharacter::OnUpdateHp);
-		OnUpdateHp(ps->CurHp, ps->MaxHp);
+		StateComponent->Fuc_Dele_DynamicUpdateHp.AddDynamic(this, &AFHMCharacter::OnUpdateHp);
+		OnUpdateHp(StateComponent->CurHp, StateComponent->MaxHp);
 	}
 
 	FTimerManager& timerManager = GetWorld()->GetTimerManager();
 	timerManager.SetTimer(th_BindPlayerState, this, &AFHMCharacter::BindPlayerState, 0.1f, false);
+}
+
+void AFHMCharacter::S2CTakeBlood_Implementation()
+{
+	S2MTakeBlood();
+}
+
+void AFHMCharacter::S2MTakeBlood_Implementation()
+{
+	if (!BloodEffect)
+		return ;
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation());
+
+	FRandomStream Stream(FMath::Rand());
+
+	if (!BloodDecalClass)
+		return ;
+
+	for (int32 i = 0; i < Stream.RandRange(1, 4); i++)
+	{
+		FVector DecalLoc = GetMesh()->GetComponentLocation();
+		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
+		DecalLoc.Y = Stream.FRandRange(DecalLoc.Y - 60.f, DecalLoc.Y + 60.f);
+
+		ADecalActor* BloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, DecalLoc, FRotator(0.f, -90.f, 0.f));
+		if (BloodDecal)
+		{
+			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(20.f, 70.f));
+			BloodDecal->GetDecal()->SetFadeOut(8, 3, true);
+		}
+
+		Stream.GenerateNewSeed();
+	}
+}
+
+void AFHMCharacter::S2CDoRagdoll_Implementation()
+{
+	DoRagdoll();
 }
 
 void AFHMCharacter::DoRagdoll_Implementation()
@@ -163,7 +207,7 @@ void AFHMCharacter::DoRagdoll_Implementation()
 		EquippedWeapon = nullptr;
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(th_DestroyActor, this, &AFHMCharacter::DestroyActor, 3.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(th_DestroyActor, this, &AFHMCharacter::DestroyActor, 10.0f, false);
 }
 
 void AFHMCharacter::DestroyActor_Implementation()
@@ -247,20 +291,29 @@ void AFHMCharacter::OnRep_Equip()
 
 }
 
-void AFHMCharacter::TakeGroggy()
+void AFHMCharacter::S2CTakeGroggy_Implementation()
 {
-	bIsGroggy = true;
+	TakeGroggy();
+}
+
+void AFHMCharacter::S2COnGroggyEnded_Implementation(UAnimMontage* Montage, bool bInterrupted)
+{
+	OnGroggyEnded(Montage, bInterrupted);
+}
+
+void AFHMCharacter::TakeGroggy_Implementation()
+{
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 	if (AnimInstance && Hitstun)
 	{
 		AnimInstance->Montage_Play(Hitstun);
-		AnimInstance->OnMontageEnded.AddDynamic(this, &AFHMCharacter::OnGroggyEnded);
+		AnimInstance->OnMontageEnded.AddDynamic(EquippedWeapon, &AWeapon::OnMontageEnded);
 	}
 }
 
-void AFHMCharacter::OnGroggyEnded(UAnimMontage* Montage, bool bInterrupted)
+void AFHMCharacter::OnGroggyEnded_Implementation(UAnimMontage* Montage, bool bInterrupted)
 {
 	bIsGroggy = false;
 }
@@ -269,46 +322,17 @@ float AFHMCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 {
 	UE_LOG(LogTemp, Warning, TEXT("Enermy Take %f"), DamageAmount);
 
-	AFHMonsterAIController* AICntrl = Cast<AFHMonsterAIController>(GetController());
-	if (!IsValid(AICntrl))
+	FString CauserName = DamageCauser->GetName();
+	UE_LOG(LogTemp, Warning, TEXT("Damage caused by: %s"), *CauserName);
+
+	UFHMonsterStateComponent* StateComponent = Cast<UFHMonsterStateComponent>(GetComponentByClass(UFHMonsterStateComponent::StaticClass()));
+	if (IsValid(StateComponent))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AI Controller is null"));
-		return 0.f;
+		StateComponent->AddDamage(DamageAmount);
 	}
 
-	//AICntrl->AddDamage(DamageAmount);
 
-	//Aggro score calculation
-	ACharacter* Player = Cast<ACharacter>(EventInstigator->GetPawn());
-	if (IsValid(Player))
-	{
-		Cast<AFHMonsterAIController>(Player->GetController())->AddAggroFromDamage(Player, DamageAmount);
-
-	}
-
-	if (!BloodEffect)
-		return 0;
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation());
-
-	FRandomStream Stream(FMath::Rand());
-
-	if (!BloodDecalClass)
-		return 0;
-	for (int32 i = 0; i < Stream.RandRange(1, 4); i++)
-	{
-		FVector DecalLoc = GetMesh()->GetComponentLocation();
-		DecalLoc.X = Stream.FRandRange(DecalLoc.X - 60.f, DecalLoc.X + 60.f);
-		DecalLoc.Y = Stream.FRandRange(DecalLoc.Y - 60.f, DecalLoc.Y + 60.f);
-
-		ADecalActor* BloodDecal = GetWorld()->SpawnActor<ADecalActor>(BloodDecalClass, DecalLoc, FRotator(0.f, -90.f, 0.f));
-		if (BloodDecal)
-		{
-			BloodDecal->GetDecal()->DecalSize = FVector(Stream.FRandRange(20.f, 70.f));
-			BloodDecal->GetDecal()->SetFadeOut(8, 3, true);
-		}
-
-		Stream.GenerateNewSeed();
-	}
+	S2MTakeBlood();
 
 	return DamageAmount;
 }
@@ -333,4 +357,25 @@ void AFHMCharacter::ResPhaseChange_Implementation()
 		return;
 
 	InterfaceObj->Execute_EventPhase(Weapon);
+}
+
+void AFHMCharacter::S2MStageClear_Implementation()
+{
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+		if (PlayerController != nullptr)
+		{
+			UUserWidget* SeenStageClearWidget = CreateWidget<UUserWidget>(PlayerController, StageClearWidgetClass);
+
+			if (SeenStageClearWidget != nullptr)
+			{
+				SeenStageClearWidget->AddToViewport();
+
+			}
+		}
+}
+
+void AFHMCharacter::S2CStageClear_Implementation()
+{
+	S2MStageClear();
 }

@@ -6,6 +6,7 @@
 #include "ItemDataManager.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
+#include "FHPlayerController.h"
 
 UFHGameInstance::UFHGameInstance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -147,4 +148,15 @@ bool UFHGameInstance::GetArmorItemInfo(const int32& PureItemID, FArmorItemData& 
 
 	OutData = *pData;
 	return true;
+}
+
+void UFHGameInstance::PerformServerTravel_Implementation(const FString& MapName)
+{
+	UWorld* World = GetWorld();
+
+	if (World != nullptr)
+	{
+
+		World->ServerTravel(MapName + TEXT("?listen"));
+	}
 }

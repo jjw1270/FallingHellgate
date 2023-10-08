@@ -65,29 +65,18 @@ public:
 	UFUNCTION(Server, Reliable, Category = "Monster")
 	void ResetSight();
 
+	UFUNCTION(Server, Reliable, Category = "Monster")
+	void S2CServerTravel();
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
+	
+	void S2CDelayServerTravel();
+
 public:
 
-	UFUNCTION(Server, Reliable, Category = "Monster")
-	void AddAggroFromDamage(ACharacter* Player, float DamageAmount);
-
-	UFUNCTION(Server, Reliable, Category = "Monster")
-	void CalculateAggroScoreFromDamage(float DamageAmount);
-
-	UFUNCTION(Server, Reliable, Category = "Monster")
-	void SetHighestAggroPlayerToBlackboard();
-
-	UFUNCTION(Server, Reliable, Category = "Monster")
-	void FindHighestAggroPlayer();
-
-	TMap<ACharacter*, float> PlayerAggroScores;
-
-	UPROPERTY(Replicated)
-	float LastCalculatedAggroScore;
-
-	UPROPERTY(Replicated)
-	ACharacter* LastHighestAggroPlayer;
-
 	FTimerHandle th_SightOut;
+
+	FTimerHandle th_SeverTravel;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Monster")

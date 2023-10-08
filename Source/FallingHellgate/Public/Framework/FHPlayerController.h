@@ -87,7 +87,6 @@ public:
 	UFUNCTION(Client, Reliable)
 	void S2C_SyncPlayerStats();
 
-
 // UI
 protected:
 	UPROPERTY()

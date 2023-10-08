@@ -12,6 +12,7 @@
 #include "Net/UnrealNetwork.h"
 #include "FHMonsterState.h"
 #include "FHPlayerCharacter.h"
+#include "FHGameInstance.h"
 
 const FName AFHMonsterAIController::TargetActor(TEXT("TargetActor"));
 const FName AFHMonsterAIController::StartLocation(TEXT("StartLocation"));
@@ -102,78 +103,26 @@ void AFHMonsterAIController::BeginPlay()
     }
 }
 
-void AFHMonsterAIController::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
-{
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-    DOREPLIFETIME(AFHMonsterAIController, LastCalculatedAggroScore);
-    DOREPLIFETIME(AFHMonsterAIController, LastHighestAggroPlayer);
-}
-
 void AFHMonsterAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
 }
 
-void AFHMonsterAIController::AddAggroFromDamage_Implementation(ACharacter* Player, float DamageAmount)
+void AFHMonsterAIController::S2CDelayServerTravel_Implementation()
 {
-    if (!IsValid(Player) || !Player->ActorHasTag(FName("Player")))
-        return;
-
-    CalculateAggroScoreFromDamage(DamageAmount);
-    float AggroScoreFromDamage = LastCalculatedAggroScore;
-
-    float* CurrentScore = PlayerAggroScores.Find(Player);
-    if (CurrentScore)
-    {
-        *CurrentScore += AggroScoreFromDamage;
-
-        FindHighestAggroPlayer();
-    }
-    else
-    {
-        PlayerAggroScores.Add(Player, AggroScoreFromDamage);
-    }
-
-    SetHighestAggroPlayerToBlackboard();
+    GetWorld()->GetTimerManager().SetTimer(th_SeverTravel, this, &AFHMonsterAIController::S2CServerTravel, 5.0f, false);
 }
 
-void AFHMonsterAIController::CalculateAggroScoreFromDamage_Implementation(float DamageAmount)
+void AFHMonsterAIController::S2CServerTravel_Implementation()
 {
-    LastCalculatedAggroScore = DamageAmount * 0.5f;
-}
+    UFHGameInstance* GameInst = Cast<UFHGameInstance>(GetWorld()->GetGameInstance());
 
-void AFHMonsterAIController::SetHighestAggroPlayerToBlackboard_Implementation()
-{
-     FindHighestAggroPlayer();
-
-    if (LastHighestAggroPlayer)
+    if (nullptr != GameInst)
     {
-        GetBlackboardComponent()->SetValueAsObject(TargetActor, LastHighestAggroPlayer);
-    }
-}
-
-void AFHMonsterAIController::FindHighestAggroPlayer_Implementation()
-{
-    ACharacter* HighestAggroPlayer = nullptr;
-    float HighestAggroScore = 0.0f;
-
-    for (auto& Elem : PlayerAggroScores)
-    {
-        if (Elem.Value > HighestAggroScore)
-        {
-            HighestAggroScore = Elem.Value;
-            HighestAggroPlayer = Elem.Key;
-        }
-    }
-
-    LastHighestAggroPlayer = HighestAggroPlayer;
-
-    if (IsValid(HighestAggroPlayer))
-    {
-        FString PlayerName = HighestAggroPlayer->GetName();
-        UE_LOG(LogTemp, Log, TEXT("The player with the highest agro score is: %s with score: %f"), *PlayerName, HighestAggroScore);
+        UE_LOG(LogTemp, Warning, TEXT("GameInst is done"));
+        GameInst->PerformServerTravel(TEXT("/Game/Maps/villageMain"));
+        UnPossess();
     }
 }
 

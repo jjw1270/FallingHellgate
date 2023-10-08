@@ -147,4 +147,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Data)
 	bool GetArmorItemInfo(const int32& PureItemID, FArmorItemData& OutData);
 
+public:
+
+	UFUNCTION(Server, Reliable, Category = "ServerTravel")
+	void PerformServerTravel(const FString& MapName);
+
 };

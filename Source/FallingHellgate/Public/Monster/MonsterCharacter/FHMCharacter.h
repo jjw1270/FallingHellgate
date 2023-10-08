@@ -55,6 +55,10 @@ public:
 	UPROPERTY()
 	AActor* Weapon;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+
+	class UFHMonsterStateComponent* MonsterStateComponent;
+
 public:
 	UFUNCTION(Server, Reliable)
 	void ReqTrigger();
@@ -83,7 +87,16 @@ public:
 	virtual void BindPlayerState();
 
 	UFUNCTION(Server, Reliable, Category = "Monster")
+	virtual void S2CDoRagdoll();
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
 	virtual void DoRagdoll();
+
+	UFUNCTION(Server, Reliable, Category = "Monster")
+	void S2CTakeBlood();
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
+	void S2MTakeBlood();
 
 	UFUNCTION(Server, Reliable, Category = "Monster")
 	void DestroyActor();
@@ -94,17 +107,32 @@ public:
 	UFUNCTION(Category = "Monster")
 	void OnRep_Equip();
 
-	UFUNCTION(BlueprintCallable, Category = "Monster")
+	UFUNCTION(Server, Reliable, Category = "Monster")
+	void S2CTakeGroggy();
+
+	UFUNCTION(Server, Reliable, Category = "Monster")
+	virtual void S2COnGroggyEnded(UAnimMontage* Montage, bool bInterrupted);
+
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
 	void TakeGroggy();
 
-	UFUNCTION(BlueprintCallable, Category = "Monster")
+	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
 	virtual void OnGroggyEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION(Server, Reliable, Category = "Monster")
+	void S2CStageClear();
+
+	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
+	void S2MStageClear();
 
 	UPROPERTY(Replicated)
 	ACharacter* OwnChar;
-		
+	
+	UPROPERTY(Replicated)
 	bool bIsGroggy = false;
 
+	UPROPERTY(Replicated)
 	bool IsRagdoll;
 
 	bool bHasDown;
@@ -120,6 +148,12 @@ public:
 public:
 	UFUNCTION(Category = "Monster")
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UPROPERTY(EditAnywhere, Category = "Widget")
+	TSubclassOf<UUserWidget> StageClearWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, Category = "Widget")
+	UUserWidget* StageClearWidget = nullptr;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Effect)

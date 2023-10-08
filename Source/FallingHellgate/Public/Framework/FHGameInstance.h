@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "Engine/GameInstance.h"
 #include "FHGameInstance.generated.h"
 
@@ -57,17 +58,6 @@ protected:
 	virtual void Shutdown() override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = Data)
-	TSubclassOf<class UItemDataManager> ItemDataManagerClass;
-
-	UPROPERTY()
-	class UItemDataManager* ItemDataManager;
-
-public:
-	UFUNCTION(BLueprintCallable)
-	FORCEINLINE class UItemDataManager* GetItemDataManager() const { return ItemDataManager; }
-
-protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Data)
 	int32 CurrentDungeonID;
 
@@ -79,24 +69,24 @@ public:
 	FORCEINLINE int32 GetCurrentDungeonID() const { return CurrentDungeonID; }
 
 protected:
-	// TMap<ItemData, ItemAmount>
+	// TMap<ItemID, ItemAmount>
 	UPROPERTY()
-	TMap<class UItemData*, int32> InventoryItems;
+	TMap<int32, int32> InventoryItems;
 
-	// TMap<QuickSlotIdx, ItemData>
+	// TMap<QuickSlotIdx, ItemID>
 	UPROPERTY()
-	TMap<int32, class UItemData*> QuickSlotItems;
+	TMap<int32, int32> QuickSlotItems;
 
-	// TArray<ItemData>
+	// TArray<ItemID>
 	UPROPERTY()
-	TArray<class UItemData*> EquipmentItems;
+	TArray<int32> EquipmentItems;
 
 public:
-	FORCEINLINE TMap<class UItemData*, int32>* GetInventoryItems() { return &InventoryItems; }
+	FORCEINLINE TMap<int32, int32>* GetInventoryItems() { return &InventoryItems; }
 
-	FORCEINLINE TMap<int32, class UItemData*>* GetQuickSlotItems() { return &QuickSlotItems; }
+	FORCEINLINE TMap<int32, int32>* GetQuickSlotItems() { return &QuickSlotItems; }
 
-	FORCEINLINE TArray<class UItemData*>* GetEquipments() { return &EquipmentItems; }
+	FORCEINLINE TArray<int32>* GetEquipments() { return &EquipmentItems; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Data)
@@ -120,5 +110,41 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Status)
 	FORCEINLINE FPlayerStats& GetDefaultPlayerStats() { return DefaultPlayerStats; }
+
+
+//Item DataTables
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = Data)
+	class UDataTable* ConsumableItemDataTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = Data)
+	class UDataTable* WeaponItemDataTable;
+
+	UPROPERTY(EditDefaultsOnly, Category = Data)
+	class UDataTable* ArmorItemDataTable;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE class UDataTable* GetConsumableItemDataTable() const { return ConsumableItemDataTable; }
+
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE class UDataTable* GetWeaponItemDataTable() const { return WeaponItemDataTable; }
+
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FORCEINLINE class UDataTable* GetArmorItemDataTable() const { return ArmorItemDataTable; }
+
+public:
+	UFUNCTION(BlueprintCallable, Category = Data)
+	FBaseItemData GetBaseItemData(const int32& ItemID);
+
+public:
+	UFUNCTION(BlueprintCallable, Category = Data)
+	bool GetConsumableItemInfo(const int32& PureItemID, FConsumableItemData& OutData);
+
+	UFUNCTION(BlueprintCallable, Category = Data)
+	bool GetWeaponItemInfo(const int32& PureItemID, FWeaponItemData& OutData);
+
+	UFUNCTION(BlueprintCallable, Category = Data)
+	bool GetArmorItemInfo(const int32& PureItemID, FArmorItemData& OutData);
 
 };

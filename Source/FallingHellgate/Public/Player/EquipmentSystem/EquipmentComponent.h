@@ -21,11 +21,11 @@
 
 // Delegate called when an Equipment Weapon Item Changed
 // UItemData* ItemData, const bool& bEquip
-DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_WeaponUpdate, class UItemData*, const bool&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_WeaponUpdate, const int32&, const bool&);
 
 // Delegate called when an Equipment Armor Item Changed
 // const EArmorType& ArmorType, UItemData* ItemData, const bool& bEquip
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FDele_Multi_ArmorUpdate, const EArmorType&, class UItemData*, const bool&);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FDele_Multi_ArmorUpdate, const EArmorType&, const int32&, const bool&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FALLINGHELLGATE_API UEquipmentComponent : public UActorComponent
@@ -59,13 +59,17 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Equipment)
-	void ManageEquipment(class UItemData* TargetItemData);
+	void ManageEquipment(const int32& TargetItemID);
 
 protected:
-	void Equip(class UItemData* NewItemData);
+	UFUNCTION()
+	void OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist);
 
-	void UnEquip(class UItemData* TargetItemData);
+protected:
+	void Equip(const int32& NewItemID);
 
-	bool IsItemExistInEquipmentSlot(class UItemData* TargetItemData, EItemType& OutItemType, EArmorType& OutArmorType);
+	void UnEquip(const int32& TargetItemID);
+
+	bool IsItemExistInEquipmentSlot(const int32& TargetItemID, EItemType& OutItemType, EArmorType& OutArmorType);
 
 };

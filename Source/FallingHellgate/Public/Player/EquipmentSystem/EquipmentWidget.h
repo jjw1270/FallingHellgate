@@ -47,7 +47,7 @@ protected:
 
 protected:
 	UFUNCTION()
-	void OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateItemData, const bool& bEquip);
+	void OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateItemID, const bool& bEquip);
 
 protected:
 	UFUNCTION()

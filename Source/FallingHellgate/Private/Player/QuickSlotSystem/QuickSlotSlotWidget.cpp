@@ -3,6 +3,7 @@
 
 #include "QuickSlotSlotWidget.h"
 #include "FallingHellgate.h"
+#include "FHGameInstance.h"
 #include "ItemData.h"
 #include "InventoryComponent.h"
 #include "QuickSlotComponent.h"
@@ -13,6 +14,9 @@
 void UQuickSlotSlotWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
 
 	AFHPlayerController* PC = Cast<AFHPlayerController>(GetOwningPlayer());
 	CHECK_VALID(PC);
@@ -34,6 +38,11 @@ bool UQuickSlotSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 {	
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
+	if (!GI)
+	{
+		return false;
+	}
+
 	UItemDragDropOperation* DDOperation = Cast<UItemDragDropOperation>(InOperation);
 	if (!DDOperation)
 	{
@@ -41,12 +50,12 @@ bool UQuickSlotSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	}
 
 	// Quick slot is only for Consumalbe Items
-	if (!IsValid(DDOperation->DraggingItemData) && DDOperation->DraggingItemData->GetItemType() != EItemType::Consumable)
+	if (DDOperation->DraggingItemID > 0 && GI->GetBaseItemData(DDOperation->DraggingItemID).Type != EItemType::Consumable)
 	{
 		return false;
 	}
 
-	QuickSlotComp->SetItemToQuickSlot(Index, DDOperation->DraggingItemData, DDOperation->DraggingItemAmount); 
+	QuickSlotComp->SetItemToQuickSlot(Index, DDOperation->DraggingItemID, DDOperation->DraggingItemAmount); 
 
 	return false;
 }
@@ -75,7 +84,7 @@ FReply UQuickSlotSlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InG
 	return FReply::Handled();
 }
 
-void UQuickSlotSlotWidget::SetSlot(class UItemData* NewItemData, const int32& NewItemAmount)
+void UQuickSlotSlotWidget::SetSlot(const int32& NewItemID, const int32& NewItemAmount)
 {
 	if (NewItemAmount <= 0)
 	{
@@ -83,21 +92,21 @@ void UQuickSlotSlotWidget::SetSlot(class UItemData* NewItemData, const int32& Ne
 		return;
 	}
 
-	SlotItemData = NewItemData;
+	SlotItemID = NewItemID;
 	SlotItemAmount = NewItemAmount;
 
 	ItemImageWidget->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
-	ItemImageWidget->SetBrushFromTexture(SlotItemData->GetBaseData().Icon2D);
+	ItemImageWidget->SetBrushFromTexture(GI->GetBaseItemData(SlotItemID).Icon2D);
 }
 
-void UQuickSlotSlotWidget::OnUpdateItem(class UItemData* UpdateItemData, const int32& UpdateAmount)
+void UQuickSlotSlotWidget::OnUpdateItem(const int32& UpdateItemID, const int32& UpdateAmount)
 {
 	if (IsEmpty())
 	{
 		return;
 	}
 
-	if (SlotItemData != UpdateItemData)
+	if (SlotItemID != UpdateItemID)
 	{
 		return;
 	}
@@ -112,12 +121,12 @@ void UQuickSlotSlotWidget::OnUpdateItem(class UItemData* UpdateItemData, const i
 
 bool UQuickSlotSlotWidget::IsEmpty()
 {
-	return !IsValid(SlotItemData);
+	return (SlotItemID == 0) ? true : false;
 }
 
 void UQuickSlotSlotWidget::ClearSlot()
 {
-	SlotItemData = nullptr;
+	SlotItemID = 0;
 	SlotItemAmount = 0;
 
 	ItemImageWidget->SetBrushFromTexture(nullptr);

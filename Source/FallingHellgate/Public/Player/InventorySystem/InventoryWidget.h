@@ -57,7 +57,7 @@ protected:
 	int32 SlotGridColRange{ 5 };
 
 public:
-	void AddNewItemToSlot(class UItemData* NewItemData, const int32& NewItemAmount);
+	void AddNewItemToSlot(const int32& NewItemID, const int32& NewItemAmount);
 
 protected:
 	void CreateSlotWidgets(int32 Row);
@@ -65,10 +65,10 @@ protected:
 	void BindInventoryCompEvents();
 
 	UFUNCTION()
-	void OnItemUpdated(class UItemData* UpdateItemData, const int32& UpdateAmount);
+	void OnItemUpdated(const int32& UpdateItemID, const int32& UpdateAmount);
 
 	UFUNCTION()
-	void OnItemRegister(class UItemData* UpdateItemData, const bool& bIsRegist);
+	void OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist);
 
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	void SortItemSlot();

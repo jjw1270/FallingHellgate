@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "Engine/DataTable.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "ItemDataManager.generated.h"
 
 // Item drop data by dungeon struct
@@ -242,43 +242,30 @@ public:
 	}
 };
 
-UCLASS(BlueprintType, Blueprintable)
-class FALLINGHELLGATE_API UItemDataManager : public UObject
+/*
+ItemID = ID+Regist(0/1)+UniqueID(0/101~999)
+*/
+UCLASS()
+class FALLINGHELLGATE_API UItemDataManager : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-
-	//Item DataTables
-protected:
-	UPROPERTY(EditDefaultsOnly, Category = Data)
-	class UDataTable* ConsumableItemDataTable;
-
-	UPROPERTY(EditDefaultsOnly, Category = Data)
-	class UDataTable* WeaponItemDataTable;
-
-	UPROPERTY(EditDefaultsOnly, Category = Data)
-	class UDataTable* ArmorItemDataTable;
+	
+public:
+	UFUNCTION(BlueprintCallable, Category = Data)
+	static EItemType GetItemType(const int32& ItemID);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Data)
-	bool GetConsumableItemInfo(const int32& ItemID, FConsumableItemData& OutData);
+	static int32 GetPureID(const int32& ItemID);
 
 	UFUNCTION(BlueprintCallable, Category = Data)
-	bool GetWeaponItemInfo(const int32& ItemID, FWeaponItemData& OutData);
+	static int32 GetUniqueID(const int32& ItemID);
 
 	UFUNCTION(BlueprintCallable, Category = Data)
-	bool GetArmorItemInfo(const int32& ItemID, FArmorItemData& OutData);
-
-	UFUNCTION(BlueprintCallable, Category = Data)
-	EItemType GetItemType(const int32& ItemID);
+	static bool IsRegistered(const int32& ItemID);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Data)
-	FORCEINLINE class UDataTable* GetConsumableItemDataTable() const { return ConsumableItemDataTable; }
-
-	UFUNCTION(BlueprintCallable, Category = Data)
-	FORCEINLINE class UDataTable* GetWeaponItemDataTable() const { return WeaponItemDataTable; }
-
-	UFUNCTION(BlueprintCallable, Category = Data)
-	FORCEINLINE class UDataTable* GetArmorItemDataTable() const { return ArmorItemDataTable; }
+	static void RegistItem(int32& ItemID);
 
 };

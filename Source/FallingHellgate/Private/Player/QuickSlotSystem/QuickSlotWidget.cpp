@@ -3,6 +3,7 @@
 
 #include "QuickSlotWidget.h"
 #include "FallingHellgate.h"
+#include "FHGameInstance.h"
 #include "FHPlayerController.h"
 #include "QuickSlotComponent.h"
 #include "QuickSlotSlotWidget.h"
@@ -52,11 +53,11 @@ void UQuickSlotWidget::BindQuickSlotCompEvents()
 	GetWorld()->GetTimerManager().SetTimer(InitTimerHandle, this, &UQuickSlotWidget::BindQuickSlotCompEvents, 0.1f, false);
 }
 
-void UQuickSlotWidget::OnQuickSlotUpdated(const int32& QuickSlotIndex, UItemData* NewItemData, const int32& NewItemAmount)
+void UQuickSlotWidget::OnQuickSlotUpdated(const int32& QuickSlotIndex, const int32& NewItemID, const int32& NewItemAmount)
 {
 	UQuickSlotSlotWidget* QuickSlotSlot = QuickSlotSlotArray[QuickSlotIndex];
 
-	QuickSlotSlot->SetSlot(NewItemData, NewItemAmount);
+	QuickSlotSlot->SetSlot(NewItemID, NewItemAmount);
 }
 
 void UQuickSlotWidget::OnDragBtnPressed()

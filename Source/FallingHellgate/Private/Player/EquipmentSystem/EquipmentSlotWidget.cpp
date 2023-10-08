@@ -2,6 +2,8 @@
 
 
 #include "EquipmentSlotWidget.h"
+#include "FallingHellgate.h"
+#include "FHGameInstance.h"
 #include "ItemData.h"
 #include "Components/Image.h"
 #include "EquipmentComponent.h"
@@ -18,6 +20,8 @@ void UEquipmentSlotWidget::NativePreConstruct()
 void UEquipmentSlotWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	GI = GetGameInstance<UFHGameInstance>();
 
 	BindEquipmentCompEvents();
 }
@@ -52,20 +56,25 @@ bool UEquipmentSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 {
 	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
+	if (!GI)
+	{
+		return false;
+	}
+
 	UItemDragDropOperation* DDOperation = Cast<UItemDragDropOperation>(InOperation);
 	if (!DDOperation)
 	{
 		return false;
 	}
 
-	UItemData* DraggedItemData = DDOperation->DraggingItemData;
-	if (!DraggedItemData)
+	int32 DraggedItemID = DDOperation->DraggingItemID;
+	if (DraggedItemID == 0)
 	{
 		return false;
 	}
 
 	// Equipment is only for Weapon/Armor Items
-	if (DraggedItemData->GetItemType() != ItemType)
+	if (GI->GetBaseItemData(DraggedItemID).Type != ItemType)
 	{
 		return false;
 	}
@@ -73,17 +82,17 @@ bool UEquipmentSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	// Weapon
 	if (ItemType == EItemType::Weapon)
 	{
-		EquipComp->ManageEquipment(DraggedItemData);
+		EquipComp->ManageEquipment(DraggedItemID);
 
 		return false;
 	}
 
 	// Armor
 	FArmorItemData DraggedArmorItemData;
-	DraggedItemData->GetArmorData(DraggedArmorItemData);
+	GI->GetArmorItemInfo(DraggedItemID, DraggedArmorItemData);
 	if (DraggedArmorItemData.ArmorType == ArmorType)
 	{
-		EquipComp->ManageEquipment(DraggedItemData);
+		EquipComp->ManageEquipment(DraggedItemID);
 
 		return false;
 	}
@@ -110,12 +119,12 @@ FReply UEquipmentSlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InG
 		}
 	}
 
-	EquipComp->ManageEquipment(EquippedItemData);
+	EquipComp->ManageEquipment(EquippedItemID);
 
 	return FReply::Handled();
 }
 
-void UEquipmentSlotWidget::OnWeaponUpdate(class UItemData* UpdateItemData, const bool& bEquip)
+void UEquipmentSlotWidget::OnWeaponUpdate(const int32& UpdateItemID, const bool& bEquip)
 {
 	// if UnEquip
 	if (!bEquip)
@@ -124,10 +133,10 @@ void UEquipmentSlotWidget::OnWeaponUpdate(class UItemData* UpdateItemData, const
 		return;
 	}
 
-	SetSlot(UpdateItemData);
+	SetSlot(UpdateItemID);
 }
 
-void UEquipmentSlotWidget::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateItemData, const bool& bEquip)
+void UEquipmentSlotWidget::OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateItemID, const bool& bEquip)
 {
 	//Check ArmorType
 	if (ArmorType != UpdateArmorType)
@@ -144,14 +153,16 @@ void UEquipmentSlotWidget::OnArmorUpdate(const EArmorType& UpdateArmorType, UIte
 		return;
 	}
 	
-	SetSlot(UpdateItemData);
+	SetSlot(UpdateItemID);
 }
 
-void UEquipmentSlotWidget::SetSlot(class UItemData* UpdateItemData)
+void UEquipmentSlotWidget::SetSlot(const int32& UpdateItemID)
 {
-	EquippedItemData = UpdateItemData;
+	CHECK_VALID(GI);
 
-	FBaseItemData EquippedBaseItemData = EquippedItemData->GetBaseData();
+	EquippedItemID = UpdateItemID;
+
+	FBaseItemData EquippedBaseItemData = GI->GetBaseItemData(EquippedItemID);
 
 	Image_Equip->SetBrushFromTexture(EquippedBaseItemData.Icon2D);
 	Image_Equip->SetVisibility(ESlateVisibility::Visible);
@@ -159,7 +170,7 @@ void UEquipmentSlotWidget::SetSlot(class UItemData* UpdateItemData)
 
 void UEquipmentSlotWidget::ClearSlot()
 {
-	EquippedItemData = nullptr;
+	EquippedItemID = 0;
 
 	Image_Equip->SetBrushFromTexture(nullptr);
 	Image_Equip->SetVisibility(ESlateVisibility::Collapsed);
@@ -167,5 +178,5 @@ void UEquipmentSlotWidget::ClearSlot()
 
 bool UEquipmentSlotWidget::IsEmpty()
 {
-	return !IsValid(EquippedItemData);
+	return (EquippedItemID == 0) ? true : false;
 }

@@ -65,18 +65,18 @@ void UShopWidget::OnMoneyUpdate(int32 UpdateMoney)
 	TextBlock_MyMoney->SetText(FText::FromString(FString::FromInt(GI->GetPlayerMoney())));
 }
 
-void UShopWidget::OnInventoryUpdate(UItemData* NewItemData, const int32& NewAmount)
+void UShopWidget::OnInventoryUpdate(const int32& NewItemID, const int32& NewAmount)
 {
 	//Refresh ShopInventorySlot
 	for (const auto& InventorySlot : ShopInventorySlotArray)
 	{
-		UItemData* SlotItemData = InventorySlot->GetSlotData();
-		if (!SlotItemData)
+		int32 SlotItemID = InventorySlot->GetSlotItemID();
+		if (SlotItemID == 0)
 		{
 			continue;
 		}
 
-		if (SlotItemData == NewItemData)
+		if (SlotItemID == NewItemID)
 		{
 			if (NewAmount == 0)
 			{
@@ -88,7 +88,7 @@ void UShopWidget::OnInventoryUpdate(UItemData* NewItemData, const int32& NewAmou
 		}
 	}
 
-	AddShopInventorySlot(NewItemData, NewAmount);
+	AddShopInventorySlot(NewItemID, NewAmount);
 }
 
 void UShopWidget::InitShopInventory()
@@ -103,23 +103,23 @@ void UShopWidget::InitShopInventory()
 	CHECK_VALID(ShopInventorySlotClass);
 	for (const auto& InventorySlot : InventoryWidget->GetInventorySlotArray())
 	{
-		if (!InventorySlot->GetSlotItemData())
+		if (InventorySlot->GetSlotItemID() == 0)
 		{
 			continue;
 		}
 
-		AddShopInventorySlot(InventorySlot->GetSlotItemData(), InventorySlot->GetSlotItemAmount());
+		AddShopInventorySlot(InventorySlot->GetSlotItemID(), InventorySlot->GetSlotItemAmount());
 	}
 }
 
-void UShopWidget::AddShopInventorySlot(class UItemData* NewItemData, int32 NewAmount)
+void UShopWidget::AddShopInventorySlot(const int32& NewItemID, int32 NewAmount)
 {
 	// create slot widget
 	// set slot data = ItemName, price, amount, image, type
 	// add slot to scrollbox
 
 	// Dont create widget if item is on registed
-	if (NewItemData->IsRegisted())
+	if (UItemDataManager::IsRegistered(NewItemID))
 	{
 		return;
 	}
@@ -128,7 +128,7 @@ void UShopWidget::AddShopInventorySlot(class UItemData* NewItemData, int32 NewAm
 	ShopInventorySlot->AddToViewport();
 	CHECK_VALID(ShopInventorySlot);
 
-	ShopInventorySlot->SetSlotData(NewItemData, NewAmount);
+	ShopInventorySlot->SetSlotData(NewItemID, NewAmount);
 	ShopInventorySlotArray.Add(ShopInventorySlot);
 
 	ScrollBox_Inventory->AddChild(ShopInventorySlot);
@@ -136,9 +136,7 @@ void UShopWidget::AddShopInventorySlot(class UItemData* NewItemData, int32 NewAm
 
 void UShopWidget::InitShopSlot()
 {
-	UItemDataManager* ItemDataMgr = GI->GetItemDataManager();
-	CHECK_VALID(ItemDataMgr);
-	UDataTable* ConsumalbeItemDataTable = ItemDataMgr->GetConsumableItemDataTable();
+	UDataTable* ConsumalbeItemDataTable = GI->GetConsumableItemDataTable();
 	CHECK_VALID(ConsumalbeItemDataTable);
 	
 	TArray<FConsumableItemData*> AllConsumableItemData;

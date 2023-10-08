@@ -48,7 +48,7 @@ protected:
 	class UInventoryComponent* InventoryComp;
 
 	UPROPERTY()
-	class UItemData* SloItemData;
+	int32 SloItemID;
 
 	int32 MaxAmount;
 
@@ -67,9 +67,9 @@ protected:
 	void Sell();
 
 public:
-	void SetSlotData(class UItemData* NewItemData, const int32& NewAmount);
+	void SetSlotData(const int32& NewItemID, const int32& NewAmount);
 
 	void UpdateSlotAmount(const int32& NewAmount);
 
-	FORCEINLINE class UItemData* GetSlotData() const { return SloItemData; }
+	FORCEINLINE const int32& GetSlotItemID() const { return SloItemID; }
 };

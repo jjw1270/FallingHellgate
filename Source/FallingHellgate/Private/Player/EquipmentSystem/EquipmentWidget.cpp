@@ -64,7 +64,7 @@ void UEquipmentWidget::OnDragBtnReleased()
 	HUDWidget->WidgetDragEnd();
 }
 
-void UEquipmentWidget::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateItemData, const bool& bEquip)
+void UEquipmentWidget::OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateItemID, const bool& bEquip)
 {
 	if (UpdateArmorType == EArmorType::Helmet)
 	{

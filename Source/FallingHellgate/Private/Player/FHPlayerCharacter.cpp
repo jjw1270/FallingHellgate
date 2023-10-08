@@ -736,7 +736,7 @@ void AFHPlayerCharacter::S2C_UseItem_Implementation(const int32& QuickSlotIdx)
 	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
 	CHECK_VALID(GI);
 
-	TempUseItem = *GI->GetQuickSlotItems()->Find(QuickSlotIdx);
+	TempUseItemID = *GI->GetQuickSlotItems()->Find(QuickSlotIdx);
 }
 
 void AFHPlayerCharacter::C2S_PlayUseItemEffect_Implementation(const EEffectTarget& EffectTarget)
@@ -774,10 +774,15 @@ void AFHPlayerCharacter::S2M_PlayUseItemEffect_Implementation(const EEffectTarge
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ApplyItemSound, GetActorLocation());
 }
 
-void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)
+void AFHPlayerCharacter::OnWeaponUpdate(const int32& UpdateEquipItemID, const bool& bIsEquip)
 {
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnWeaponUpdate"));
+
 	FWeaponItemData UpdateWeaponItemData;
-	if (!UpdateEquipItem->GetWeaponData(UpdateWeaponItemData))
+	if (!GI->GetWeaponItemInfo(UItemDataManager::GetPureID(UpdateEquipItemID), UpdateWeaponItemData))
 	{
 		return;
 	}
@@ -787,18 +792,23 @@ void AFHPlayerCharacter::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& 
 
 void AFHPlayerCharacter::C2S_OnWeaponUpdate_Implementation(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip)
 {
+	UE_LOG(LogTemp, Warning, TEXT("C2S_OnWeaponUpdate"));
 	S2M_OnWeaponUpdate(UpdateWeaponItemData, bIsEquip);
 }
 
 void AFHPlayerCharacter::S2M_OnWeaponUpdate_Implementation(const FWeaponItemData& UpdateWeaponItemData, const bool bIsEquip)
 {
+	UE_LOG(LogTemp, Warning, TEXT("S2M_OnWeaponUpdate"));
 	Weapon->SetEquipMesh(UpdateWeaponItemData.WeaponMesh, bIsEquip, UpdateWeaponItemData.NormalAttackMontage, UpdateWeaponItemData.SmashAttackMontage);
 }
 
-void AFHPlayerCharacter::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateEquipItem, const bool& bIsEquip)
+void AFHPlayerCharacter::OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateEquipItemID, const bool& bIsEquip)
 {
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
 	FArmorItemData UpdateArmorItemData;
-	if (!UpdateEquipItem->GetArmorData(UpdateArmorItemData))
+	if (!GI->GetArmorItemInfo(UItemDataManager::GetPureID(UpdateEquipItemID), UpdateArmorItemData))
 	{
 		return;
 	}

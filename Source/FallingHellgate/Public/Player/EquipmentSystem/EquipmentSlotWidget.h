@@ -28,6 +28,9 @@ protected:
 
 protected:
 	UPROPERTY()
+	class UFHGameInstance* GI;
+
+	UPROPERTY()
 	class UEquipmentComponent* EquipComp;
 
 	FTimerHandle InitTimerHandle;
@@ -44,8 +47,7 @@ protected:
 	EArmorType ArmorType;
 
 protected:
-	UPROPERTY()
-	class UItemData* EquippedItemData;
+	int32 EquippedItemID;
 
 // Variables to Bind UMG Components
 protected:
@@ -57,14 +59,14 @@ protected:
 
 protected:
 	UFUNCTION()
-	void OnWeaponUpdate(class UItemData* UpdateItemData, const bool& bEquip);
+	void OnWeaponUpdate(const int32& UpdateItemID, const bool& bEquip);
 
 	UFUNCTION()
-	void OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateItemData, const bool& bEquip);
+	void OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateItemID, const bool& bEquip);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Widget)
-	void SetSlot(class UItemData* UpdateItemData);
+	void SetSlot(const int32& UpdateItemID);
 
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	void ClearSlot();

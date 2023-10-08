@@ -67,12 +67,12 @@ protected:
 	void OnMoneyUpdate(int32 UpdateMoney);
 
 	UFUNCTION()
-	void OnInventoryUpdate(class UItemData* NewItemData, const int32& NewAmount);
+	void OnInventoryUpdate(const int32& NewItemID, const int32& NewAmount);
 
 protected:
 	void InitShopInventory();
 
-	void AddShopInventorySlot(class UItemData* NewItemData, int32 NewAmount);
+	void AddShopInventorySlot(const int32& NewItemID, int32 NewAmount);
 
 	void InitShopSlot();
 

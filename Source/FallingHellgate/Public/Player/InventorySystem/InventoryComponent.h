@@ -7,12 +7,12 @@
 #include "InventoryComponent.generated.h"
 
 // Delegate called when an inventory item changed
-// UItemData* ItemData, const int32& ItemAmount
-DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_ItemUpdate, class UItemData*, const int32&);
+// const int32& ItemID, const int32& ItemAmount
+DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_ItemUpdate, const int32&, const int32&);
 
 // Delegate called when inventory item is registered
-// UItemData* ItemData, const int32& UniqueID, const bool& bIsRegist
-DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_ItemRegister, class UItemData*, const bool&);
+// const int32& ItemID, const int64& UniqueID, const bool& bIsRegist
+DECLARE_MULTICAST_DELEGATE_TwoParams(FDele_Multi_ItemRegister, const int32&, const bool&);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDele_Dynamic_MoneyUpdate, int32, UpdateMoney);
 
@@ -29,6 +29,9 @@ protected:
 
 protected:
 	void InitComponent();
+
+	UFUNCTION()
+	void UpdateInventory();
 
 protected:
 	UPROPERTY()
@@ -49,24 +52,21 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Event)
 	FDele_Dynamic_MoneyUpdate MoneyUpdateDelegate;
 
+protected:
+	UFUNCTION()
+	void OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist);
+
 // Inventory func
 public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void AddItemToInventory(const int32& NewItemID, const int32& NewAmount);
+	void AddItemToInventory(const int32& NewPureItemID, const int32& NewAmount);
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void RemoveItemFromInventory(class UItemData* ItemData, const int32& Amount);
+	void RemoveItemFromInventory(const int32& TargetItemID, const int32& Amount);
 
-	int32 MakeUniqueID();
+	int32 MakeUniqueID(const int32& NewPureItemID);
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
-	void ManageItem(class UItemData* TargetItemData, const int32& TargetItemAmount);
-
-protected:
-	class UItemData* GetWeaponItemData(const int32& TargetItemID);
-
-	class UItemData* GetArmorItemData(const int32& TargetItemID);
-
-	class UItemData* GetConsumableItemData(const int32& TargetItemID);
+	void ManageItem(const int32& TargetItemID, const int32& TargetItemAmount);
 
 };

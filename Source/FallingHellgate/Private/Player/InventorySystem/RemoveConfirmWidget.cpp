@@ -2,6 +2,7 @@
 
 
 #include "RemoveConfirmWidget.h"
+#include "FHGameInstance.h"
 #include "FallingHellgate.h"
 #include "ItemData.h"
 //Widget Comp
@@ -29,12 +30,15 @@ void URemoveConfirmWidget::NativeConstruct()
 
 void URemoveConfirmWidget::ShowRemoveConfirm(UItemDragDropOperation* NewDragDropOperation)
 {
-	ItemData = NewDragDropOperation->DraggingItemData;
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
+	TargetItemID = NewDragDropOperation->DraggingItemID;
 	MaxAmount = NewDragDropOperation->DraggingItemAmount;
 
 	Slider_Amount->SetMaxValue(MaxAmount);
 
-	Image_Item->SetBrushFromTexture(ItemData->GetBaseData().Icon2D);
+	Image_Item->SetBrushFromTexture(GI->GetBaseItemData(TargetItemID).Icon2D);
 
 	if (MaxAmount == 1)
 	{
@@ -48,7 +52,7 @@ void URemoveConfirmWidget::RemoveItem()
 {
 	int32 Amount = Slider_Amount->GetValue();
 
-	InventoryComp->RemoveItemFromInventory(ItemData, Amount);
+	InventoryComp->RemoveItemFromInventory(TargetItemID, Amount);
 
 	OnCancel();
 }
@@ -63,7 +67,7 @@ void URemoveConfirmWidget::OnCancel()
 
 void URemoveConfirmWidget::ClearWidget()
 {
-	ItemData = nullptr;
+	TargetItemID = 0;
 	MaxAmount = 0;
 
 	Slider_Amount->SetValue(1.f);

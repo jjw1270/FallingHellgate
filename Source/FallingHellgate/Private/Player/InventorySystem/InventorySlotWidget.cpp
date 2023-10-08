@@ -3,6 +3,7 @@
 
 #include "InventorySlotWidget.h"
 #include "FallingHellgate.h"
+#include "FHGameInstance.h"
 #include "ItemData.h"
 // Drag Drop Operation
 #include "Blueprint/WidgetBlueprintLibrary.h"
@@ -44,7 +45,10 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 	CHECK_VALID(DragWidgetClass);
 	UOnDragWidget* DragWidget = Cast<UOnDragWidget>(CreateWidget(GetOwningPlayer(), DragWidgetClass));
 
-	FBaseItemData BaseItemData = SlotItemData->GetBaseData();
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
+	FBaseItemData BaseItemData = GI->GetBaseItemData(SlotItemID);
 
 	DragWidget->SetItemImage(BaseItemData.Icon2D);
 
@@ -52,7 +56,7 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 	CHECK_VALID(DDOperation);
 
 	DDOperation->DefaultDragVisual = DragWidget;
-	DDOperation->DraggingItemData = SlotItemData;
+	DDOperation->DraggingItemID = SlotItemID;
 	DDOperation->DraggingItemAmount = SlotItemAmount;
 	
 	DDOperation->Payload = this;
@@ -61,7 +65,7 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 	ClearSlot();
 
 	InventoryWidget->GetItemInfoBox()->SetVisibility(ESlateVisibility::Collapsed);
-	if (!DDOperation->DraggingItemData->IsRegisted())
+	if (!UItemDataManager::IsRegistered(DDOperation->DraggingItemID))
 	{
 		InventoryWidget->GetItemTrash()->SetVisibility(ESlateVisibility::Visible);
 	}
@@ -81,11 +85,11 @@ void UInventorySlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDro
 	// If a new item is added to the PrevInventorySlot, Add to New slot
 	if (!IsEmpty())
 	{
-		InventoryWidget->AddNewItemToSlot(DDOperation->DraggingItemData, DDOperation->DraggingItemAmount);
+		InventoryWidget->AddNewItemToSlot(DDOperation->DraggingItemID, DDOperation->DraggingItemAmount);
 		return;
 	}
 
-	SetSlot(DDOperation->DraggingItemData, DDOperation->DraggingItemAmount);
+	SetSlot(DDOperation->DraggingItemID, DDOperation->DraggingItemAmount);
 }
 
 // Called On Drag Droped Slot!
@@ -104,8 +108,8 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	// if slot is empty
 	if (IsEmpty())
 	{	
-		SetSlot(DDOperation->DraggingItemData, DDOperation->DraggingItemAmount);
-		SetOnRegistImageVisibility(DDOperation->DraggingItemData->IsRegisted());
+		SetSlot(DDOperation->DraggingItemID, DDOperation->DraggingItemAmount);
+		SetOnRegistImageVisibility(UItemDataManager::IsRegistered(DDOperation->DraggingItemID));
 
 		return true;
 	}
@@ -117,15 +121,15 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 		return false;
 	}
 
-	PrevInventorySlot->SetSlot(SlotItemData, SlotItemAmount);
+	PrevInventorySlot->SetSlot(SlotItemID, SlotItemAmount);
 	if (IsSlotItemRegisted())
 	{
 		PrevInventorySlot->SetOnRegistImageVisibility(true);
 	}
 	
 	ClearSlot();
-	SetSlot(DDOperation->DraggingItemData, DDOperation->DraggingItemAmount);
-	SetOnRegistImageVisibility(DDOperation->DraggingItemData->IsRegisted());
+	SetSlot(DDOperation->DraggingItemID, DDOperation->DraggingItemAmount);
+	SetOnRegistImageVisibility(UItemDataManager::IsRegistered(DDOperation->DraggingItemID));
 
 	return true;
 }
@@ -149,7 +153,7 @@ FReply UInventorySlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InG
 		}
 	}
 
-	InventoryComp->ManageItem(SlotItemData, SlotItemAmount);
+	InventoryComp->ManageItem(SlotItemID, SlotItemAmount);
 
 	return FReply::Handled();
 }
@@ -159,23 +163,28 @@ void UInventorySlotWidget::SetOwningInventoryWidget(UInventoryWidget* NewInvento
 	InventoryWidget = NewInventoryWidget;
 }
 
-void UInventorySlotWidget::SetSlot(class UItemData* NewItemData, const int32& NewAmount)
+void UInventorySlotWidget::SetSlot(const int32& NewItemID, const int32& NewAmount)
 {
+	UE_LOG(LogTemp, Warning, TEXT("SetSlot %d"), NewItemID);
+
 	if (NewAmount <= 0)
 	{
 		ClearSlot();
 		return;
 	}
 
-	if (!SlotItemData)
+	if (!SlotItemID)
 	{
 		Image_Item->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
 	}
 
-	SlotItemData = NewItemData;
+	SlotItemID = NewItemID;
 	SlotItemAmount = NewAmount;
 
-	Image_Item->SetBrushFromTexture(SlotItemData->GetBaseData().Icon2D);
+	UFHGameInstance* GI = GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
+
+	Image_Item->SetBrushFromTexture(GI->GetBaseItemData(SlotItemID).Icon2D);
 
 	// If InfoBox is on Visible, Set Collapsed
 	if (InventoryWidget)
@@ -190,7 +199,7 @@ void UInventorySlotWidget::SetSlot(class UItemData* NewItemData, const int32& Ne
 
 void UInventorySlotWidget::ClearSlot()
 {
-	SlotItemData = nullptr;
+	SlotItemID = 0;
 	SlotItemAmount = 0;
 
 	Image_Item->SetBrushFromTexture(nullptr);
@@ -210,15 +219,15 @@ void UInventorySlotWidget::SetOnRegistImageVisibility(const bool& bIsRegist)
 		Image_OnRegist->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
-	SlotItemData->RegistItem(bIsRegist);
+	//UItemDataManager::RegistItem(SlotItemID);
 }
 
 bool UInventorySlotWidget::IsSlotItemRegisted()
 {
-	return SlotItemData->IsRegisted();
+	return UItemDataManager::IsRegistered(SlotItemID);
 }
 
 bool UInventorySlotWidget::IsEmpty()
 {
-	return !IsValid(SlotItemData);
+	return (SlotItemID == 0) ? true : false;
 }

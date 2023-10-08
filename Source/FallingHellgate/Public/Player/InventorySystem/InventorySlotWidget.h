@@ -39,7 +39,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = Widget)
-	void SetSlot(class UItemData* NewItemData, const int32& NewAmount);
+	void SetSlot(const int32& NewItemID, const int32& NewAmount);
 
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	void ClearSlot();
@@ -67,7 +67,7 @@ protected:
 	
 protected:
 	UPROPERTY()
-	class UItemData* SlotItemData;
+	int32 SlotItemID;
 
 	UPROPERTY()
 	int32 SlotItemAmount;
@@ -77,7 +77,7 @@ public:
 	bool IsEmpty();
 
 	UFUNCTION(BlueprintCallable, Category = Widget)
-	FORCEINLINE class UItemData* GetSlotItemData() const { return SlotItemData; }
+	FORCEINLINE int32 GetSlotItemID() const { return SlotItemID; }
 
 	UFUNCTION(BlueprintCallable, Category = Widget)
 	FORCEINLINE int32 GetSlotItemAmount() const { return SlotItemAmount; }

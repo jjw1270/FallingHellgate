@@ -37,12 +37,12 @@ void UQuickSlotComponent::InitComponent()
 	CHECK_VALID(InventoryComp);
 }
 
-void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32& TargetItemAmount)
+void UQuickSlotComponent::ManageQuickSlot(const int32& TargetItemID, const int32& TargetItemAmount)
 {
 	// check item is already in quickslot
 	// if true, Delete QuickSlot Item
 	int32 ItemExistInQuickSlotIndex;
-	if (IsItemExistInQuickSlot(TargetItemData, ItemExistInQuickSlotIndex))
+	if (IsItemExistInQuickSlot(TargetItemID, ItemExistInQuickSlotIndex))
 	{
 		DeleteItemFromQuickSlot(ItemExistInQuickSlotIndex);
 		UGameplayStatics::PlaySound2D(GetWorld(), QuickSlotSound);
@@ -59,7 +59,7 @@ void UQuickSlotComponent::ManageQuickSlot(UItemData* TargetItemData, const int32
 	}
 
 	// Set Item to QuickSlot
-	SetItemToQuickSlot(QuickSlotIndex, TargetItemData, TargetItemAmount);
+	SetItemToQuickSlot(QuickSlotIndex, TargetItemID, TargetItemAmount);
 	UGameplayStatics::PlaySound2D(GetWorld(), QuickSlotSound);
 }
 
@@ -71,12 +71,15 @@ void UQuickSlotComponent::UseQuickSlotItem()
 	AFHPlayerCharacter* PlayerChar = PC->GetPawn<AFHPlayerCharacter>();
 	CHECK_VALID(PlayerChar);
 
-	UItemData* UsingItemData = PlayerChar->TempUseItem;
-	CHECK_VALID(UsingItemData);
-	PlayerChar->TempUseItem = nullptr;
+	if (PlayerChar->TempUseItemID == 0)
+	{
+		return;
+	}
+	int32 UseItemID = PlayerChar->TempUseItemID;
+	PlayerChar->TempUseItemID = 0;
 
 	FConsumableItemData QuickSlotConsumableItemData;
-	UsingItemData->GetConsumableData(QuickSlotConsumableItemData);
+	GI->GetConsumableItemInfo(UItemDataManager::GetPureID(UseItemID), QuickSlotConsumableItemData);
 
 	PlayerChar->C2S_PlayUseItemEffect(QuickSlotConsumableItemData.EffectTarget);
 
@@ -101,15 +104,15 @@ void UQuickSlotComponent::UseQuickSlotItem()
 		break;
 	}
 
-	InventoryComp->RemoveItemFromInventory(UsingItemData, 1);
+	InventoryComp->RemoveItemFromInventory(UseItemID, 1);
 }
 
-void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount)
+void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, const int32& NewItemID, const int32& NewItemAmount)
 {
 	// Check item already exist in quick slots
 	// if true, delete exist item.
 	int32 ItemExistInQuickSlotIndex;
-	if (IsItemExistInQuickSlot(NewItemData, ItemExistInQuickSlotIndex))
+	if (IsItemExistInQuickSlot(NewItemID, ItemExistInQuickSlotIndex))
 	{
 		DeleteItemFromQuickSlot(ItemExistInQuickSlotIndex);
 	}
@@ -117,19 +120,28 @@ void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, cla
 	// if Item Exist in NewQuickSlotIndex, delete item
 	DeleteItemFromQuickSlot(NewQuickSlotIndex);
 
-	GI->GetQuickSlotItems()->Add(NewQuickSlotIndex, NewItemData);
+	GI->GetQuickSlotItems()->Add(NewQuickSlotIndex, NewItemID);
 
 	//BroadCast to Inventory Widget
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
-		InventoryComp->ItemRegisterDelegate.Broadcast(NewItemData, true);
+		InventoryComp->ItemRegisterDelegate.Broadcast(NewItemID, true);
 	}
 
 	//BroadCast to QuickSlot Widget
 	if (QuickSlotUpdateDelegate.IsBound())
 	{
-		QuickSlotUpdateDelegate.Broadcast(NewQuickSlotIndex, NewItemData, NewItemAmount);
+		QuickSlotUpdateDelegate.Broadcast(NewQuickSlotIndex, NewItemID, NewItemAmount);
 	}
+
+	//reserved
+	//CHECK_VALID(GI);
+	//UE_LOG(LogTemp, Warning, TEXT("QuickSlot OnItemRegister %d"), NewItemID);
+
+	//int32 RegistedItemID = NewItemID;
+	//UItemDataManager::RegistItem(RegistedItemID);
+
+	//*GI->GetQuickSlotItems()->Find(NewQuickSlotIndex) = RegistedItemID;
 }
 
 void UQuickSlotComponent::DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex)
@@ -139,20 +151,20 @@ void UQuickSlotComponent::DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex
 		return;
 	}
 
-	UItemData* DeleteItemData = *GI->GetQuickSlotItems()->Find(NewQuickSlotIndex);
+	int32 DeleteItemID = *GI->GetQuickSlotItems()->Find(NewQuickSlotIndex);
 
 	GI->GetQuickSlotItems()->Remove(NewQuickSlotIndex);
 
 	//BroadCast to Inventory Widget
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
-		InventoryComp->ItemRegisterDelegate.Broadcast(DeleteItemData, false);
+		InventoryComp->ItemRegisterDelegate.Broadcast(DeleteItemID, false);
 	}
 
 	//BroadCast to QuickSlot Widget
 	if (QuickSlotUpdateDelegate.IsBound())
 	{
-		QuickSlotUpdateDelegate.Broadcast(NewQuickSlotIndex, nullptr, 0);
+		QuickSlotUpdateDelegate.Broadcast(NewQuickSlotIndex, DeleteItemID, 0);
 	}
 }
 
@@ -169,11 +181,11 @@ bool UQuickSlotComponent::IsQuickSlotEmpty(int32 QuickSlotIndex)
 	return true;
 }
 
-bool UQuickSlotComponent::IsItemExistInQuickSlot(UItemData* TargetItemData, int32& OutIndex)
+bool UQuickSlotComponent::IsItemExistInQuickSlot(const int32& TargetItemID, int32& OutIndex)
 {
 	for (const auto& MyQuickslot : *GI->GetQuickSlotItems())
 	{
-		if (MyQuickslot.Value == TargetItemData)
+		if (UItemDataManager::GetPureID(MyQuickslot.Value) == UItemDataManager::GetPureID(TargetItemID))
 		{
 			OutIndex = MyQuickslot.Key;
 

@@ -50,7 +50,7 @@ protected:
 
 protected:
 	UFUNCTION()
-	void OnQuickSlotUpdated(const int32& QuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount);
+	void OnQuickSlotUpdated(const int32& QuickSlotIndex, const int32& NewItemID, const int32& NewItemAmount);
 
 //Drag Func
 protected:

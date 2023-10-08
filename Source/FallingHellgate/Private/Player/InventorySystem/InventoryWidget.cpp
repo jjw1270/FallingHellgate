@@ -65,68 +65,58 @@ void UInventoryWidget::BindInventoryCompEvents()
 	GetWorld()->GetTimerManager().SetTimer(InitTimerHandle, this, &UInventoryWidget::BindInventoryCompEvents, 0.1f, false);
 }
 
-void UInventoryWidget::OnItemUpdated(class UItemData* UpdateItemData, const int32& UpdateAmount)
+void UInventoryWidget::OnItemUpdated(const int32& UpdateItemID, const int32& UpdateAmount)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnItemUpdated %d"), UpdateItemID);
+
 	// Check Item already exist in slot, stack item
 	// If Item is NonStackable, Item will be AddNewItemToSlot cause of UniqueID
 	for (auto& InventorySlot : InventorySlotArray)
 	{
-		UItemData* InventorySlotItemData = InventorySlot->GetSlotItemData();
-		if (!InventorySlotItemData)
+		if (InventorySlot->GetSlotItemID() == UpdateItemID)
 		{
-			continue;
-		}
-
-		if (InventorySlotItemData == UpdateItemData)
-		{
-			InventorySlot->SetSlot(UpdateItemData, UpdateAmount);
+			InventorySlot->SetSlot(UpdateItemID, UpdateAmount);
 
 			return;
 		}
 	}
 
 	// else Add Item to New Slot
-	AddNewItemToSlot(UpdateItemData, UpdateAmount);
+	AddNewItemToSlot(UpdateItemID, UpdateAmount);
 }
 
-void UInventoryWidget::AddNewItemToSlot(class UItemData* NewItemData, const int32& NewItemAmount)
+void UInventoryWidget::AddNewItemToSlot(const int32& NewItemID, const int32& NewItemAmount)
 {
 	for (auto& slot : InventorySlotArray)
 	{
 		if (slot->IsEmpty())
 		{
-			slot->SetSlot(NewItemData, NewItemAmount);
+			slot->SetSlot(NewItemID, NewItemAmount);
 			return;
 		}
 	}
 
 	//If All Slots are Full, Make New Slots On New Row
 	CreateSlotWidgets(1);
-	AddNewItemToSlot(NewItemData, NewItemAmount);
+	AddNewItemToSlot(NewItemID, NewItemAmount);
 }
 
-void UInventoryWidget::OnItemRegister(class UItemData* UpdateItemData, const bool& bIsRegist)
+void UInventoryWidget::OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist)
 {
 	// Set Register Image visibility
-	for (auto& slot : InventorySlotArray)
+	for (auto& InventorySlot : InventorySlotArray)
 	{
-		UItemData* SlotItemData = slot->GetSlotItemData();
-		if (!SlotItemData)
+		if (InventorySlot->GetSlotItemID() == UpdateItemID)
 		{
-			continue;
-		}
-
-		if (SlotItemData == UpdateItemData)
-		{
-			slot->SetOnRegistImageVisibility(bIsRegist);
+			InventorySlot->SetOnRegistImageVisibility(bIsRegist);
 			return;
 		}
 	}
 
 	// for Item in Inventory is dragged to QuickSlot slot
-	GetWorld()->GetTimerManager().SetTimerForNextTick([this, UpdateItemData, bIsRegist]()
+	GetWorld()->GetTimerManager().SetTimerForNextTick([this, UpdateItemID, bIsRegist]()
 		{
-			OnItemRegister(UpdateItemData, bIsRegist);
+			OnItemRegister(UpdateItemID, bIsRegist);
 		});
 }
 
@@ -144,7 +134,7 @@ void UInventoryWidget::SortItemSlot()
 		{
 			if (!InventorySlotArray[j]->IsEmpty())
 			{
-				InventorySlotArray[i]->SetSlot(InventorySlotArray[j]->GetSlotItemData(), InventorySlotArray[j]->GetSlotItemAmount());
+				InventorySlotArray[i]->SetSlot(InventorySlotArray[j]->GetSlotItemID(), InventorySlotArray[j]->GetSlotItemAmount());
 				InventorySlotArray[i]->SetOnRegistImageVisibility(InventorySlotArray[j]->IsSlotItemRegisted());
 
 				InventorySlotArray[j]->ClearSlot();

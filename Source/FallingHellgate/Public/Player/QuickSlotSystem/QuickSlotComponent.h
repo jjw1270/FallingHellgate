@@ -9,7 +9,7 @@
 
 // Delegate called when an QuickSlot Item Changed
 // const int32& QuickSlotIndex, UItemData* ItemData, const int32& ItemAmount
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FDele_Multi_QuickSlotUpdate, const int32&, class UItemData*, const int32&);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FDele_Multi_QuickSlotUpdate, const int32&, const int32&, const int32&);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class FALLINGHELLGATE_API UQuickSlotComponent : public UActorComponent
@@ -44,13 +44,13 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
-	void ManageQuickSlot(UItemData* TargetItemData, const int32& TargetItemAmount);
+	void ManageQuickSlot(const int32& TargetItemID, const int32& TargetItemAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
 	void UseQuickSlotItem();
 
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
-	void SetItemToQuickSlot(const int32& NewQuickSlotIndex, class UItemData* NewItemData, const int32& NewItemAmount);
+	void SetItemToQuickSlot(const int32& NewQuickSlotIndex, const int32& NewItemID, const int32& NewItemAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
 	void DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex);
@@ -58,7 +58,7 @@ public:
 	bool IsQuickSlotEmpty(int32 QuickSlotIndex);
 
 protected:
-	bool IsItemExistInQuickSlot(class UItemData* TargetItemData, int32& OutIndex);
+	bool IsItemExistInQuickSlot(const int32& TargetItemID, int32& OutIndex);
 
 	int32 GetEmptyQuickSlotSlotIndex();
 

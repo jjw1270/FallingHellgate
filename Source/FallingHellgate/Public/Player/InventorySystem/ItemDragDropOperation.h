@@ -16,7 +16,7 @@ class FALLINGHELLGATE_API UItemDragDropOperation : public UDragDropOperation
 	
 public:
 	UPROPERTY(BlueprintReadOnly, Category = "Drag Drop Operation")
-	class UItemData* DraggingItemData;
+	int32 DraggingItemID;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Drag Drop Operation")
 	int32 DraggingItemAmount;

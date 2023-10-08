@@ -35,62 +35,81 @@ void UEquipmentComponent::InitComponent()
 
 	InventoryComp = PC->GetInventoryComp();
 	CHECK_VALID(InventoryComp);
+
+	InventoryComp->ItemRegisterDelegate.AddUObject(this, &UEquipmentComponent::OnItemRegister);
 }
 
-void UEquipmentComponent::ManageEquipment(UItemData* TargetItemData)
+void UEquipmentComponent::ManageEquipment(const int32& TargetItemID)
 {
 	// check Item is already regist
 	// if true, UnEquip target Item
 	EItemType ExistItemType;
 	EArmorType ExistArmorType;
-	if (IsItemExistInEquipmentSlot(TargetItemData, ExistItemType, ExistArmorType))
+	if (IsItemExistInEquipmentSlot(TargetItemID, ExistItemType, ExistArmorType))
 	{
-		UnEquip(TargetItemData);
+		UnEquip(TargetItemID);
 		UGameplayStatics::PlaySound2D(GetWorld(), EquipmentSound);
 
 		return;
 	}
 
 	// else, EquipItem
-	Equip(TargetItemData);
+	Equip(TargetItemID);
 	UGameplayStatics::PlaySound2D(GetWorld(), EquipmentSound);
 }
 
-void UEquipmentComponent::Equip(class UItemData* NewItemData)
+//reserved
+void UEquipmentComponent::OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist)
 {
-	EItemType NewItemType = NewItemData->GetItemType();
+	CHECK_VALID(GI);
+
+	UE_LOG(LogTemp, Warning, TEXT("Equip OnItemRegister %d"), UpdateItemID);
+
+	GI->GetEquipments()->Remove(UpdateItemID);
+
+	int32 RegistedItemID = UpdateItemID;
+	UItemDataManager::RegistItem(RegistedItemID);
+
+	GI->GetEquipments()->Add(RegistedItemID);
+}
+
+void UEquipmentComponent::Equip(const int32& NewItemID)
+{
+	CHECK_VALID(GI);
+	
+	EItemType NewItemType = UItemDataManager::GetItemType(NewItemID);
 	FArmorItemData NewArmorData;
-	NewItemData->GetArmorData(NewArmorData);
+	GI->GetArmorItemInfo(UItemDataManager::GetPureID(NewItemID), NewArmorData);
 
 	// Check Already Equipped at Same EquipType
 	// if True : UnEquip Equipped Item
-	for (auto& EquippedItemData : *GI->GetEquipments())
+	for (auto& EquippedItemID : *GI->GetEquipments())
 	{
 		// Weapon ItemType
-		if (NewItemType == EItemType::Weapon && EquippedItemData->GetItemType() == NewItemType)
+		if (NewItemType == EItemType::Weapon && UItemDataManager::GetItemType(EquippedItemID) == NewItemType)
 		{
-			UnEquip(EquippedItemData);
+			UnEquip(EquippedItemID);
 			break;
 		}
 
 		// Armor ItemType
 		FArmorItemData EquippedArmorData;
-		if (EquippedItemData->GetArmorData(EquippedArmorData))
+		if (GI->GetArmorItemInfo(UItemDataManager::GetPureID(EquippedItemID), EquippedArmorData))
 		{
 			if (EquippedArmorData.ArmorType == NewArmorData.ArmorType)
 			{
-				UnEquip(EquippedItemData);
+				UnEquip(EquippedItemID);
 				break;
 			}
 		}
 	}
 
 	//Equip Item
-	GI->GetEquipments()->Add(NewItemData);
+	GI->GetEquipments()->Add(NewItemID);
 
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
-		InventoryComp->ItemRegisterDelegate.Broadcast(NewItemData, true);
+		InventoryComp->ItemRegisterDelegate.Broadcast(NewItemID, true);
 	}
 
 	// boradcast
@@ -98,7 +117,7 @@ void UEquipmentComponent::Equip(class UItemData* NewItemData)
 	{
 		if (WeaponUpdateDelegate.IsBound())
 		{
-			WeaponUpdateDelegate.Broadcast(NewItemData, true);
+			WeaponUpdateDelegate.Broadcast(NewItemID, true);
 		}
 
 		return;
@@ -107,34 +126,36 @@ void UEquipmentComponent::Equip(class UItemData* NewItemData)
 	{
 		if (ArmorUpdateDelegate.IsBound())
 		{
-			ArmorUpdateDelegate.Broadcast(NewArmorData.ArmorType, NewItemData, true);
+			ArmorUpdateDelegate.Broadcast(NewArmorData.ArmorType, NewItemID, true);
 		}
 
 		return;
 	}
 }
 
-void UEquipmentComponent::UnEquip(class UItemData* TargetItemData)
+void UEquipmentComponent::UnEquip(const int32& TargetItemID)
 {
+	CHECK_VALID(GI);
+
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
-		InventoryComp->ItemRegisterDelegate.Broadcast(TargetItemData, false);
+		InventoryComp->ItemRegisterDelegate.Broadcast(TargetItemID, false);
 	}
 
-	EItemType TargetItemType = TargetItemData->GetItemType();
+	EItemType TargetItemType = UItemDataManager::GetItemType(TargetItemID);
 
 	if (TargetItemType == EItemType::Weapon)
 	{
 		// boradcast
 		if (WeaponUpdateDelegate.IsBound())
 		{
-			WeaponUpdateDelegate.Broadcast(TargetItemData, false);
+			WeaponUpdateDelegate.Broadcast(TargetItemID, false);
 		}
 	}
 	else if (TargetItemType == EItemType::Armor)
 	{
 		FArmorItemData TargetArmorData;
-		if (!TargetItemData->GetArmorData(TargetArmorData))
+		if (GI->GetArmorItemInfo(UItemDataManager::GetPureID(TargetItemID), TargetArmorData))
 		{
 			return;
 		}
@@ -142,27 +163,32 @@ void UEquipmentComponent::UnEquip(class UItemData* TargetItemData)
 		// boradcast
 		if (ArmorUpdateDelegate.IsBound())
 		{
-			ArmorUpdateDelegate.Broadcast(TargetArmorData.ArmorType, TargetItemData, false);
+			ArmorUpdateDelegate.Broadcast(TargetArmorData.ArmorType, TargetItemID, false);
 		}
 	}
 
-	GI->GetEquipments()->Remove(TargetItemData);
+	GI->GetEquipments()->Remove(TargetItemID);
 }
 
-bool UEquipmentComponent::IsItemExistInEquipmentSlot(UItemData* TargetItemData, EItemType& OutItemType, EArmorType& OutArmorType)
+bool UEquipmentComponent::IsItemExistInEquipmentSlot(const int32& TargetItemID, EItemType& OutItemType, EArmorType& OutArmorType)
 {
-	for (auto& MyEquipItem : *GI->GetEquipments())
+	if (!GI)
 	{
-		if (MyEquipItem != TargetItemData)
+		return false;
+	}
+
+	for (auto& MyEquipItemID : *GI->GetEquipments())
+	{
+		if (MyEquipItemID != TargetItemID)
 		{
 			continue;
 		}
 
-		OutItemType = MyEquipItem->GetItemType();
-
+		OutItemType = UItemDataManager::GetItemType(TargetItemID);
+		
 		// Check Item has ArmorData
 		FArmorItemData MyEquipArmorItemData;
-		if (MyEquipItem->GetArmorData(MyEquipArmorItemData))
+		if (GI->GetArmorItemInfo(UItemDataManager::GetPureID(MyEquipItemID), MyEquipArmorItemData))
 		{
 			OutArmorType = MyEquipArmorItemData.ArmorType;
 		}

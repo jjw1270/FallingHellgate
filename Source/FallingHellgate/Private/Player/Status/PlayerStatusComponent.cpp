@@ -201,10 +201,12 @@ void UPlayerStatusComponent::S2M_UpdateCurrentPlayerStats_Implementation(const F
 	UpdateCurrentStatusUI();
 }
 
-void UPlayerStatusComponent::OnWeaponUpdate(UItemData* UpdateEquipItem, const bool& bIsEquip)
+void UPlayerStatusComponent::OnWeaponUpdate(const int32& UpdateEquipItemID, const bool& bIsEquip)
 {
+	CHECK_VALID(GI);
+
 	FWeaponItemData UpdateWeaponItemData;
-	if (!UpdateEquipItem->GetWeaponData(UpdateWeaponItemData))
+	if (!GI->GetWeaponItemInfo(UItemDataManager::GetPureID(UpdateEquipItemID), UpdateWeaponItemData))
 	{
 		return;
 	}
@@ -212,10 +214,12 @@ void UPlayerStatusComponent::OnWeaponUpdate(UItemData* UpdateEquipItem, const bo
 	UpdateDefaultPlayerStats(bIsEquip, 0, 0, UpdateWeaponItemData.AttackPower, UpdateWeaponItemData.AttackSpeed, UpdateWeaponItemData.CriticalChance, 0);
 }
 
-void UPlayerStatusComponent::OnArmorUpdate(const EArmorType& UpdateArmorType, UItemData* UpdateEquipItem, const bool& bIsEquip)
+void UPlayerStatusComponent::OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateEquipItemID, const bool& bIsEquip)
 {
+	CHECK_VALID(GI);
+
 	FArmorItemData UpdateArmorItemData;
-	if (!UpdateEquipItem->GetArmorData(UpdateArmorItemData))
+	if (!GI->GetArmorItemInfo(UItemDataManager::GetPureID(UpdateEquipItemID), UpdateArmorItemData))
 	{
 		return;
 	}

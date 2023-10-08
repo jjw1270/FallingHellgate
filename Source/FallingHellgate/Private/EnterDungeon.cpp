@@ -4,7 +4,7 @@
 #include "EnterDungeon.h"
 #include "FallingHellgate.h"
 #include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "FHPlayerController.h"
 
 // Sets default values
@@ -18,7 +18,7 @@ AEnterDungeon::AEnterDungeon()
 
 	EnterDungeonCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnterDungeon::OnCollisionEnter);
 
-	EnterDungeonMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	EnterDungeonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	EnterDungeonMesh->SetupAttachment(EnterDungeonCollision);
 }
 

@@ -181,10 +181,10 @@ protected:
 	// Delegate Binding Events
 protected:
 	UFUNCTION()
-	void OnWeaponUpdate(class UItemData* UpdateEquipItem, const bool& bIsEquip);
+	void OnWeaponUpdate(const int32& UpdateEquipItemID, const bool& bIsEquip);
 
 	UFUNCTION()
-	void OnArmorUpdate(const EArmorType& UpdateArmorType, class UItemData* UpdateEquipItem, const bool& bIsEquip);
+	void OnArmorUpdate(const EArmorType& UpdateArmorType, const int32& UpdateEquipItemID, const bool& bIsEquip);
 
 	UFUNCTION()
 	void OnEquipVisibilityUpdate(const EArmorType& UpdateArmorType);
@@ -347,8 +347,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Interaction)
 	AActor* LootingEffect;
 
-	UPROPERTY()
-	class UItemData* TempUseItem;
+	int32 TempUseItemID;
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FDele_Multi_EquipVisibilityUpdate EquipVisibilityUpdateDelegate;

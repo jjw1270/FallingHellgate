@@ -24,7 +24,7 @@ protected:
 	class UBoxComponent* EnterDungeonCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Component)
-	class UStaticMeshComponent* EnterDungeonMesh;
+	class USkeletalMeshComponent* EnterDungeonMesh;
 
 protected:
 	UPROPERTY(EditAnywhere)

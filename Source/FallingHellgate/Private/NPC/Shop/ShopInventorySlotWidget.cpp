@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/Button.h"
+#include "FHGameInstance.h"
 
 void UShopInventorySlotWidget::NativeConstruct()
 {
@@ -51,23 +52,28 @@ void UShopInventorySlotWidget::Sell()
 		InventoryComp->MoneyUpdateDelegate.Broadcast(Price * SellAmount);
 	}
 	// remove inventory item from inventory comp
-	InventoryComp->RemoveItemFromInventory(SloItemData, SellAmount);
+	InventoryComp->RemoveItemFromInventory(SloItemID, SellAmount);
 }
 
-void UShopInventorySlotWidget::SetSlotData(class UItemData* NewItemData, const int32& NewAmount)
+void UShopInventorySlotWidget::SetSlotData(const int32& NewItemID, const int32& NewAmount)
 {
-	SloItemData = NewItemData;
+	UFHGameInstance* GI = GetWorld()->GetGameInstance<UFHGameInstance>();
+	CHECK_VALID(GI);
 
-	TextBlock_ItemName->SetText(FText::FromString(SloItemData->GetBaseData().Name));
+	SloItemID = NewItemID;
 
-	FString ItemTypeText = UEnum::GetValueAsString(SloItemData->GetItemType());
+	FBaseItemData SlotBaseItemData = GI->GetBaseItemData(SloItemID);
+
+	TextBlock_ItemName->SetText(FText::FromString(SlotBaseItemData.Name));
+
+	FString ItemTypeText = UEnum::GetValueAsString(GI->GetBaseItemData(SloItemID).Type);
 	ItemTypeText.Split(TEXT("::"), nullptr, &ItemTypeText, ESearchCase::CaseSensitive, ESearchDir::FromEnd);
 	TextBlock_ItemType->SetText(FText::FromString(ItemTypeText));
 
-	Price = SloItemData->GetBaseData().BasePrice * SloItemData->GetBaseData().UpgradeValue;
+	Price = SlotBaseItemData.BasePrice * SlotBaseItemData.UpgradeValue;
 	TextBlock_ItemPrice->SetText(FText::FromString(FString::FromInt(Price)));
 
-	Image_Item->SetBrushFromTexture(SloItemData->GetBaseData().Icon2D);
+	Image_Item->SetBrushFromTexture(SlotBaseItemData.Icon2D);
 
 	MaxAmount = NewAmount;
 	SellAmount = 1;

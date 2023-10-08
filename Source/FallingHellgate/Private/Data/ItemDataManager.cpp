@@ -4,56 +4,19 @@
 #include "ItemDataManager.h"
 #include "FallingHellgate.h"
 
-bool UItemDataManager::GetConsumableItemInfo(const int32& ItemID, FConsumableItemData& OutData)
-{
-	check(ConsumableItemDataTable);
-
-	FConsumableItemData* pData = ConsumableItemDataTable->FindRow<FConsumableItemData>(*FString::FromInt(ItemID), TEXT(""), false);
-
-	if (pData == nullptr)
-	{
-		return false;
-	}
-
-	OutData = *pData;
-	return true;
-}
-
-bool UItemDataManager::GetWeaponItemInfo(const int32& ItemID, FWeaponItemData& OutData)
-{
-	check(WeaponItemDataTable);
-
-	FWeaponItemData* pData = WeaponItemDataTable->FindRow<FWeaponItemData>(*FString::FromInt(ItemID), TEXT(""), false);
-
-	if (pData == nullptr)
-	{
-		return false;
-	}
-
-	OutData = *pData;
-	return true;
-}
-
-bool UItemDataManager::GetArmorItemInfo(const int32& ItemID, FArmorItemData& OutData)
-{
-	check(ArmorItemDataTable);
-
-	FArmorItemData* pData = ArmorItemDataTable->FindRow<FArmorItemData>(*FString::FromInt(ItemID), TEXT(""), false);
-
-	if (pData == nullptr)
-	{
-		return false;
-	}
-
-	OutData = *pData;
-	return true;
-}
 
 EItemType UItemDataManager::GetItemType(const int32& ItemID)
 {
 	EItemType Itemtype = EItemType::None;
 
-	switch (ItemID / 10000)
+	int32 ItemTypeNum = ItemID / 10000;
+
+	if (ItemTypeNum > 4)
+	{
+		ItemTypeNum = GetPureID(ItemID) / 10000;
+	}
+
+	switch (ItemTypeNum)
 	{
 	case 1:
 		Itemtype = EItemType::Consumable;
@@ -72,4 +35,67 @@ EItemType UItemDataManager::GetItemType(const int32& ItemID)
 	}
 
 	return Itemtype;
+}
+
+int32 UItemDataManager::GetPureID(const int32& ItemID)
+{
+	FString TempItemIDStr = FString::FromInt(ItemID);
+
+	int32 PureItemID = FCString::Atoi(*TempItemIDStr.LeftChop(4));
+
+	return PureItemID;
+}
+
+int32 UItemDataManager::GetUniqueID(const int32& ItemID)
+{
+	FString TempItemIDStr = FString::FromInt(ItemID);
+
+	int32 UniqueID = FCString::Atoi(*TempItemIDStr.Right(3));
+
+	return UniqueID;
+}
+
+bool UItemDataManager::IsRegistered(const int32& ItemID)
+{
+	FString TempItemIDStr = FString::FromInt(ItemID);
+
+	if (TempItemIDStr.Len() >= 4) {
+		int32 RegisterIndex = TempItemIDStr.Len() - 4;
+
+		return TempItemIDStr.Mid(RegisterIndex, 1).ToBool();
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void UItemDataManager::RegistItem(int32& ItemID)
+{
+	FString TempItemIDStr = FString::FromInt(ItemID);
+
+	bool bIsRegisted = false;
+	int32 RegisterIndex = -1;
+
+	if (TempItemIDStr.Len() >= 4) {
+		RegisterIndex = TempItemIDStr.Len() - 4;
+
+		bIsRegisted = TempItemIDStr.Mid(RegisterIndex, 1).ToBool();
+	}
+
+	if (RegisterIndex < 0)
+	{
+		return;
+	}
+
+	if (bIsRegisted)
+	{
+		TempItemIDStr[RegisterIndex] = TEXT('0');
+	}
+	else
+	{
+		TempItemIDStr[RegisterIndex] = TEXT('1');
+	}
+
+	ItemID = FCString::Atoi(*TempItemIDStr);
 }

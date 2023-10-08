@@ -23,7 +23,7 @@ protected:
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = Data)
-	class UItemData* ItemData;
+	int32 TargetItemID;
 
 	UPROPERTY(BlueprintReadOnly, Category = Widget)
 	int32 MaxAmount;

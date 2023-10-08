@@ -24,16 +24,19 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
-	void SetSlot(class UItemData* NewItemData, const int32& NewItemAmount);
+	void SetSlot(const int32& NewItemID, const int32& NewItemAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Quick Slot")
 	void ClearSlot();
 
 protected:
 	UFUNCTION()
-	void OnUpdateItem(class UItemData* UpdateItemData, const int32& UpdateAmount);
+	void OnUpdateItem(const int32& UpdateItemID, const int32& UpdateAmount);
 
 protected:
+	UPROPERTY()
+	class UFHGameInstance* GI;
+
 	UPROPERTY(BlueprintReadOnly, Category = Component)
 	class UInventoryComponent* InventoryComp;
 
@@ -53,7 +56,7 @@ protected:
 	int32 Index;
 
 	UPROPERTY(BlueprintReadOnly, Category = Data)
-	class UItemData* SlotItemData;
+	int32 SlotItemID;
 
 	UPROPERTY(BlueprintReadOnly, Category = Inventory)
 	int32 SlotItemAmount;
@@ -65,7 +68,7 @@ public:
 	bool IsEmpty();
 	
 	UFUNCTION(BlueprintCallable, Category = Data)
-	FORCEINLINE class UItemData* GetSlotItemData() const { return SlotItemData; }
+	FORCEINLINE int32 GetSlotItemID() const { return SlotItemID; }
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	FORCEINLINE int32 GetSlotItemAmount() const { return SlotItemAmount; }

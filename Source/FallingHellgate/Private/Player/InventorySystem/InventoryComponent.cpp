@@ -4,8 +4,6 @@
 #include "InventoryComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "FallingHellgate.h"
-#include "ItemData.h"
-#include "ItemDataManager.h"
 
 #include "FHGameInstance.h"
 #include "FHPlayerController.h"
@@ -17,7 +15,7 @@
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
+	
 	SetComponentTickEnabled(false);
 }
 
@@ -41,39 +39,64 @@ void UInventoryComponent::InitComponent()
 
 	EquipComp = PC->GetEquipmentComp();
 	CHECK_VALID(EquipComp);
+
+	ItemRegisterDelegate.AddUObject(this, &UInventoryComponent::OnItemRegister);
+
+	FTimerHandle TempHandle;
+	GetWorld()->GetTimerManager().SetTimer(TempHandle, this, &UInventoryComponent::UpdateInventory, 2.f, false);
 }
 
-void UInventoryComponent::AddItemToInventory(const int32& NewItemID, const int32& NewAmount)
+void UInventoryComponent::UpdateInventory()
+{
+	for (const auto& MyItem : *GI->GetInventoryItems())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Broadcast %d"), MyItem.Key);
+
+		ItemUpdateDelegate.Broadcast(MyItem.Key, MyItem.Value);
+	}
+}
+
+void UInventoryComponent::OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist)
+{
+	CHECK_VALID(GI);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnItemRegister %d"), UpdateItemID);
+
+	int32 UpdateItemAmount;
+	GI->GetInventoryItems()->RemoveAndCopyValue(UpdateItemID, UpdateItemAmount);
+
+	int32 RegistedItemID = UpdateItemID;
+	UItemDataManager::RegistItem(RegistedItemID);
+
+	GI->GetInventoryItems()->Add(RegistedItemID, UpdateItemAmount);
+}
+
+// ItemID = ID+Regist(0/1)+UniqueID(1000/1001~9999)
+void UInventoryComponent::AddItemToInventory(const int32& NewPureItemID, const int32& NewAmount)
 {
 	// If Item is Equipment Item, Add new item with unique id
 	// else, Already Exist in Inventory, Add Amount
 
-	EItemType NewItemType = GI->GetItemDataManager()->GetItemType(NewItemID);
-	UItemData* NewItem;
+	int32 NewItemID = 0;
 
-	switch (NewItemType)
+	FString TempItemIDString = FString::FromInt(NewPureItemID);
+
+	TempItemIDString.Append("0"); // Num Register
+
+	switch (UItemDataManager::GetItemType(NewPureItemID))
 	{
 	case EItemType::Weapon:
-		NewItem = GetWeaponItemData(NewItemID);
-		CHECK_VALID(NewItem);
-
-		GI->GetInventoryItems()->Add(NewItem, NewAmount);
-
-		if (ItemUpdateDelegate.IsBound())
-		{
-			ItemUpdateDelegate.Broadcast(NewItem, NewAmount);
-		}
-
-		return;
 	case EItemType::Armor:
-		NewItem = GetArmorItemData(NewItemID);
-		CHECK_VALID(NewItem);
+		TempItemIDString.AppendInt(MakeUniqueID(NewPureItemID));
 
-		GI->GetInventoryItems()->Add(NewItem, NewAmount);
+		NewItemID = FCString::Atoi(*TempItemIDString);
+		UE_LOG(LogTemp, Warning, TEXT("Add Equip Item To Inventory %d"), NewItemID);
+
+		GI->GetInventoryItems()->Add(NewItemID, NewAmount);
 
 		if (ItemUpdateDelegate.IsBound())
 		{
-			ItemUpdateDelegate.Broadcast(NewItem, NewAmount);
+			ItemUpdateDelegate.Broadcast(NewItemID, NewAmount);
 		}
 
 		return;
@@ -81,9 +104,7 @@ void UInventoryComponent::AddItemToInventory(const int32& NewItemID, const int32
 		// Check Item is already in Inventory and add Amount if true
 		for (auto& MyItem : *GI->GetInventoryItems())
 		{
-			FBaseItemData BaseItemData = MyItem.Key->GetBaseData();
-
-			if (BaseItemData.ID == NewItemID)
+			if (UItemDataManager::GetPureID(MyItem.Key) == NewPureItemID)
 			{
 				MyItem.Value += NewAmount;
 
@@ -97,42 +118,42 @@ void UInventoryComponent::AddItemToInventory(const int32& NewItemID, const int32
 		}
 
 		// else Make New Item
-		NewItem = GetConsumableItemData(NewItemID);
-		CHECK_VALID(NewItem);
+		TempItemIDString.AppendInt(100);
+		NewItemID = FCString::Atoi(*TempItemIDString);
 
-		GI->GetInventoryItems()->Add(NewItem, NewAmount);
+		GI->GetInventoryItems()->Add(NewItemID, NewAmount);
 
 		if (ItemUpdateDelegate.IsBound())
 		{
-			ItemUpdateDelegate.Broadcast(NewItem, NewAmount);
+			ItemUpdateDelegate.Broadcast(NewItemID, NewAmount);
 		}
 
 		return;
 	case EItemType::Others:
-		// To be implemented :)
+		// Reserved
 		break;
 	default:
 		break;
 	}
 }
 
-void UInventoryComponent::RemoveItemFromInventory(class UItemData* ItemData, const int32& Amount)
+void UInventoryComponent::RemoveItemFromInventory(const int32& TargetItemID, const int32& Amount)
 {
 	for (auto& MyItem : *GI->GetInventoryItems())
 	{
-		if (MyItem.Key == ItemData)
+		if (MyItem.Key == TargetItemID)
 		{
 			MyItem.Value -= Amount;
 
 			// BroadCast
 			if (ItemUpdateDelegate.IsBound())
 			{
-				ItemUpdateDelegate.Broadcast(MyItem.Key, MyItem.Value);
+				ItemUpdateDelegate.Broadcast(TargetItemID, MyItem.Value);
 			}
 
 			if (MyItem.Value <= 0)
 			{
-				GI->GetInventoryItems()->Remove(MyItem.Key);
+				GI->GetInventoryItems()->Remove(TargetItemID);
 			}
 
 			return;
@@ -140,109 +161,49 @@ void UInventoryComponent::RemoveItemFromInventory(class UItemData* ItemData, con
 	}
 }
 
-int32 UInventoryComponent::MakeUniqueID()
+int32 UInventoryComponent::MakeUniqueID(const int32& NewPureItemID)
 {
 	while (true)
 	{
 		bool bSuccess = true;
-		int32 TempID = FMath::RandRange(1001, 9999);
+		int32 TempUniqueID = FMath::RandRange(101, 999);
 
-		for (auto& Item : *GI->GetInventoryItems())
+		if (GI->GetInventoryItems()->Num() > 0)
 		{
-			if (Item.Key->GetUniqueID() == TempID)
+			for (const auto& Item : *GI->GetInventoryItems())
 			{
-				bSuccess = false;
-				break;
+				if (UItemDataManager::GetPureID(Item.Key) != NewPureItemID)
+				{
+					continue;
+				}
+
+				if (UItemDataManager::GetUniqueID(Item.Key) == TempUniqueID)
+				{
+					bSuccess = false;
+					break;
+				}
 			}
 		}
 
 		if (bSuccess)
 		{
-			return TempID;
+			return TempUniqueID;
 		}
 	}
 }
 
-void UInventoryComponent::ManageItem(class UItemData* TargetItemData, const int32& TargetItemAmount)
+void UInventoryComponent::ManageItem(const int32& TargetItemID, const int32& TargetItemAmount)
 {
-	FBaseItemData BaseItemData = TargetItemData->GetBaseData();
-
-	// Consumable Items
-	if (BaseItemData.Type == EItemType::Consumable)
+	switch (UItemDataManager::GetItemType(TargetItemID))
 	{
-		QuickSlotComp->ManageQuickSlot(TargetItemData, TargetItemAmount);
-
-		return;
+	case EItemType::Consumable:
+		QuickSlotComp->ManageQuickSlot(TargetItemID, TargetItemAmount);
+		break;
+	case EItemType::Weapon:
+	case EItemType::Armor:
+		EquipComp->ManageEquipment(TargetItemID);
+		break;
+	default:
+		break;
 	}
-
-	// Weapon, Armor Items
-	if (BaseItemData.Type == EItemType::Weapon || BaseItemData.Type == EItemType::Armor)
-	{
-		EquipComp->ManageEquipment(TargetItemData);
-
-		return;
-	}
-}
-
-UItemData* UInventoryComponent::GetWeaponItemData(const int32& TargetItemID)
-{
-	FWeaponItemData TempWeaponItemData;
-
-	if (!GI->GetItemDataManager()->GetWeaponItemInfo(TargetItemID, TempWeaponItemData))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Data in WeaponItemDataTable is Missing"));
-		return nullptr;
-	}
-
-	UItemData* NewItem = NewObject<UItemData>(this, UItemData::StaticClass());
-	if (NewItem)
-	{
-		NewItem->SetWeaponData(TempWeaponItemData, MakeUniqueID());
-
-		return NewItem;
-	}
-
-	return nullptr;
-}
-
-UItemData* UInventoryComponent::GetArmorItemData(const int32& TargetItemID)
-{
-	FArmorItemData TempArmorItemData;
-
-	if (!GI->GetItemDataManager()->GetArmorItemInfo(TargetItemID, TempArmorItemData))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Data in ArmorItemDataTable is Missing"));
-		return nullptr;
-	}
-
-	UItemData* NewItem = NewObject<UItemData>(this, UItemData::StaticClass());
-	if (NewItem)
-	{
-		NewItem->SetArmorData(TempArmorItemData, MakeUniqueID());
-
-		return NewItem;
-	}
-
-	return nullptr;
-}
-
-UItemData* UInventoryComponent::GetConsumableItemData(const int32& TargetItemID)
-{
-	FConsumableItemData TempConsumableItemData;
-
-	if (!GI->GetItemDataManager()->GetConsumableItemInfo(TargetItemID, TempConsumableItemData))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Data in ConsumableItemDataTable is Missing"));
-		return nullptr;
-	}
-
-	UItemData* NewItem = NewObject<UItemData>(this, UItemData::StaticClass());
-	if (NewItem)
-	{
-		NewItem->SetConsumableData(TempConsumableItemData);
-
-		return NewItem;
-	}
-
-	return nullptr;
 }

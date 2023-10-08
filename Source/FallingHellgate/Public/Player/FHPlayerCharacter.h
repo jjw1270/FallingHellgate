@@ -354,10 +354,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
-	int32 JumpStamina{ 100 };
+	int32 JumpStamina{ 50 };
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 DashStamina{ 100 };
+	int32 DashStamina{ 50 };
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 NormalAttackStamina{ 40 };

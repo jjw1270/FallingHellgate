@@ -210,6 +210,12 @@ void UPlayerStatusComponent::OnWeaponUpdate(const int32& UpdateEquipItemID, cons
 		return;
 	}
 
+	//// ..... delete later
+	//if (GI->GetDefaultPlayerStats().Attack > 0)
+	//{
+	//	return;
+	//}
+
 	UpdateDefaultPlayerStats(bIsEquip, 0, 0, UpdateWeaponItemData.AttackPower, UpdateWeaponItemData.AttackSpeed, UpdateWeaponItemData.CriticalChance, 0);
 }
 

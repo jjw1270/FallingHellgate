@@ -51,10 +51,13 @@ void UEquipmentComponent::UpdateEquipment()
 		{
 			if (WeaponUpdateDelegate.IsBound())
 			{
-				WeaponUpdateDelegate.Broadcast(MyEquipID, true);
+				WeaponUpdateDelegate.Broadcast(MyEquipID, false);
 			}
 
-			return;
+			if (WeaponUpdateDelegate.IsBound())
+			{
+				WeaponUpdateDelegate.Broadcast(MyEquipID, true);
+			}
 		}
 		else if (GI->GetBaseItemData(MyEquipID).Type == EItemType::Armor)
 		{
@@ -63,10 +66,13 @@ void UEquipmentComponent::UpdateEquipment()
 
 			if (ArmorUpdateDelegate.IsBound())
 			{
-				ArmorUpdateDelegate.Broadcast(ArmorItemData.ArmorType, MyEquipID, true);
+				ArmorUpdateDelegate.Broadcast(ArmorItemData.ArmorType, MyEquipID, false);
 			}
 
-			return;
+			if (ArmorUpdateDelegate.IsBound())
+			{
+				ArmorUpdateDelegate.Broadcast(ArmorItemData.ArmorType, MyEquipID, true);
+			}
 		}
 	}
 }

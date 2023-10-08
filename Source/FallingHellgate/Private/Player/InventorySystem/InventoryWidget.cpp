@@ -3,7 +3,7 @@
 
 #include "InventoryWidget.h"
 #include "FallingHellgate.h"
-#include "ItemData.h"
+#include "ItemDataManager.h"
 
 #include "InventoryComponent.h"
 #include "FHPlayerController.h"
@@ -67,13 +67,11 @@ void UInventoryWidget::BindInventoryCompEvents()
 
 void UInventoryWidget::OnItemUpdated(const int32& UpdateItemID, const int32& UpdateAmount)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnItemUpdated %d"), UpdateItemID);
-
 	// Check Item already exist in slot, stack item
 	// If Item is NonStackable, Item will be AddNewItemToSlot cause of UniqueID
 	for (auto& InventorySlot : InventorySlotArray)
 	{
-		if (InventorySlot->GetSlotItemID() == UpdateItemID)
+		if (UItemDataManager::GetPureID(InventorySlot->GetSlotItemID()) == UItemDataManager::GetPureID(UpdateItemID))
 		{
 			InventorySlot->SetSlot(UpdateItemID, UpdateAmount);
 
@@ -106,8 +104,14 @@ void UInventoryWidget::OnItemRegister(const int32& UpdateItemID, const bool& bIs
 	// Set Register Image visibility
 	for (auto& InventorySlot : InventorySlotArray)
 	{
-		if (InventorySlot->GetSlotItemID() == UpdateItemID)
+		if (InventorySlot->GetSlotItemID() <= 0)
 		{
+			continue;
+		}
+
+		if (UItemDataManager::GetPureID(InventorySlot->GetSlotItemID()) == UItemDataManager::GetPureID(UpdateItemID))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("InventorySlot->GetSlotItemID() == UpdateItemID"));
 			InventorySlot->SetOnRegistImageVisibility(bIsRegist);
 			return;
 		}

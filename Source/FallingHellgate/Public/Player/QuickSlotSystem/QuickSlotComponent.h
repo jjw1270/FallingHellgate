@@ -24,6 +24,12 @@ protected:
 
 protected:
 	void InitComponent();
+
+	//UFUNCTION()
+	//void OnQuickSLotUpdate(const int32& UpdateSlotIdx, const int32& SlotItemID, const int32& NewAmount);
+
+	UFUNCTION()
+	void UpdateQuickSlot();
 		
 protected:
 	UPROPERTY()
@@ -62,8 +68,8 @@ protected:
 
 	int32 GetEmptyQuickSlotSlotIndex();
 
-	void UseTemporaryItem(const struct FConsumableItemData& ConsumableItemData, UPlayerStatusComponent* PlayerStatusComp);
+	void UseTemporaryItem(const struct FConsumableItemData& ConsumableItemData, class UPlayerStatusComponent* PlayerStatusComp);
 
 	UFUNCTION()
-	void RestorePlayerStatus(const struct FConsumableItemData& ConsumableItemData, UPlayerStatusComponent* PlayerStatusComp);
+	void RestorePlayerStatus(const struct FConsumableItemData& ConsumableItemData, class UPlayerStatusComponent* PlayerStatusComp);
 };

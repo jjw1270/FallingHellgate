@@ -3,7 +3,7 @@
 
 #include "QuickSlotSystem/QuickSlotComponent.h"
 #include "FallingHellgate.h"
-#include "ItemData.h"
+#include "ItemDataManager.h"
 #include "FHGameInstance.h"
 #include "FHPlayerController.h"
 #include "FHPlayerCharacter.h"
@@ -35,10 +35,36 @@ void UQuickSlotComponent::InitComponent()
 
 	InventoryComp = PC->GetInventoryComp();
 	CHECK_VALID(InventoryComp);
+
+	//QuickSlotUpdateDelegate.AddUObject(this, &UQuickSlotComponent::OnQuickSLotUpdate);
+
+	FTimerHandle TempHandle;
+	GetWorld()->GetTimerManager().SetTimer(TempHandle, this, &UQuickSlotComponent::UpdateQuickSlot, 1.f, false);
+}
+
+//void UQuickSlotComponent::OnQuickSLotUpdate(const int32& UpdateSlotIdx, const int32& SlotItemID, const int32& NewAmount)
+//{
+//
+//}
+
+void UQuickSlotComponent::UpdateQuickSlot()
+{
+	for (const auto& MyItem : *GI->GetQuickSlotItems())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Broadcast %d"), MyItem.Value);
+
+		//BroadCast to QuickSlot Widget
+		if (QuickSlotUpdateDelegate.IsBound())
+		{
+			QuickSlotUpdateDelegate.Broadcast(MyItem.Key, MyItem.Value, *GI->GetInventoryItems()->Find(MyItem.Value));
+		}
+	}
 }
 
 void UQuickSlotComponent::ManageQuickSlot(const int32& TargetItemID, const int32& TargetItemAmount)
 {
+	UE_LOG(LogTemp, Error, TEXT("ManageQuickSlot"));
+
 	// check item is already in quickslot
 	// if true, Delete QuickSlot Item
 	int32 ItemExistInQuickSlotIndex;
@@ -135,13 +161,13 @@ void UQuickSlotComponent::SetItemToQuickSlot(const int32& NewQuickSlotIndex, con
 	}
 
 	//reserved
-	//CHECK_VALID(GI);
-	//UE_LOG(LogTemp, Warning, TEXT("QuickSlot OnItemRegister %d"), NewItemID);
+	CHECK_VALID(GI);
+	UE_LOG(LogTemp, Warning, TEXT("QuickSlot OnItemRegister %d"), NewItemID);
 
-	//int32 RegistedItemID = NewItemID;
-	//UItemDataManager::RegistItem(RegistedItemID);
+	int32 RegistedItemID = NewItemID;
+	UItemDataManager::RegistItem(RegistedItemID);
 
-	//*GI->GetQuickSlotItems()->Find(NewQuickSlotIndex) = RegistedItemID;
+	*GI->GetQuickSlotItems()->Find(NewQuickSlotIndex) = RegistedItemID;
 }
 
 void UQuickSlotComponent::DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex)
@@ -159,6 +185,8 @@ void UQuickSlotComponent::DeleteItemFromQuickSlot(const int32& NewQuickSlotIndex
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
 		InventoryComp->ItemRegisterDelegate.Broadcast(DeleteItemID, false);
+		UE_LOG(LogTemp, Error, TEXT("ItemRegisterDelegate %d"), DeleteItemID);
+
 	}
 
 	//BroadCast to QuickSlot Widget

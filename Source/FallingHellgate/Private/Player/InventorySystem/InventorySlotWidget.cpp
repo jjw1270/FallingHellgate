@@ -4,7 +4,7 @@
 #include "InventorySlotWidget.h"
 #include "FallingHellgate.h"
 #include "FHGameInstance.h"
-#include "ItemData.h"
+#include "ItemDataManager.h"
 // Drag Drop Operation
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "ItemDragDropOperation.h"
@@ -165,8 +165,6 @@ void UInventorySlotWidget::SetOwningInventoryWidget(UInventoryWidget* NewInvento
 
 void UInventorySlotWidget::SetSlot(const int32& NewItemID, const int32& NewAmount)
 {
-	UE_LOG(LogTemp, Warning, TEXT("SetSlot %d"), NewItemID);
-
 	if (NewAmount <= 0)
 	{
 		ClearSlot();
@@ -218,8 +216,6 @@ void UInventorySlotWidget::SetOnRegistImageVisibility(const bool& bIsRegist)
 	{
 		Image_OnRegist->SetVisibility(ESlateVisibility::Collapsed);
 	}
-
-	//UItemDataManager::RegistItem(SlotItemID);
 }
 
 bool UInventorySlotWidget::IsSlotItemRegisted()

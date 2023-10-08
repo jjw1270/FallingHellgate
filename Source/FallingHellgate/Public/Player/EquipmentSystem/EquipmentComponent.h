@@ -72,4 +72,7 @@ protected:
 
 	bool IsItemExistInEquipmentSlot(const int32& TargetItemID, EItemType& OutItemType, EArmorType& OutArmorType);
 
+protected:
+	UFUNCTION()
+	void UpdateEquipment();
 };

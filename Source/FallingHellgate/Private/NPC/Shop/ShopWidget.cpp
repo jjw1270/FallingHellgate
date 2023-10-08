@@ -7,7 +7,6 @@
 #include "Components/Button.h"
 #include "FHGameInstance.h"
 #include "ShopInventorySlotWidget.h"
-#include "ItemData.h"
 #include "Components/ScrollBox.h"
 #include "InventoryComponent.h"
 #include "FHPlayerController.h"

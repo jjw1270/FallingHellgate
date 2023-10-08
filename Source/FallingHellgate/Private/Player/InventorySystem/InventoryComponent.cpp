@@ -43,7 +43,7 @@ void UInventoryComponent::InitComponent()
 	ItemRegisterDelegate.AddUObject(this, &UInventoryComponent::OnItemRegister);
 
 	FTimerHandle TempHandle;
-	GetWorld()->GetTimerManager().SetTimer(TempHandle, this, &UInventoryComponent::UpdateInventory, 2.f, false);
+	GetWorld()->GetTimerManager().SetTimer(TempHandle, this, &UInventoryComponent::UpdateInventory, 1.f, false);
 }
 
 void UInventoryComponent::UpdateInventory()
@@ -59,6 +59,10 @@ void UInventoryComponent::UpdateInventory()
 void UInventoryComponent::OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist)
 {
 	CHECK_VALID(GI);
+	if (GI->GetInventoryItems()->Find(UpdateItemID) <= 0)
+	{
+		return;
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("OnItemRegister %d"), UpdateItemID);
 
@@ -139,6 +143,7 @@ void UInventoryComponent::AddItemToInventory(const int32& NewPureItemID, const i
 
 void UInventoryComponent::RemoveItemFromInventory(const int32& TargetItemID, const int32& Amount)
 {
+
 	for (auto& MyItem : *GI->GetInventoryItems())
 	{
 		if (MyItem.Key == TargetItemID)
@@ -153,8 +158,11 @@ void UInventoryComponent::RemoveItemFromInventory(const int32& TargetItemID, con
 
 			if (MyItem.Value <= 0)
 			{
+				UE_LOG(LogTemp, Error, TEXT("RemoveItemFromInventory %d"), TargetItemID);
 				GI->GetInventoryItems()->Remove(TargetItemID);
 			}
+
+			QuickSlotComp->ManageQuickSlot(TargetItemID, MyItem.Value);
 
 			return;
 		}
@@ -202,6 +210,7 @@ void UInventoryComponent::ManageItem(const int32& TargetItemID, const int32& Tar
 	case EItemType::Weapon:
 	case EItemType::Armor:
 		EquipComp->ManageEquipment(TargetItemID);
+		UE_LOG(LogTemp, Warning, TEXT("ManageEquipment"));
 		break;
 	default:
 		break;

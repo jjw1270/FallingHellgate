@@ -4,7 +4,7 @@
 #include "QuickSlotSlotWidget.h"
 #include "FallingHellgate.h"
 #include "FHGameInstance.h"
-#include "ItemData.h"
+#include "ItemDataManager.h"
 #include "InventoryComponent.h"
 #include "QuickSlotComponent.h"
 #include "FHPlayerController.h"

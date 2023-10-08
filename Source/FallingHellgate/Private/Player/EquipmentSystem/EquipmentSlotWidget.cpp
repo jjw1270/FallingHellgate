@@ -4,7 +4,6 @@
 #include "EquipmentSlotWidget.h"
 #include "FallingHellgate.h"
 #include "FHGameInstance.h"
-#include "ItemData.h"
 #include "Components/Image.h"
 #include "EquipmentComponent.h"
 #include "FHPlayerController.h"

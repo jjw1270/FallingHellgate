@@ -22,7 +22,6 @@
 #include "WeaponInterface.h"
 
 #include "FHPlayerController.h"
-#include "ItemData.h"
 #include "BaseWeapon.h"
 
 #include "Blueprint/UserWidget.h"
@@ -737,6 +736,7 @@ void AFHPlayerCharacter::S2C_UseItem_Implementation(const int32& QuickSlotIdx)
 	CHECK_VALID(GI);
 
 	TempUseItemID = *GI->GetQuickSlotItems()->Find(QuickSlotIdx);
+	UE_LOG(LogTemp, Warning, TEXT("TempUseItemID : %d"), TempUseItemID);
 }
 
 void AFHPlayerCharacter::C2S_PlayUseItemEffect_Implementation(const EEffectTarget& EffectTarget)

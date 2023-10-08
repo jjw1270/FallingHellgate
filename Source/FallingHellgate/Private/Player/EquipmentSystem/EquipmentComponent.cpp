@@ -3,7 +3,6 @@
 
 #include "EquipmentComponent.h"
 #include "FallingHellgate.h"
-#include "ItemData.h"
 #include "ItemDataManager.h"
 #include "InventoryComponent.h"
 #include "FHGameInstance.h"
@@ -24,7 +23,6 @@ void UEquipmentComponent::BeginPlay()
 	InitComponent();
 }
 
-
 void UEquipmentComponent::InitComponent()
 {
 	AFHPlayerController* PC = GetOwner<AFHPlayerController>();
@@ -36,7 +34,41 @@ void UEquipmentComponent::InitComponent()
 	InventoryComp = PC->GetInventoryComp();
 	CHECK_VALID(InventoryComp);
 
-	InventoryComp->ItemRegisterDelegate.AddUObject(this, &UEquipmentComponent::OnItemRegister);
+	// InventoryComp->ItemRegisterDelegate.AddUObject(this, &UEquipmentComponent::OnItemRegister);
+
+	FTimerHandle TempHandle;
+	GetWorld()->GetTimerManager().SetTimer(TempHandle, this, &UEquipmentComponent::UpdateEquipment, 1.f, false);
+}
+
+void UEquipmentComponent::UpdateEquipment()
+{
+	for (const auto& MyEquipID : *GI->GetEquipments())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Broadcast %d"), MyEquipID);
+
+		// boradcast
+		if (GI->GetBaseItemData(MyEquipID).Type == EItemType::Weapon)
+		{
+			if (WeaponUpdateDelegate.IsBound())
+			{
+				WeaponUpdateDelegate.Broadcast(MyEquipID, true);
+			}
+
+			return;
+		}
+		else if (GI->GetBaseItemData(MyEquipID).Type == EItemType::Armor)
+		{
+			FArmorItemData ArmorItemData;
+			GI->GetArmorItemInfo(MyEquipID, ArmorItemData);
+
+			if (ArmorUpdateDelegate.IsBound())
+			{
+				ArmorUpdateDelegate.Broadcast(ArmorItemData.ArmorType, MyEquipID, true);
+			}
+
+			return;
+		}
+	}
 }
 
 void UEquipmentComponent::ManageEquipment(const int32& TargetItemID)
@@ -58,7 +90,6 @@ void UEquipmentComponent::ManageEquipment(const int32& TargetItemID)
 	UGameplayStatics::PlaySound2D(GetWorld(), EquipmentSound);
 }
 
-//reserved
 void UEquipmentComponent::OnItemRegister(const int32& UpdateItemID, const bool& bIsRegist)
 {
 	CHECK_VALID(GI);
@@ -110,6 +141,7 @@ void UEquipmentComponent::Equip(const int32& NewItemID)
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
 		InventoryComp->ItemRegisterDelegate.Broadcast(NewItemID, true);
+		OnItemRegister(NewItemID, true);
 	}
 
 	// boradcast
@@ -140,6 +172,7 @@ void UEquipmentComponent::UnEquip(const int32& TargetItemID)
 	if (InventoryComp->ItemRegisterDelegate.IsBound())
 	{
 		InventoryComp->ItemRegisterDelegate.Broadcast(TargetItemID, false);
+		OnItemRegister(TargetItemID, false);
 	}
 
 	EItemType TargetItemType = UItemDataManager::GetItemType(TargetItemID);

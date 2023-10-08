@@ -3,7 +3,6 @@
 
 #include "PlayerStatusComponent.h"
 #include "FallingHellgate.h"
-#include "ItemData.h"
 #include "Kismet/GameplayStatics.h"
 #include "FHPlayerController.h"
 #include "EquipmentComponent.h"

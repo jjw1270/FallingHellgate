@@ -6,7 +6,6 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include "ItemData.h"
 #include "FHPlayerController.h"
 #include "InventoryComponent.h"
 #include "Kismet/GameplayStatics.h"

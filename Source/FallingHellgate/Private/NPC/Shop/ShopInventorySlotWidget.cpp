@@ -3,6 +3,7 @@
 
 #include "NPC/Shop/ShopInventorySlotWidget.h"
 #include "FallingHellgate.h"
+#include "ItemDataManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "FHPlayerController.h"
 #include "InventoryComponent.h"

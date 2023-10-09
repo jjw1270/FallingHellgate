@@ -33,6 +33,13 @@ EBTNodeResult::Type UBTTaskOutRange::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	UClass* WeaponType = Cast<UClass>(BlackboardComp->GetValueAsClass(TEXT("WeaponType")));
 
 
+	if (!TargetActor->Tags.Contains("Player"))
+	{
+		BlackboardComp->ClearValue(FName("TargetActor"));
+		BlackboardComp->SetValueAsEnum(FName("AIState"), static_cast<uint8>(EEnemyAIState::M_Patrol));
+		return EBTNodeResult::Failed;
+	}
+
 	float TargetDist = FVector::Dist(EnemyLocation, PlayerLocation);
 	BlackboardComp->SetValueAsFloat(TEXT("TargetDistance"), TargetDist);
 

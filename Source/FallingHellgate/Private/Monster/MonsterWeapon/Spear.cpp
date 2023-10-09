@@ -46,12 +46,9 @@ void ASpear::ReqAttack_Implementation(FVector vStart, FVector vEnd)
         ObjectTypes,
         false,
         ActorsToIgnore,
-        EDrawDebugTrace::ForDuration,
+        EDrawDebugTrace::None,
         OutHits,
-        true,
-        FLinearColor{ 1,0,0,1 },
-        FLinearColor{ 0,0,1,1 },
-        3
+        true
     );
 
     if (bHit)

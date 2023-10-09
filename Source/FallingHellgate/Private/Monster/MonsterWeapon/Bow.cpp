@@ -52,12 +52,9 @@ void ABow::ReqAttack_Implementation(FVector vStart, FVector vEnd)
         ObjectTypes,
         false,
         ActorsToIgnore,
-        EDrawDebugTrace::ForDuration,
-        OutHit,  // Single hit result
-        true,
-        FLinearColor{ 1,0,0,1 },
-        FLinearColor{ 0,0,1,1 },
-        3.0f
+        EDrawDebugTrace::None,
+        OutHit,
+        true
     );
 
     if (bHit)

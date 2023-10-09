@@ -331,8 +331,11 @@ float AFHMCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		StateComponent->AddDamage(DamageAmount);
 	}
 
-
-	S2MTakeBlood();
+	APlayerController* PC = Cast<APlayerController>(EventInstigator);
+	if (PC)
+	{
+		S2CTakeBlood();
+	}
 
 	return DamageAmount;
 }

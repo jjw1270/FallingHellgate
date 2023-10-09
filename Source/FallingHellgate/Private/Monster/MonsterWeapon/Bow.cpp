@@ -39,6 +39,10 @@ void ABow::ReqAttack_Implementation(FVector vStart, FVector vEnd)
     TArray<AActor*> ActorsToIgnore = FHMCharactersToIgnore;
     ActorsToIgnore.Add(this);
 
+    AFHMCharacter* Monster = Cast<AFHMCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AFHMCharacter::StaticClass()));
+    if (Monster)
+        ActorsToIgnore.Add(Monster);
+
     FHitResult OutHit;
 
     bool bHit = UKismetSystemLibrary::LineTraceSingleForObjects(

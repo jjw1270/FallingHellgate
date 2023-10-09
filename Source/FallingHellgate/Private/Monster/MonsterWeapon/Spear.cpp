@@ -32,6 +32,10 @@ void ASpear::ReqAttack_Implementation(FVector vStart, FVector vEnd)
     TArray<AActor*> ActorsToIgnore;
     ActorsToIgnore.Add(this);
 
+    AFHMCharacter* Monster = Cast<AFHMCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AFHMCharacter::StaticClass()));
+    if (Monster)
+        ActorsToIgnore.Add(Monster);
+
     TArray<FHitResult> OutHits;
 
     bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(

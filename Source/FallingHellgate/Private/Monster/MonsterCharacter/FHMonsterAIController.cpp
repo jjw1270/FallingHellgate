@@ -90,12 +90,13 @@ void AFHMonsterAIController::BeginPlay()
         GetBlackboardComponent()->SetValueAsEnum(FName("AIState"), static_cast<uint8>(EEnemyAIState::M_Patrol));
 
         //Patrol Point 예외처리
-        if (Player->TargetPatrol != nullptr)
+        if (IsValid(Player->TargetPatrol))
         {
             FVector TargetPoint = Player->TargetPatrol->GetActorLocation();
             GetBlackboardComponent()->SetValueAsVector(TargetPointLocation, TargetPoint);
         }
-        else
+
+        if (!IsValid(Player->TargetPatrol))
         {
             GetBlackboardComponent()->SetValueAsVector(TargetPointLocation, GetPawn()->GetActorLocation());
         }
@@ -139,7 +140,7 @@ void AFHMonsterAIController::UpdateLocation_Implementation(AActor* Actor)
 
 void AFHMonsterAIController::UpdateTarget_Implementation(AActor* Actor, FAIStimulus Stimulus)
 {
-    if (Stimulus.WasSuccessfullySensed())
+    if (Stimulus.WasSuccessfullySensed() && Actor->Tags.Contains("Player"))
     {
         UpdateLocation(Actor);
     }

@@ -78,6 +78,9 @@ void AWeapon::PlayAttackMontage_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("AWeapon::PlayAttackMontage_Implementation called"));
 
+	if (bIsMontagePlaying == true)
+		return;
+
 	for (UAnimMontage* Anim : AttackAnimations)
 	{
 		if (!Anim)
@@ -128,9 +131,6 @@ void AWeapon::PlayAnimation_Implementation(int32 Index)
 
 void AWeapon::PlayPhaseChangeMontage_Implementation()
 {
-
-	if (bIsMontagePlaying == false)
-	{
 		bIsMontagePlaying = true;
 		if (OwnChar == nullptr)
 		{
@@ -138,7 +138,6 @@ void AWeapon::PlayPhaseChangeMontage_Implementation()
 			return;
 		}
 		PlayPhaseChangeAnimation();
-	}
 }
 
 void AWeapon::PlayPhaseChangeAnimation_Implementation()
@@ -169,11 +168,13 @@ void AWeapon::PlayPhaseChangeAnimation_Implementation()
 		//Phase ¼³Á¤
 		if (FHMChar->PhaseCheck == 2)
 		{
+			UE_LOG(LogTemp, Error, TEXT("Phase 2"));
 			Damage = 300.f;
 			OwnChar->PlayAnimMontage(PhaseChangeAnim1);
 		}
 		else if (FHMChar->PhaseCheck == 3)
 		{
+			UE_LOG(LogTemp, Error, TEXT("Phase 3"));
 			Damage = 600.f;
 			OwnChar->PlayAnimMontage(PhaseChangeAnim2);
 		}
@@ -193,7 +194,7 @@ void AWeapon::PlayPhaseChangeAnimation_Implementation()
 
 void AWeapon::OnMontageEnded_Implementation(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (HasAuthority())
+	if (bIsMontagePlaying == true)
 	{
 		bIsMontagePlaying = false;
 

@@ -303,19 +303,33 @@ void AFHMCharacter::S2COnGroggyEnded_Implementation(UAnimMontage* Montage, bool 
 
 void AFHMCharacter::TakeGroggy_Implementation()
 {
+	bIsGroggy = true;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 
 	if (AnimInstance && Hitstun)
 	{
+		if (MovementComponent)
+		{
+			MovementComponent->Deactivate();
+		}
+
 		AnimInstance->Montage_Play(Hitstun);
-		AnimInstance->OnMontageEnded.AddDynamic(EquippedWeapon, &AWeapon::OnMontageEnded);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &AFHMCharacter::S2COnGroggyEnded);
 	}
 }
 
 void AFHMCharacter::OnGroggyEnded_Implementation(UAnimMontage* Montage, bool bInterrupted)
 {
 	bIsGroggy = false;
+
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+
+	if (MovementComponent)
+	{
+		MovementComponent->Activate(true);
+	}
 }
 
 float AFHMCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

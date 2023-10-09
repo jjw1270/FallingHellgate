@@ -110,7 +110,7 @@ public:
 	UFUNCTION(Server, Reliable, Category = "Monster")
 	void S2CTakeGroggy();
 
-	UFUNCTION(Server, Reliable, Category = "Monster")
+	UFUNCTION(Client, Reliable, Category = "Monster")
 	virtual void S2COnGroggyEnded(UAnimMontage* Montage, bool bInterrupted);
 
 

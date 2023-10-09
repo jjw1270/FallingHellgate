@@ -25,8 +25,8 @@ void UFHMonsterStateComponent::BeginPlay()
 
 	if (bIsBoss)
 	{
-		CurHp = 1000;
-		MaxHp = 1000;
+		CurHp = 3000;
+		MaxHp = 3000;
 	}
 	else
 	{
@@ -80,8 +80,8 @@ void UFHMonsterStateComponent::AddDamage_Implementation(float Damage)
 			if (Phase != 2)
 			{
 				Phase = 2;
-				OwnerCharacter->PhaseChangeTrigger();
 				OwnerCharacter->PhaseCheck = 2;
+				OwnerCharacter->PhaseChangeTrigger();
 			}
 		}
 		else if (CurHp <= MaxHp * 0.4) // 체력이 40% 이하일 경우
@@ -89,8 +89,8 @@ void UFHMonsterStateComponent::AddDamage_Implementation(float Damage)
 			if (Phase != 3)
 			{
 				Phase = 3;
-				OwnerCharacter->PhaseChangeTrigger();
 				OwnerCharacter->PhaseCheck = 3;
+				OwnerCharacter->PhaseChangeTrigger();
 			}
 		}
 

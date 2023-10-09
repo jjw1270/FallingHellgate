@@ -126,6 +126,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable, Category = "Monster")
 	void S2MStageClear();
 
+	UFUNCTION(Client, Reliable, Category = "Monster")
+	void S2CDropItem();
+
 	UPROPERTY(Replicated)
 	ACharacter* OwnChar;
 	
@@ -136,6 +139,10 @@ public:
 	bool IsRagdoll;
 
 	bool bHasDown;
+
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ADropItem> DropItemClass;
 
 public:
 

@@ -25,7 +25,7 @@
 #include "Components/DecalComponent.h"
 #include "Engine/DecalActor.h"
 #include "Blueprint/UserWidget.h"
-
+#include "DropItem.h"
 
 // Sets default values
 AFHMCharacter::AFHMCharacter()
@@ -349,11 +349,23 @@ float AFHMCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	if (PC)
 	{
 		S2CTakeBlood();
+
+		if (StateComponent->CurHp <= 0)
+		{
+			S2CDropItem();
+		}
 	}
 
 	return DamageAmount;
 }
 
+void AFHMCharacter::S2CDropItem_Implementation()
+{
+	if (DropItemClass)
+	{
+		GetWorld()->SpawnActor<ADropItem>(DropItemClass, GetActorLocation(), FRotator());
+	}
+}
 
 void AFHMCharacter::PhaseChangeTrigger_Implementation()
 {

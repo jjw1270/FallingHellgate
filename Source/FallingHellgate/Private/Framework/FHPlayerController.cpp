@@ -11,7 +11,6 @@
 #include "QuickSlotComponent.h"
 #include "EquipmentComponent.h"
 // UI
-#include "FHHUD.h"
 #include "HUDWidget.h"
 #include "BloodScreenWidget.h"
 #include "EnterDungeonWidget.h"
@@ -57,6 +56,11 @@ void AFHPlayerController::BeginPlay()
 
 	FTimerHandle SyncPlayerStatsHandle;
 	GetWorldTimerManager().SetTimer(SyncPlayerStatsHandle, [&]() { C2S_SyncPlayerStats(); }, 3.f, false);
+
+	// Create HUDWidget
+	check(HUDWidgetClass);
+	HUDWidget = CreateWidget<UHUDWidget>(GetWorld(), HUDWidgetClass);
+	HUDWidget->AddToViewport();
 }
 
 void AFHPlayerController::SetupInputComponent()
@@ -87,42 +91,21 @@ void AFHPlayerController::SetMouseCursorVisibility()
 
 void AFHPlayerController::WidgetOnOff(FName WidgetName)
 {
-	if (!HUDWidget)
-	{
-		AFHHUD* FHHUD = GetHUD<AFHHUD>();
-		check(FHHUD);
-
-		HUDWidget = FHHUD->GetHUDWidget();
-		check(HUDWidget);
-	}
+	CHECK_VALID(HUDWidget);
 
 	HUDWidget->SwichWidgetVisibility(this, WidgetName);
 }
 
 void AFHPlayerController::CloseAllWidgets()
 {
-	if (!HUDWidget)
-	{
-		AFHHUD* FHHUD = GetHUD<AFHHUD>();
-		check(FHHUD);
-
-		HUDWidget = FHHUD->GetHUDWidget();
-		check(HUDWidget);
-	}
+	CHECK_VALID(HUDWidget);
 
 	HUDWidget->CloseAllWidgets();
 }
 
 void AFHPlayerController::OpenBackgroundWidgets()
 {
-	if (!HUDWidget)
-	{
-		AFHHUD* FHHUD = GetHUD<AFHHUD>();
-		check(FHHUD);
-
-		HUDWidget = FHHUD->GetHUDWidget();
-		check(HUDWidget);
-	}
+	CHECK_VALID(HUDWidget);
 
 	HUDWidget->OpenBackgroundWidgets();
 }
@@ -168,9 +151,8 @@ void AFHPlayerController::C2S_SyncPlayerStats_Implementation()
 
 void AFHPlayerController::S2C_SyncPlayerStats_Implementation()
 {
-	AFHHUD* FHHUD = GetHUD<AFHHUD>();
-	CHECK_VALID(FHHUD);
-	UPartyInfoWidget* PartyInfoWidget = FHHUD->GetHUDWidget()->GetPartyInfoWidget();
+	CHECK_VALID(HUDWidget);
+	UPartyInfoWidget* PartyInfoWidget = HUDWidget->GetPartyInfoWidget();
 	CHECK_VALID(PartyInfoWidget);
 
 	for (TActorIterator<AFHPlayerCharacter> Iter(GetWorld()); Iter; ++Iter)
@@ -185,4 +167,14 @@ void AFHPlayerController::S2C_SyncPlayerStats_Implementation()
 			}
 		}
 	}
+}
+
+UHUDWidget* AFHPlayerController::GetHUDWidget()
+{
+	if (!IsValid(HUDWidget))
+	{
+		return nullptr;
+	}
+
+	return HUDWidget;
 }

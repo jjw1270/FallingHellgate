@@ -8,7 +8,6 @@
 #include "EquipmentComponent.h"
 #include "FHPlayerCharacter.h"
 #include "Net/UnrealNetwork.h"
-#include "FHHUD.h"
 #include "HUDWidget.h"
 #include "PartyInfoWidget.h"
 

@@ -16,15 +16,5 @@ class FALLINGHELLGATE_API AFHHUD : public AHUD
 	
 protected:
 	virtual void BeginPlay() override;
-	
-protected:
-	UPROPERTY(EditDefaultsOnly, Category = Widget)
-	TSubclassOf<class UHUDWidget> HUDWidgetClass;
 
-	UPROPERTY(BlueprintReadOnly, Category = Widget)
-	class UHUDWidget* HUDWidget;
-
-public:
-	UFUNCTION(BlueprintCallable, Category = Widget)
-	class UHUDWidget* GetHUDWidget();
 };

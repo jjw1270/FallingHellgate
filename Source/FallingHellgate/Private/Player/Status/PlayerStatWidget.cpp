@@ -7,7 +7,6 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
-#include "FHHUD.h"
 #include "HUDWidget.h"
 #include "FHPlayerCharacter.h"
 #include "PlayerStatusComponent.h"
@@ -86,10 +85,9 @@ void UPlayerStatWidget::OnDragBtnPressed()
 {
 	if (!HUDWidget)
 	{
-		AFHHUD* HUD = Cast<AFHHUD>(GetOwningPlayer()->GetHUD());
-		CHECK_VALID(HUD);
-
-		HUDWidget = HUD->GetHUDWidget();
+		AFHPlayerController* PC = GetOwningPlayer<AFHPlayerController>();
+		CHECK_VALID(PC);
+		HUDWidget = PC->GetHUDWidget();
 	}
 
 	HUDWidget->WidgetDragStart(this);

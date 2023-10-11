@@ -12,7 +12,6 @@
 #include "FHPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
-#include "FHHUD.h"
 #include "HUDWidget.h"
 #include "InventoryWidget.h"
 #include "InventorySlotWidget.h"
@@ -92,11 +91,10 @@ void UShopWidget::OnInventoryUpdate(const int32& NewItemID, const int32& NewAmou
 
 void UShopWidget::InitShopInventory()
 {
-	AFHHUD* Hud = PC->GetHUD<AFHHUD>();
-	CHECK_VALID(Hud);
-	UHUDWidget* HudWidget = Hud->GetHUDWidget();
-	CHECK_VALID(HudWidget);
-	UInventoryWidget* InventoryWidget = HudWidget->GetInventoryWidget();
+	CHECK_VALID(PC);
+	UHUDWidget* HUDWidget = PC->GetHUDWidget();
+	CHECK_VALID(HUDWidget);
+	UInventoryWidget* InventoryWidget = HUDWidget->GetInventoryWidget();
 	CHECK_VALID(InventoryWidget);
 
 	CHECK_VALID(ShopInventorySlotClass);

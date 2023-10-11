@@ -2,10 +2,10 @@
 
 
 #include "PartyInfoWidget.h"
+#include "FHPlayerController.h"
 #include "FallingHellgate.h"
 #include "Components/Button.h"
 #include "Components/VerticalBox.h"
-#include "FHHUD.h"
 #include "HUDWidget.h"
 #include "PlayerStatusComponent.h"
 #include "PartyMemberInfoWidget.h"
@@ -59,10 +59,9 @@ void UPartyInfoWidget::OnDragBtnPressed()
 {
 	if (!HUDWidget)
 	{
-		AFHHUD* HUD = Cast<AFHHUD>(GetOwningPlayer()->GetHUD());
-		CHECK_VALID(HUD);
-
-		HUDWidget = HUD->GetHUDWidget();
+		AFHPlayerController* PC = GetOwningPlayer<AFHPlayerController>();
+		CHECK_VALID(PC);
+		HUDWidget = PC->GetHUDWidget();
 	}
 
 	HUDWidget->WidgetDragStart(this);

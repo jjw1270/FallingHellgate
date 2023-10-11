@@ -9,7 +9,6 @@
 #include "QuickSlotSlotWidget.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/Button.h"
-#include "FHHUD.h"
 #include "HUDWidget.h"
 
 void UQuickSlotWidget::NativeConstruct()
@@ -64,10 +63,9 @@ void UQuickSlotWidget::OnDragBtnPressed()
 {
 	if (!HUDWidget)
 	{
-		AFHHUD* HUD = Cast<AFHHUD>(GetOwningPlayer()->GetHUD());
-		CHECK_VALID(HUD);
-
-		HUDWidget = HUD->GetHUDWidget();
+		AFHPlayerController* PC = GetOwningPlayer<AFHPlayerController>();
+		CHECK_VALID(PC);
+		HUDWidget = PC->GetHUDWidget();
 	}
 
 	HUDWidget->WidgetDragStart(this);

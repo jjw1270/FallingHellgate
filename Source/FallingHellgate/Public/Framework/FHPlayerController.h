@@ -89,6 +89,9 @@ public:
 
 // UI
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = Widget)
+	TSubclassOf<class UHUDWidget> HUDWidgetClass;
+
 	UPROPERTY()
 	class UHUDWidget* HUDWidget;
 
@@ -101,5 +104,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UEnterDungeonWidget> EnterDungeonWidgetClass;
 
-
+public:
+	UFUNCTION(BlueprintCallable, Category = Widget)
+	class UHUDWidget* GetHUDWidget();
 };

@@ -8,7 +8,6 @@
 #include "EquipmentComponent.h"
 
 #include "Components/Button.h"
-#include "FHHUD.h"
 #include "HUDWidget.h"
 
 void UEquipmentWidget::NativeConstruct()
@@ -48,10 +47,9 @@ void UEquipmentWidget::OnDragBtnPressed()
 {
 	if (!HUDWidget)
 	{
-		AFHHUD* HUD = Cast<AFHHUD>(GetOwningPlayer()->GetHUD());
-		CHECK_VALID(HUD);
-
-		HUDWidget = HUD->GetHUDWidget();
+		AFHPlayerController* PC = GetOwningPlayer<AFHPlayerController>();
+		CHECK_VALID(PC);
+		HUDWidget = PC->GetHUDWidget();
 	}
 
 	HUDWidget->WidgetDragStart(this);

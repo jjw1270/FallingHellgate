@@ -7,36 +7,19 @@
 #include "Engine/GameInstance.h"
 #include "FHGameInstance.generated.h"
 
+// Item drop data by dungeon
 USTRUCT(BlueprintType)
-struct FPlayerStats
+struct FItemDropData : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	FPlayerStats()
-		: Health(1000), Stamina(1000), Attack(0),
-		AttackSpeed(0.f), Critcal(0.f), Defence(0)
-	{
-	}
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dungeon")
+	int32 DungeonID;
 
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	int32 Health;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	int32 Stamina;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	int32 Attack;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	float AttackSpeed;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	float Critcal;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Status)
-	int32 Defence;
+	//TMap<ItemPureID, DropWeight>
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dungeon")
+	TMap<int32, int32> ItemDropWeightsMap;
 };
 
 UCLASS()
@@ -53,21 +36,23 @@ public:
 	void TESTss();
 
 protected:
-	virtual void Init() override;
+	//virtual void Init() override;
 
-	virtual void Shutdown() override;
+	//virtual void Shutdown() override;
 
+// Manage Dungeon ID
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Data)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dungeon")
 	int32 CurrentDungeonID;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = Data)
+	UFUNCTION(BlueprintCallable, Category = "Dungeon")
 	FORCEINLINE void SetCurrentDungeonID(const int32& NewDungeonID) { CurrentDungeonID = NewDungeonID; }
 
-	UFUNCTION(BlueprintCallable, Category = Data)
+	UFUNCTION(BlueprintCallable, Category = "Dungeon")
 	FORCEINLINE int32 GetCurrentDungeonID() const { return CurrentDungeonID; }
 
+// I want move this to DB
 protected:
 	// TMap<ItemID, ItemAmount>
 	UPROPERTY()
@@ -147,9 +132,38 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Data)
 	bool GetArmorItemInfo(const int32& PureItemID, FArmorItemData& OutData);
 
-public:
-
-	UFUNCTION(Server, Reliable, Category = "ServerTravel")
-	void PerformServerTravel(const FString& MapName);
-
 };
+
+
+//
+USTRUCT(BlueprintType)
+struct FPlayerStats
+{
+	GENERATED_USTRUCT_BODY()
+
+	public:
+	FPlayerStats()
+		: Health(1000), Stamina(1000)
+	{
+	}
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	int32 Health;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	int32 Stamina;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	int32 Attack;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float AttackSpeed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	float Critcal;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player Status")
+	int32 Defence;
+};
+//

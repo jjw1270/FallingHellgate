@@ -2,8 +2,7 @@
 
 
 #include "ItemDataManager.h"
-#include "FallingHellgate.h"
-
+#include "ItemData.h"
 
 EItemType UItemDataManager::GetItemType(const int32& ItemID)
 {

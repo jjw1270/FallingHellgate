@@ -12,25 +12,6 @@ UFHGameInstance::UFHGameInstance(const FObjectInitializer& ObjectInitializer) : 
 {
 }
 
-// If Save Data is Valid, Load Save Data
-void UFHGameInstance::Init()
-{
-	Super::Init();
-
-	//if (ItemDataManagerClass)
-	//{
-	//	ItemDataManager = NewObject<UItemDataManager>(this, ItemDataManagerClass);
-	//	UE_LOG(LogTemp, Warning, TEXT("Create ItemDataManager"));
-	//}
-}
-
-// Save Data when End Game
-void UFHGameInstance::Shutdown()
-{
-
-	Super::Shutdown();
-}
-
 void UFHGameInstance::TESTss()
 {
 	UE_LOG(LogTemp, Warning, TEXT("<<<<Inventory Items>>>>"));
@@ -148,15 +129,4 @@ bool UFHGameInstance::GetArmorItemInfo(const int32& PureItemID, FArmorItemData& 
 
 	OutData = *pData;
 	return true;
-}
-
-void UFHGameInstance::PerformServerTravel_Implementation(const FString& MapName)
-{
-	UWorld* World = GetWorld();
-
-	if (World != nullptr)
-	{
-
-		World->ServerTravel(MapName + TEXT("?listen"));
-	}
 }
